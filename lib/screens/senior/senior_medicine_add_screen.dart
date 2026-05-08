@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../../models/medicine.dart';
+import '../../models/medicine_log.dart';
+import '../../services/firestore_service.dart';
 
 class SeniorMedicineAddScreen extends StatefulWidget {
   const SeniorMedicineAddScreen({super.key});
@@ -40,6 +44,46 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
     setState(() {
       _times[slot] = (_times[slot]! + delta).clamp(0, 23 * 60 + 59);
     });
+  }
+
+  Future<void> _save(BuildContext context) async {
+    final name = _nameController.text.trim();
+    if (name.isEmpty) return;
+
+    final enabledSlots = _timeEnabled.entries
+        .where((e) => e.value)
+        .map((e) {
+          final h = _times[e.key]! ~/ 60;
+          final m = _times[e.key]! % 60;
+          return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
+        })
+        .toList();
+
+    final medicine = Medicine(
+      id: FirebaseFirestore.instance.collection('medicines').doc().id,
+      name: name,
+      times: enabledSlots,
+      startDate: DateTime.now(),
+    );
+    await FirestoreService.addMedicine(medicine);
+
+    // 오늘 복용 로그 생성
+    final today = DateTime.now();
+    for (final slot in _timeEnabled.entries.where((e) => e.value)) {
+      final mins = _times[slot.key]!;
+      final scheduled = DateTime(today.year, today.month, today.day,
+          mins ~/ 60, mins % 60);
+      final log = MedicineLog(
+        id: FirebaseFirestore.instance.collection('medicine_logs').doc().id,
+        medicineId: medicine.id,
+        medicineName: medicine.name,
+        scheduledTime: scheduled,
+        taken: false,
+      );
+      await FirestoreService.addLog(log);
+    }
+
+    if (context.mounted) Navigator.pop(context);
   }
 
   void _simulateOCR() {
@@ -208,7 +252,7 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
           width: double.infinity,
           height: 64,
           child: ElevatedButton(
-            onPressed: () => Navigator.pop(context),
+            onPressed: () => _save(context),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF4A90D9),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),

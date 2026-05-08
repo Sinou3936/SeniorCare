@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import '../../models/appointment.dart';
+import '../../services/firestore_service.dart';
 
 class SeniorHospitalAddScreen extends StatefulWidget {
   const SeniorHospitalAddScreen({super.key});
@@ -28,6 +31,23 @@ class _SeniorHospitalAddScreenState extends State<SeniorHospitalAddScreen> {
 
   void _adjustTime(int delta) {
     setState(() => _timeMinutes = (_timeMinutes + delta).clamp(0, 23 * 60 + 59));
+  }
+
+  Future<void> _save(BuildContext context) async {
+    final name = _hospitalController.text.trim();
+    if (name.isEmpty) return;
+    final date = DateTime(
+      _selectedDate.year, _selectedDate.month, _selectedDate.day,
+      _timeMinutes ~/ 60, _timeMinutes % 60,
+    );
+    final appointment = Appointment(
+      id: FirebaseFirestore.instance.collection('appointments').doc().id,
+      hospitalName: name,
+      date: date,
+      memo: _memoController.text.trim().isEmpty ? null : _memoController.text.trim(),
+    );
+    await FirestoreService.addAppointment(appointment);
+    if (context.mounted) Navigator.pop(context);
   }
 
   Future<void> _pickDate() async {
@@ -158,7 +178,7 @@ class _SeniorHospitalAddScreenState extends State<SeniorHospitalAddScreen> {
               width: double.infinity,
               height: 64,
               child: ElevatedButton(
-                onPressed: () => Navigator.pop(context),
+                onPressed: () => _save(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFF4A90D9),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),

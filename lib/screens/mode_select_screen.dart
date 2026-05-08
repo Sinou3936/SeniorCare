@@ -33,7 +33,7 @@ class ModeSelectScreen extends StatelessWidget {
               const SizedBox(height: 64),
               _ModeButton(
                 icon: Icons.elderly,
-                label: '어르신용',
+                label: '내 건강 관리',
                 subtitle: '약 복용 · 병원 예약',
                 color: Colors.white,
                 textColor: const Color(0xFF4A90D9),
@@ -45,7 +45,7 @@ class ModeSelectScreen extends StatelessWidget {
               const SizedBox(height: 20),
               _ModeButton(
                 icon: Icons.family_restroom,
-                label: '가족용',
+                label: '가족 복용 확인',
                 subtitle: '부모님 복용 현황 확인',
                 color: Colors.white24,
                 textColor: Colors.white,

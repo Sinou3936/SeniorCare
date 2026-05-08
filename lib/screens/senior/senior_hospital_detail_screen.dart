@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/appointment.dart';
+import '../../services/firestore_service.dart';
 
 class SeniorHospitalDetailScreen extends StatelessWidget {
   final Appointment appointment;
@@ -137,7 +138,10 @@ class SeniorHospitalDetailScreen extends StatelessWidget {
         ],
       ),
     );
-    if (ok == true && context.mounted) Navigator.pop(context);
+    if (ok == true && context.mounted) {
+      await FirestoreService.deleteAppointment(appointment.id);
+      if (context.mounted) Navigator.pop(context);
+    }
   }
 }
 

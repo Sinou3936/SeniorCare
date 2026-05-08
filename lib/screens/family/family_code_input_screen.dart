@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../services/firestore_service.dart';
 import 'family_main_screen.dart';
 
 class FamilyCodeInputScreen extends StatefulWidget {
@@ -31,10 +32,27 @@ class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
 
   void _onCharInput(int index, String value) {
     if (value.isEmpty) {
-      // 백스페이스 → 이전 칸으로
       if (index > 0) _focusNodes[index - 1].requestFocus();
       return;
     }
+
+    // 붙여넣기: 6자리 이상 입력되면 전체 분배
+    final cleaned = value.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toUpperCase();
+    if (cleaned.length > 1) {
+      final chars = cleaned.substring(0, cleaned.length.clamp(0, 6));
+      for (int i = 0; i < chars.length && i < 6; i++) {
+        _controllers[i].text = chars[i];
+      }
+      final lastFilled = (chars.length - 1).clamp(0, 5);
+      if (chars.length >= 6) {
+        _focusNodes[lastFilled].unfocus();
+      } else {
+        _focusNodes[lastFilled + 1].requestFocus();
+      }
+      setState(() => _errorMessage = null);
+      return;
+    }
+
     _controllers[index].text = value.toUpperCase();
     _controllers[index].selection = TextSelection.fromPosition(
       TextPosition(offset: _controllers[index].text.length),
@@ -54,12 +72,13 @@ class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
       _errorMessage = null;
     });
 
-    // Firebase 연동 전 더미 검증 (A3K9X2만 성공)
-    await Future.delayed(const Duration(seconds: 2));
+    final seniorUid = await FirestoreService.verifySeniorCode(_code);
 
     if (!mounted) return;
 
-    if (_code == 'A3K9X2') {
+    if (seniorUid != null) {
+      await FirestoreService.linkToSenior(seniorUid);
+      if (!mounted) return;
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (_) => const FamilyMainScreen()),
