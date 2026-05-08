@@ -109,7 +109,7 @@ appointments/{appointmentId}
 ### 요구 사항
 - Flutter SDK 3.x
 - Android Studio 또는 VS Code
-- Firebase 프로젝트 (연동 예정)
+- Firebase 프로젝트 (`google-services.json` 및 `lib/firebase_options.dart` 필요)
 
 ### 실행
 
@@ -118,23 +118,22 @@ flutter pub get
 flutter run
 ```
 
-> 현재 Firebase 미연동 상태로, 더미 데이터로 UI 동작을 확인할 수 있습니다.  
-> 가족 모드 연결 코드 테스트: `A3K9X2`
-
 ---
 
 ## 개발 현황
 
 | 항목 | 상태 |
 |------|------|
-| 어르신 모드 UI | ✅ 완료 |
-| 가족 모드 UI | ✅ 완료 |
+| 내 건강 관리 모드 UI | ✅ 완료 |
+| 가족 복용 확인 모드 UI | ✅ 완료 |
 | 코드 연결 화면 | ✅ 완료 |
-| Firebase Auth | 🔲 예정 |
-| Firestore CRUD | 🔲 예정 |
+| Firebase Auth (익명 로그인) | ✅ 완료 |
+| Firestore CRUD | ✅ 완료 |
+| 약 수정/삭제 | 🔲 예정 |
+| 앱 재실행 시 모드 유지 | 🔲 예정 |
 | FCM 푸시 알림 | 🔲 예정 |
 | OCR 약 인식 | 🔲 예정 |
-| Cloud Functions | 🔲 예정 |
+| Cloud Functions (미복용 감지) | 🔲 예정 |
 
 ---
 
