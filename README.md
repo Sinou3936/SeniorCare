@@ -12,13 +12,13 @@
 - **홈** — 주간 달력 + 시간대별(아침/점심/저녁/취침) 복용 현황
 - **약 관리** — 약 목록 조회, 추가(OCR 촬영 or 갤러리), 수정, 삭제
 - **병원** — 예약/진료 일정 등록, 수정, 삭제, 조회
-- **내 코드** — 가족 연결용 6자리 코드 확인 및 공유
+- **설정** — 내 코드 확인/갱신, 보호자 연결 관리, 데이터 초기화, 복약 알림 ON/OFF
 
 ### 가족 모드
-- **홈** — 부모님 복용 현황 실시간 확인 (복수 부모 탭 전환 지원)
+- **홈** — 부모님 복용 현황 실시간 확인
 - **알림** — 미복용 알림 리스트 (읽음/안읽음 구분)
 - **병원** — 부모님 예약 일정 조회
-- **코드 연결** — 6자리 코드 입력으로 부모님과 연결
+- **설정** — 부모님 연결 해제, 모드 전환
 
 ---
 
@@ -36,8 +36,10 @@
 | 인증 | Firebase Auth (익명 로그인) |
 | 데이터베이스 | Firebase Firestore |
 | 푸시 알림 | Firebase Cloud Messaging (FCM) |
-| OCR | Google ML Kit |
-| AI 파싱 | Claude / GPT API (약 이름 추출) |
+| 로컬 알림 | flutter_local_notifications |
+| 세션 유지 | shared_preferences |
+| OCR | Google ML Kit (예정) |
+| AI 파싱 | Claude / GPT API (약 이름 추출, 예정) |
 
 ---
 
@@ -46,10 +48,16 @@
 ```
 lib/
 ├── main.dart
+├── firebase_options.dart
 ├── models/
 │   ├── medicine.dart         # 약 모델
 │   ├── medicine_log.dart     # 복용 기록 모델
 │   └── appointment.dart      # 병원 예약 모델
+├── services/
+│   ├── auth_service.dart         # Firebase 익명 로그인
+│   ├── firestore_service.dart    # Firestore CRUD + 보호자 연결
+│   ├── notification_service.dart # FCM + 로컬 알림
+│   └── prefs_service.dart        # 모드/알림 설정 저장
 ├── widgets/
 │   ├── weekly_calendar.dart  # 주간 달력 위젯
 │   ├── medicine_card.dart    # 약 카드 위젯
@@ -63,15 +71,19 @@ lib/
     │   ├── senior_medicine_screen.dart
     │   ├── senior_medicine_add_screen.dart
     │   ├── senior_medicine_detail_screen.dart
+    │   ├── senior_medicine_edit_screen.dart
     │   ├── senior_hospital_screen.dart
     │   ├── senior_hospital_add_screen.dart
-    │   └── senior_hospital_detail_screen.dart
+    │   ├── senior_hospital_detail_screen.dart
+    │   ├── senior_hospital_edit_screen.dart
+    │   └── senior_settings_screen.dart
     └── family/
         ├── family_code_input_screen.dart
         ├── family_main_screen.dart
         ├── family_home_screen.dart
         ├── family_notification_screen.dart
-        └── family_hospital_screen.dart
+        ├── family_hospital_screen.dart
+        └── family_settings_screen.dart
 ```
 
 ---
@@ -80,23 +92,30 @@ lib/
 
 ```
 users/{uid}
-  └── code: "A3K9X2"          # 시니어-가족 연결 코드
+  ├── code: "A3K9X2"              # 시니어 연결 코드
+  ├── linkedSeniorUid: ""         # 가족 → 시니어 연결
+  ├── linkedFamilyUids: []        # 시니어 → 가족 목록
+  └── fcmToken: ""                # FCM 푸시 토큰
 
-medicines/{medicineId}
+codes/{code}
+  ├── ownerUid: ""                # 코드 발급 시니어 uid
+  └── createdAt: Timestamp        # 1시간 후 만료
+
+users/{uid}/medicines/{medicineId}
   ├── name: "혈압약"
   ├── photoUrl: ""
   ├── times: ["08:00", "21:00"]
   ├── startDate: Timestamp
   └── endDate: Timestamp
 
-medicine_logs/{logId}
+users/{uid}/medicine_logs/{logId}
   ├── medicineId: ""
   ├── medicineName: "혈압약"
   ├── scheduledTime: Timestamp
   ├── taken: false
   └── takenAt: Timestamp | null
 
-appointments/{appointmentId}
+users/{uid}/appointments/{appointmentId}
   ├── hospitalName: "서울내과"
   ├── date: Timestamp
   └── memo: ""
@@ -124,16 +143,20 @@ flutter run
 
 | 항목 | 상태 |
 |------|------|
-| 내 건강 관리 모드 UI | ✅ 완료 |
-| 가족 복용 확인 모드 UI | ✅ 완료 |
-| 코드 연결 화면 | ✅ 완료 |
+| 어르신 모드 UI | ✅ 완료 |
+| 가족 모드 UI | ✅ 완료 |
 | Firebase Auth (익명 로그인) | ✅ 완료 |
-| Firestore CRUD | ✅ 완료 |
-| 약 수정/삭제 | 🔲 예정 |
-| 앱 재실행 시 모드 유지 | 🔲 예정 |
-| FCM 푸시 알림 | 🔲 예정 |
-| OCR 약 인식 | 🔲 예정 |
-| Cloud Functions (미복용 감지) | 🔲 예정 |
+| Firestore CRUD (약/병원/복용기록) | ✅ 완료 |
+| 6자리 코드 연결 (1시간 만료) | ✅ 완료 |
+| 보호자 관리 (연결/해제) | ✅ 완료 |
+| 설정 화면 (시니어/가족) | ✅ 완료 |
+| 앱 재실행 시 모드 유지 | ✅ 완료 |
+| 달력 실제 데이터 연동 | ✅ 완료 |
+| 데이터 초기화 | ✅ 완료 |
+| FCM 클라이언트 (토큰 저장, 로컬 알림) | ✅ 완료 |
+| Cloud Functions (미복용 감지 자동 푸시) | 🔲 예정 |
+| OCR 약 인식 (Google ML Kit) | 🔲 예정 |
+| Google 계정 연동 (익명 → 영구) | 🔲 예정 |
 
 ---
 
