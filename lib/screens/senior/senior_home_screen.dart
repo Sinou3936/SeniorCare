@@ -14,6 +14,12 @@ class SeniorHomeScreen extends StatefulWidget {
 class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
   DateTime _selectedDate = DateTime.now();
 
+  DateTime get _weekStart {
+    final wd = _selectedDate.weekday;
+    final ws = _selectedDate.subtract(Duration(days: wd - 1));
+    return DateTime(ws.year, ws.month, ws.day);
+  }
+
   static const _slotOrder = ['아침', '점심', '저녁', '취침'];
   static const _slotIcons = {
     '아침': Icons.wb_sunny_outlined,
@@ -31,7 +37,6 @@ class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
 
   String _weekdayStr(int wd) => ['월', '화', '수', '목', '금', '토', '일'][wd - 1];
 
-  DateTime _dateOnly(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
 
   Map<String, List<MedicineLog>> _grouped(List<MedicineLog> logs) {
     final map = <String, List<MedicineLog>>{};
@@ -41,16 +46,6 @@ class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
     return {
       for (final slot in _slotOrder)
         if (map.containsKey(slot)) slot: map[slot]!,
-    };
-  }
-
-  Map<DateTime, bool?> get _statusMap {
-    final today = _dateOnly(DateTime.now());
-    return {
-      today: false,
-      today.subtract(const Duration(days: 1)): true,
-      today.subtract(const Duration(days: 2)): true,
-      today.subtract(const Duration(days: 3)): false,
     };
   }
 
@@ -66,18 +61,36 @@ class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final now = DateTime.now();
-
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
-      body: StreamBuilder<List<MedicineLog>>(
-        stream: FirestoreService.watchLogsForDate(_selectedDate),
-        builder: (context, snap) {
-          final logs = snap.data ?? [];
-          final takenCount = logs.where((l) => l.taken).length;
-          final grouped = _grouped(logs);
+      body: StreamBuilder<Map<DateTime, bool?>>(
+        stream: FirestoreService.watchWeekStatus(_weekStart),
+        builder: (context, weekSnap) {
+          final statusMap = weekSnap.data ?? {};
+          return StreamBuilder<List<MedicineLog>>(
+            stream: FirestoreService.watchLogsForDate(_selectedDate),
+            builder: (context, snap) {
+              final logs = snap.data ?? [];
+              final takenCount = logs.where((l) => l.taken).length;
+              final grouped = _grouped(logs);
 
-          return Column(
+              return _buildBody(context, logs, takenCount, grouped, statusMap);
+            },
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildBody(
+    BuildContext context,
+    List<MedicineLog> logs,
+    int takenCount,
+    Map<String, List<MedicineLog>> grouped,
+    Map<DateTime, bool?> statusMap,
+  ) {
+    final now = DateTime.now();
+    return Column(
             children: [
               Container(
                 color: const Color(0xFF4A90D9),
@@ -159,13 +172,10 @@ class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
               WeeklyCalendar(
                 selectedDate: _selectedDate,
                 onDateSelected: (d) => setState(() => _selectedDate = d),
-                statusMap: _statusMap,
+                statusMap: statusMap,
               ),
               Expanded(
-                child: logs.isEmpty && snap.connectionState == ConnectionState.waiting
-                    ? const Center(
-                        child: CircularProgressIndicator(color: Color(0xFF4A90D9)))
-                    : logs.isEmpty
+                child: logs.isEmpty
                         ? const Center(
                             child: Text(
                               '오늘 복용할 약이 없어요',
@@ -195,9 +205,6 @@ class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
                           ),
               ),
             ],
-          );
-        },
-      ),
     );
   }
 }

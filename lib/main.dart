@@ -2,20 +2,36 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'firebase_options.dart';
 import 'screens/mode_select_screen.dart';
+import 'screens/senior/senior_main_screen.dart';
+import 'screens/family/family_main_screen.dart';
 import 'services/auth_service.dart';
+import 'services/notification_service.dart';
+import 'services/prefs_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await AuthService.signInAnonymously();
-  runApp(const SeniorCareApp());
+  await NotificationService.init();
+  final savedMode = await PrefsService.loadMode();
+  runApp(SeniorCareApp(initialMode: savedMode));
 }
 
 class SeniorCareApp extends StatelessWidget {
-  const SeniorCareApp({super.key});
+  final String? initialMode;
+  const SeniorCareApp({super.key, this.initialMode});
 
   @override
   Widget build(BuildContext context) {
+    Widget home;
+    if (initialMode == 'senior') {
+      home = const SeniorMainScreen();
+    } else if (initialMode == 'family') {
+      home = const FamilyMainScreen();
+    } else {
+      home = const ModeSelectScreen();
+    }
+
     return MaterialApp(
       title: 'SeniorCare',
       debugShowCheckedModeBanner: false,
@@ -36,7 +52,7 @@ class SeniorCareApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const ModeSelectScreen(),
+      home: home,
     );
   }
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/appointment.dart';
 import '../../services/firestore_service.dart';
+import 'senior_hospital_edit_screen.dart';
 
 class SeniorHospitalDetailScreen extends StatelessWidget {
   final Appointment appointment;
@@ -76,7 +77,13 @@ class SeniorHospitalDetailScreen extends StatelessWidget {
                   child: SizedBox(
                     height: 64,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              SeniorHospitalEditScreen(appointment: appointment),
+                        ),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF4A90D9),
                         shape: RoundedRectangleBorder(

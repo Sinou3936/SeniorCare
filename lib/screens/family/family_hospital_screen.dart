@@ -1,24 +1,29 @@
 import 'package:flutter/material.dart';
 import '../../models/appointment.dart';
+import '../../services/firestore_service.dart';
 import '../../widgets/hospital_card.dart';
 
-class FamilyHospitalScreen extends StatelessWidget {
+class FamilyHospitalScreen extends StatefulWidget {
   const FamilyHospitalScreen({super.key});
 
-  static final _appointments = [
-    Appointment(
-      id: 'a1',
-      hospitalName: '서울내과의원',
-      date: DateTime.now().add(const Duration(days: 3, hours: 2)),
-      memo: '혈압약 처방 갱신',
-    ),
-    Appointment(
-      id: 'a2',
-      hospitalName: '한양대학병원',
-      date: DateTime.now().add(const Duration(days: 7)),
-      memo: '정기 검진',
-    ),
-  ];
+  @override
+  State<FamilyHospitalScreen> createState() => _FamilyHospitalScreenState();
+}
+
+class _FamilyHospitalScreenState extends State<FamilyHospitalScreen> {
+  String? _seniorUid;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSeniorUid();
+  }
+
+  Future<void> _loadSeniorUid() async {
+    final uid = await FirestoreService.getLinkedSeniorUid();
+    if (mounted) setState(() { _seniorUid = uid; _loading = false; });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,28 +37,45 @@ class FamilyHospitalScreen extends StatelessWidget {
         ),
         automaticallyImplyLeading: false,
       ),
-      body: _appointments.isEmpty
-          ? const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.local_hospital_outlined, size: 72, color: Color(0xFFCCCCCC)),
-                  SizedBox(height: 16),
-                  Text(
-                    '예약된 병원이 없어요',
-                    style: TextStyle(fontSize: 20, color: Color(0xFF999999)),
-                  ),
-                ],
-              ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              itemCount: _appointments.length,
-              itemBuilder: (context, i) => HospitalCard(
-                appointment: _appointments[i],
-                onTap: () => _showDetail(context, _appointments[i]),
-              ),
-            ),
+      body: _loading
+          ? const Center(child: CircularProgressIndicator(color: Color(0xFF4A90D9)))
+          : _seniorUid == null
+              ? const Center(
+                  child: Text('연결된 부모님이 없어요',
+                      style: TextStyle(fontSize: 18, color: Color(0xFF999999))),
+                )
+              : StreamBuilder<List<Appointment>>(
+                  stream: FirestoreService.watchSeniorAppointments(_seniorUid!),
+                  builder: (context, snap) {
+                    if (snap.connectionState == ConnectionState.waiting) {
+                      return const Center(
+                          child: CircularProgressIndicator(color: Color(0xFF4A90D9)));
+                    }
+                    final appointments = snap.data ?? [];
+                    if (appointments.isEmpty) {
+                      return const Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.local_hospital_outlined,
+                                size: 72, color: Color(0xFFCCCCCC)),
+                            SizedBox(height: 16),
+                            Text('예약된 병원이 없어요',
+                                style: TextStyle(fontSize: 20, color: Color(0xFF999999))),
+                          ],
+                        ),
+                      );
+                    }
+                    return ListView.builder(
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      itemCount: appointments.length,
+                      itemBuilder: (context, i) => HospitalCard(
+                        appointment: appointments[i],
+                        onTap: () => _showDetail(context, appointments[i]),
+                      ),
+                    );
+                  },
+                ),
     );
   }
 
@@ -83,14 +105,18 @@ class FamilyHospitalScreen extends StatelessWidget {
             const SizedBox(height: 20),
             Text(
               apt.hospitalName,
-              style: const TextStyle(fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFF1A1A2E)),
+              style: const TextStyle(
+                  fontSize: 26, fontWeight: FontWeight.bold, color: Color(0xFF1A1A2E)),
             ),
             const SizedBox(height: 16),
-            _Row(icon: Icons.calendar_today_rounded, text: '${d.year}년 ${d.month}월 ${d.day}일'),
+            _Row(
+                icon: Icons.calendar_today_rounded,
+                text: '${d.year}년 ${d.month}월 ${d.day}일'),
             const SizedBox(height: 10),
             _Row(
               icon: Icons.access_time_rounded,
-              text: '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}',
+              text:
+                  '${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}',
             ),
             if (apt.memo != null && apt.memo!.isNotEmpty) ...[
               const SizedBox(height: 10),

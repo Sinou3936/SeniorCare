@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'family_home_screen.dart';
 import 'family_notification_screen.dart';
 import 'family_hospital_screen.dart';
+import 'family_settings_screen.dart';
 
 class FamilyMainScreen extends StatefulWidget {
   const FamilyMainScreen({super.key});
@@ -17,6 +18,7 @@ class _FamilyMainScreenState extends State<FamilyMainScreen> {
     FamilyHomeScreen(),
     FamilyNotificationScreen(),
     FamilyHospitalScreen(),
+    FamilySettingsScreen(),
   ];
 
   @override
@@ -43,6 +45,10 @@ class _FamilyMainScreenState extends State<FamilyMainScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.local_hospital_rounded),
             label: '병원',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings_rounded),
+            label: '설정',
           ),
         ],
       ),

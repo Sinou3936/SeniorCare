@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'senior_home_screen.dart';
 import 'senior_medicine_screen.dart';
 import 'senior_hospital_screen.dart';
+import 'senior_settings_screen.dart';
 
 class SeniorMainScreen extends StatefulWidget {
   const SeniorMainScreen({super.key});
@@ -17,6 +18,7 @@ class _SeniorMainScreenState extends State<SeniorMainScreen> {
     SeniorHomeScreen(),
     SeniorMedicineScreen(),
     SeniorHospitalScreen(),
+    SeniorSettingsScreen(),
   ];
 
   @override
@@ -35,6 +37,7 @@ class _SeniorMainScreenState extends State<SeniorMainScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: '홈'),
           BottomNavigationBarItem(icon: Icon(Icons.medication_rounded), label: '약 관리'),
           BottomNavigationBarItem(icon: Icon(Icons.local_hospital_rounded), label: '병원'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings_rounded), label: '설정'),
         ],
       ),
     );

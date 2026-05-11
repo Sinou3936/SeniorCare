@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../services/firestore_service.dart';
+import '../../services/prefs_service.dart';
 import 'family_main_screen.dart';
 
 class FamilyCodeInputScreen extends StatefulWidget {
@@ -76,8 +77,16 @@ class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
 
     if (!mounted) return;
 
-    if (seniorUid != null) {
+    if (seniorUid == 'expired') {
+      setState(() {
+        _isLoading = false;
+        _errorMessage = '만료된 코드예요. 부모님께 새 코드를 요청하세요.';
+        for (final c in _controllers) { c.clear(); }
+      });
+      _focusNodes[0].requestFocus();
+    } else if (seniorUid != null) {
       await FirestoreService.linkToSenior(seniorUid);
+      await PrefsService.saveMode('family');
       if (!mounted) return;
       Navigator.pushReplacement(
         context,

@@ -1,10 +1,36 @@
 import 'package:flutter/material.dart';
 import '../../models/medicine.dart';
+import '../../services/firestore_service.dart';
+import 'senior_medicine_edit_screen.dart';
 
 class SeniorMedicineDetailScreen extends StatelessWidget {
   final Medicine medicine;
 
   const SeniorMedicineDetailScreen({super.key, required this.medicine});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<Medicine?>(
+      stream: FirestoreService.watchMedicine(medicine.id),
+      initialData: medicine,
+      builder: (context, snap) {
+        final m = snap.data;
+        if (m == null) {
+          // 삭제된 경우 자동으로 뒤로 이동
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) Navigator.pop(context);
+          });
+          return const SizedBox.shrink();
+        }
+        return _DetailView(medicine: m);
+      },
+    );
+  }
+}
+
+class _DetailView extends StatelessWidget {
+  final Medicine medicine;
+  const _DetailView({required this.medicine});
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +55,7 @@ class SeniorMedicineDetailScreen extends StatelessWidget {
               width: double.infinity,
               height: 200,
               decoration: BoxDecoration(
-                color: const Color(0xFF4A90D9).withValues(alpha:0.1),
+                color: const Color(0xFF4A90D9).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: medicine.photoUrl != null
@@ -59,24 +85,21 @@ class SeniorMedicineDetailScreen extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    '복용 시간',
-                    style: TextStyle(fontSize: 16, color: Color(0xFF666666)),
-                  ),
+                  const Text('복용 시간',
+                      style: TextStyle(fontSize: 16, color: Color(0xFF666666))),
                   const SizedBox(height: 8),
                   Wrap(
                     spacing: 10,
                     children: medicine.times
                         .map((t) => Chip(
-                              label: Text(
-                                t,
-                                style: const TextStyle(
-                                  fontSize: 18,
-                                  color: Color(0xFF4A90D9),
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              backgroundColor: const Color(0xFF4A90D9).withValues(alpha:0.1),
+                              label: Text(t,
+                                  style: const TextStyle(
+                                    fontSize: 18,
+                                    color: Color(0xFF4A90D9),
+                                    fontWeight: FontWeight.w600,
+                                  )),
+                              backgroundColor:
+                                  const Color(0xFF4A90D9).withValues(alpha: 0.1),
                               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                             ))
                         .toList(),
@@ -96,21 +119,23 @@ class SeniorMedicineDetailScreen extends StatelessWidget {
                   child: SizedBox(
                     height: 64,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) =>
+                              SeniorMedicineEditScreen(medicine: medicine),
+                        ),
+                      ),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF4A90D9),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
+                            borderRadius: BorderRadius.circular(14)),
                       ),
-                      child: const Text(
-                        '수정',
-                        style: TextStyle(
-                          fontSize: 22,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      child: const Text('수정',
+                          style: TextStyle(
+                              fontSize: 22,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ),
@@ -123,17 +148,13 @@ class SeniorMedicineDetailScreen extends StatelessWidget {
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFE53935),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
+                            borderRadius: BorderRadius.circular(14)),
                       ),
-                      child: const Text(
-                        '삭제',
-                        style: TextStyle(
-                          fontSize: 22,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                      child: const Text('삭제',
+                          style: TextStyle(
+                              fontSize: 22,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold)),
                     ),
                   ),
                 ),
@@ -149,8 +170,10 @@ class SeniorMedicineDetailScreen extends StatelessWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('약 삭제', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-        content: Text('${medicine.name}을(를) 삭제할까요?', style: const TextStyle(fontSize: 18)),
+        title: const Text('약 삭제',
+            style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+        content: Text('${medicine.name}을(를) 삭제할까요?',
+            style: const TextStyle(fontSize: 18)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -158,11 +181,15 @@ class SeniorMedicineDetailScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('삭제', style: TextStyle(fontSize: 18, color: Color(0xFFE53935))),
+            child: const Text('삭제',
+                style: TextStyle(fontSize: 18, color: Color(0xFFE53935))),
           ),
         ],
       ),
     );
-    if (ok == true && context.mounted) Navigator.pop(context);
+    if (ok == true && context.mounted) {
+      await FirestoreService.deleteMedicine(medicine.id);
+      if (context.mounted) Navigator.pop(context);
+    }
   }
 }

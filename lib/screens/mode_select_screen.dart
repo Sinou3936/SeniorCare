@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'senior/senior_main_screen.dart';
 import 'family/family_code_input_screen.dart';
+import '../services/prefs_service.dart';
 
 class ModeSelectScreen extends StatelessWidget {
   const ModeSelectScreen({super.key});
@@ -37,10 +38,16 @@ class ModeSelectScreen extends StatelessWidget {
                 subtitle: '약 복용 · 병원 예약',
                 color: Colors.white,
                 textColor: const Color(0xFF4A90D9),
-                onTap: () => Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (_) => const SeniorMainScreen()),
-                ),
+                onTap: () async {
+                  await PrefsService.saveMode('senior');
+                  if (context.mounted) {
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SeniorMainScreen()),
+                    );
+                  }
+                },
+
               ),
               const SizedBox(height: 20),
               _ModeButton(
