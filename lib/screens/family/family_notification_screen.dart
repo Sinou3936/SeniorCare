@@ -19,7 +19,7 @@ class FamilyNotificationScreen extends StatelessWidget {
           appBar: AppBar(
             backgroundColor: const Color(0xFFE8896A),
             title: Text(
-              unreadCount > 0 ? '?�림 ($unreadCount)' : '?�림',
+              unreadCount > 0 ? '알림 ($unreadCount)' : '알림',
               style: const TextStyle(
                   color: Colors.white,
                   fontSize: 24,
@@ -31,7 +31,7 @@ class FamilyNotificationScreen extends StatelessWidget {
                 TextButton(
                   onPressed: () => FirestoreService.markAllNotificationsRead(),
                   child: const Text(
-                    '모두 ?�음',
+                    '모두 읽음',
                     style: TextStyle(color: Colors.white70, fontSize: 16),
                   ),
                 ),
@@ -42,7 +42,7 @@ class FamilyNotificationScreen extends StatelessWidget {
                   child: CircularProgressIndicator(color: Color(0xFFE8896A)))
               : notifications.isEmpty
                   ? const Center(
-                      child: Text('?�림???�어??,
+                      child: Text('알림이 없어요',
                           style: TextStyle(
                               fontSize: 20, color: Color(0xFF999999))),
                     )
@@ -127,7 +127,7 @@ class _NotificationCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${item.medicineName} 복용???��? ?�으?�어??,
+                    '${item.medicineName} 복용을 하지 않으셨어요',
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight:

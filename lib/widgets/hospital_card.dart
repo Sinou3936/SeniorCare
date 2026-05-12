@@ -56,7 +56,7 @@ class HospitalCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    '${d.month}??${d.day}?? ${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}',
+                    '${d.month}월 ${d.day}일  ${d.hour.toString().padLeft(2, '0')}:${d.minute.toString().padLeft(2, '0')}',
                     style: const TextStyle(fontSize: 17, color: Color(0xFF666666)),
                   ),
                   if (appointment.memo != null && appointment.memo!.isNotEmpty) ...[

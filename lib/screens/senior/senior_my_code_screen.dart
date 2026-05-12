@@ -22,10 +22,10 @@ class _SeniorMyCodeScreenState extends State<SeniorMyCodeScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('코드 ?�생??,
+        title: const Text('코드 재생성',
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
         content: const Text(
-          '??코드�?발급?�면\n기존 코드???�용?????�어??\n\n보호?�에�???코드�??�시 ?�려줘야 ?�요.',
+          '새 코드를 발급하면\n기존 코드는 사용할 수 없어요.\n\n보호자에게 새 코드를 다시 알려줘야 해요.',
           style: TextStyle(fontSize: 18, height: 1.5),
         ),
         actions: [
@@ -35,7 +35,7 @@ class _SeniorMyCodeScreenState extends State<SeniorMyCodeScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('?�생??,
+            child: const Text('재생성',
                 style: TextStyle(fontSize: 18, color: Color(0xFF7C3AED))),
           ),
         ],
@@ -59,7 +59,7 @@ class _SeniorMyCodeScreenState extends State<SeniorMyCodeScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          '??코드',
+          '내 코드',
           style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
         ),
       ),
@@ -72,7 +72,7 @@ class _SeniorMyCodeScreenState extends State<SeniorMyCodeScreen> {
             );
           }
           if (snap.hasError) {
-            return const Center(child: Text('코드�?불러?????�어??));
+            return const Center(child: Text('코드를 불러올 수 없어요'));
           }
           final result = snap.data!;
           return _CodeBody(
@@ -127,7 +127,7 @@ class _CodeBody extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  isExpired ? '코드가 만료?�어?? : '?��??�게 ??코드�??�려주세??,
+                  isExpired ? '코드가 만료됐어요' : '자녀에게 이 코드를 알려주세요',
                   style: TextStyle(
                     fontSize: 18,
                     color: isExpired ? const Color(0xFFE53935) : const Color(0xFF666666),
@@ -167,7 +167,7 @@ class _CodeBody extends StatelessWidget {
                       Clipboard.setData(ClipboardData(text: code));
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(
-                          content: Text('코드가 복사?�어??', style: TextStyle(fontSize: 16)),
+                          content: Text('코드가 복사됐어요!', style: TextStyle(fontSize: 16)),
                           duration: Duration(seconds: 2),
                         ),
                       );
@@ -181,7 +181,7 @@ class _CodeBody extends StatelessWidget {
                 ] else ...[
                   const SizedBox(height: 16),
                   const Text(
-                    '?�래 버튼?�로 ??코드�?발급받으?�요',
+                    '아래 버튼으로 새 코드를 발급받으세요',
                     style: TextStyle(fontSize: 15, color: Color(0xFF999999)),
                   ),
                 ],
@@ -197,7 +197,7 @@ class _CodeBody extends StatelessWidget {
                 onPressed: () {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('카카?�톡 공유 기능?� 준�?중이?�요',
+                      content: Text('카카오톡 공유 기능은 준비 중이에요',
                           style: TextStyle(fontSize: 16)),
                     ),
                   );
@@ -210,7 +210,7 @@ class _CodeBody extends StatelessWidget {
                 icon: const Icon(Icons.chat_bubble_rounded,
                     color: Color(0xFF3A1D1D), size: 28),
                 label: const Text(
-                  '카카?�톡?�로 공유',
+                  '카카오톡으로 공유',
                   style: TextStyle(
                       fontSize: 20,
                       fontWeight: FontWeight.bold,
@@ -240,7 +240,7 @@ class _CodeBody extends StatelessWidget {
                       : const Color(0xFF7C3AED),
                   size: 24),
               label: Text(
-                isExpired ? '??코드 발급' : '코드 ?�생??,
+                isExpired ? '새 코드 발급' : '코드 재생성',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -253,7 +253,7 @@ class _CodeBody extends StatelessWidget {
           ),
           const SizedBox(height: 16),
           Text(
-            isExpired ? '코드??발급 ??1?�간 ?�안 ?�효?�요' : '코드???�제?��? ???�면?�서 ?�인?????�어??,
+            isExpired ? '코드는 발급 후 1시간 동안 유효해요' : '코드는 언제든지 이 화면에서 확인할 수 있어요',
             style: const TextStyle(fontSize: 15, color: Color(0xFF999999)),
             textAlign: TextAlign.center,
           ),

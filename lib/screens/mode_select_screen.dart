@@ -28,14 +28,14 @@ class ModeSelectScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               const Text(
-                '건강???�루�??�께?�요',
+                '건강한 하루를 함께해요',
                 style: TextStyle(color: Colors.white70, fontSize: 18),
               ),
               const SizedBox(height: 64),
               _ModeButton(
                 icon: Icons.elderly,
-                label: '??건강 관�?,
-                subtitle: '??복용 · 병원 ?�약',
+                label: '내 건강 관리',
+                subtitle: '약 복용 · 병원 예약',
                 color: Colors.white,
                 textColor: const Color(0xFFE8896A),
                 onTap: () async {
@@ -52,8 +52,8 @@ class ModeSelectScreen extends StatelessWidget {
               const SizedBox(height: 20),
               _ModeButton(
                 icon: Icons.family_restroom,
-                label: '가�?복용 ?�인',
-                subtitle: '부모님 복용 ?�황 ?�인',
+                label: '가족 복용 확인',
+                subtitle: '부모님 복용 현황 확인',
                 color: Colors.white24,
                 textColor: Colors.white,
                 border: Border.all(color: Colors.white, width: 2),

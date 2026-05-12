@@ -85,7 +85,7 @@ class _SeniorHospitalEditScreenState extends State<SeniorHospitalEditScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          '?�약 ?�정',
+          '예약 수정',
           style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
         ),
       ),
@@ -94,7 +94,7 @@ class _SeniorHospitalEditScreenState extends State<SeniorHospitalEditScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('병원 ?�름', style: TextStyle(fontSize: 18, color: Color(0xFF666666))),
+            const Text('병원 이름', style: TextStyle(fontSize: 18, color: Color(0xFF666666))),
             const SizedBox(height: 8),
             TextField(
               controller: _hospitalController,
@@ -110,7 +110,7 @@ class _SeniorHospitalEditScreenState extends State<SeniorHospitalEditScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            const Text('?�짜', style: TextStyle(fontSize: 18, color: Color(0xFF666666))),
+            const Text('날짜', style: TextStyle(fontSize: 18, color: Color(0xFF666666))),
             const SizedBox(height: 8),
             GestureDetector(
               onTap: _pickDate,
@@ -126,7 +126,7 @@ class _SeniorHospitalEditScreenState extends State<SeniorHospitalEditScreen> {
                     const Icon(Icons.calendar_today_rounded, color: Color(0xFFE8896A), size: 28),
                     const SizedBox(width: 12),
                     Text(
-                      '${_selectedDate.year}??${_selectedDate.month}??${_selectedDate.day}??,
+                      '${_selectedDate.year}년 ${_selectedDate.month}월 ${_selectedDate.day}일',
                       style: const TextStyle(
                         fontSize: 22,
                         fontWeight: FontWeight.bold,
@@ -138,7 +138,7 @@ class _SeniorHospitalEditScreenState extends State<SeniorHospitalEditScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            const Text('?�간', style: TextStyle(fontSize: 18, color: Color(0xFF666666))),
+            const Text('시간', style: TextStyle(fontSize: 18, color: Color(0xFF666666))),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
@@ -169,14 +169,14 @@ class _SeniorHospitalEditScreenState extends State<SeniorHospitalEditScreen> {
               ),
             ),
             const SizedBox(height: 24),
-            const Text('메모 (?�택)', style: TextStyle(fontSize: 18, color: Color(0xFF666666))),
+            const Text('메모 (선택)', style: TextStyle(fontSize: 18, color: Color(0xFF666666))),
             const SizedBox(height: 8),
             TextField(
               controller: _memoController,
               style: const TextStyle(fontSize: 18),
               maxLines: 3,
               decoration: InputDecoration(
-                hintText: '메모�??�력?�세??,
+                hintText: '메모를 입력하세요',
                 hintStyle: const TextStyle(fontSize: 18, color: Color(0xFFCCCCCC)),
                 filled: true,
                 fillColor: Colors.white,
@@ -200,7 +200,7 @@ class _SeniorHospitalEditScreenState extends State<SeniorHospitalEditScreen> {
                 child: _isSaving
                     ? const CircularProgressIndicator(color: Colors.white)
                     : const Text(
-                        '?�??,
+                        '저장',
                         style: TextStyle(
                             fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),
                       ),

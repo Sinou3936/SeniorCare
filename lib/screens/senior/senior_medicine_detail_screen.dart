@@ -17,7 +17,7 @@ class SeniorMedicineDetailScreen extends StatelessWidget {
       builder: (context, snap) {
         final m = snap.data;
         if (m == null) {
-          // ??��??경우 ?�동?�로 ?�로 ?�동
+          // 삭제된 경우 자동으로 뒤로 이동
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (context.mounted) Navigator.pop(context);
           });
@@ -44,7 +44,7 @@ class _DetailView extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          '???�세',
+          '약 상세',
           style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
         ),
       ),
@@ -71,7 +71,7 @@ class _DetailView extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  const Text('복용 ?�간',
+                  const Text('복용 시간',
                       style: TextStyle(fontSize: 16, color: Color(0xFF666666))),
                   const SizedBox(height: 8),
                   Wrap(
@@ -92,14 +92,14 @@ class _DetailView extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    '복용 ?�작: ${medicine.startDate.year}??${medicine.startDate.month}??${medicine.startDate.day}??,
+                    '복용 시작: ${medicine.startDate.year}년 ${medicine.startDate.month}월 ${medicine.startDate.day}일',
                     style: const TextStyle(fontSize: 16, color: Color(0xFF666666)),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     medicine.endDate != null
-                        ? '복용 종료: ${medicine.endDate!.year}??${medicine.endDate!.month}??${medicine.endDate!.day}??
-                        : '복용 종료: 미설??(계속 복용)',
+                        ? '복용 종료: ${medicine.endDate!.year}년 ${medicine.endDate!.month}월 ${medicine.endDate!.day}일'
+                        : '복용 종료: 미설정 (계속 복용)',
                     style: const TextStyle(fontSize: 16, color: Color(0xFF666666)),
                   ),
                 ],
@@ -124,7 +124,7 @@ class _DetailView extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14)),
                       ),
-                      child: const Text('?�정',
+                      child: const Text('수정',
                           style: TextStyle(
                               fontSize: 22,
                               color: Colors.white,
@@ -143,7 +143,7 @@ class _DetailView extends StatelessWidget {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14)),
                       ),
-                      child: const Text('??��',
+                      child: const Text('삭제',
                           style: TextStyle(
                               fontSize: 22,
                               color: Colors.white,
@@ -163,9 +163,9 @@ class _DetailView extends StatelessWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('????��',
+        title: const Text('약 삭제',
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-        content: Text('${medicine.name}??�? ??��?�까??',
+        content: Text('${medicine.name}을(를) 삭제할까요?',
             style: const TextStyle(fontSize: 18)),
         actions: [
           TextButton(
@@ -174,7 +174,7 @@ class _DetailView extends StatelessWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('??��',
+            child: const Text('삭제',
                 style: TextStyle(fontSize: 18, color: Color(0xFFE53935))),
           ),
         ],

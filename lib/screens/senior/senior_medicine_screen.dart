@@ -15,7 +15,7 @@ class SeniorMedicineScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFFE8896A),
         title: const Text(
-          '????,
+          '내 약',
           style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
         ),
         automaticallyImplyLeading: false,
@@ -35,7 +35,7 @@ class SeniorMedicineScreen extends StatelessWidget {
                 children: [
                   Icon(Icons.medication_outlined, size: 72, color: Color(0xFFCCCCCC)),
                   SizedBox(height: 16),
-                  Text('?�록???�이 ?�어??,
+                  Text('등록된 약이 없어요',
                       style: TextStyle(fontSize: 20, color: Color(0xFF999999))),
                 ],
               ),
@@ -64,7 +64,7 @@ class SeniorMedicineScreen extends StatelessWidget {
         backgroundColor: const Color(0xFFE8896A),
         icon: const Icon(Icons.add, size: 28, color: Colors.white),
         label: const Text(
-          '??추�?',
+          '약 추가',
           style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),

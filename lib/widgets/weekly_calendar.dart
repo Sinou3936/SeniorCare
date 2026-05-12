@@ -13,7 +13,7 @@ class WeeklyCalendar extends StatelessWidget {
     this.statusMap = const {},
   });
 
-  static const _dayLabels = ['??, '??, '??, '�?, '�?, '??, '??];
+  static const _dayLabels = ['월', '화', '수', '목', '금', '토', '일'];
 
   DateTime get _weekStart {
     final wd = selectedDate.weekday;

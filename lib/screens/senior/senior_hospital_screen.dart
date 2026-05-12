@@ -15,7 +15,7 @@ class SeniorHospitalScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color(0xFFE8896A),
         title: const Text(
-          '병원 ?�약',
+          '병원 예약',
           style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
         ),
         automaticallyImplyLeading: false,
@@ -36,7 +36,7 @@ class SeniorHospitalScreen extends StatelessWidget {
                   Icon(Icons.local_hospital_outlined,
                       size: 72, color: Color(0xFFCCCCCC)),
                   SizedBox(height: 16),
-                  Text('?�약??병원???�어??,
+                  Text('예약된 병원이 없어요',
                       style: TextStyle(fontSize: 20, color: Color(0xFF999999))),
                 ],
               ),
@@ -66,7 +66,7 @@ class SeniorHospitalScreen extends StatelessWidget {
         backgroundColor: const Color(0xFFE8896A),
         icon: const Icon(Icons.add, size: 28, color: Colors.white),
         label: const Text(
-          '?�약 추�?',
+          '예약 추가',
           style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),

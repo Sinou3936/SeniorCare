@@ -33,7 +33,7 @@ class SeniorCareApp extends StatelessWidget {
     }
 
     return MaterialApp(
-      title: '?�봄',
+      title: '약봄',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(

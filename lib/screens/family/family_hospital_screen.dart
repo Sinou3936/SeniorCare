@@ -32,7 +32,7 @@ class _FamilyHospitalScreenState extends State<FamilyHospitalScreen> {
       appBar: AppBar(
         backgroundColor: const Color(0xFFE8896A),
         title: const Text(
-          '부모님 병원 ?�약',
+          '부모님 병원 예약',
           style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
         ),
         automaticallyImplyLeading: false,
@@ -41,7 +41,7 @@ class _FamilyHospitalScreenState extends State<FamilyHospitalScreen> {
           ? const Center(child: CircularProgressIndicator(color: Color(0xFFE8896A)))
           : _seniorUid == null
               ? const Center(
-                  child: Text('?�결??부모님???�어??,
+                  child: Text('연결된 부모님이 없어요',
                       style: TextStyle(fontSize: 18, color: Color(0xFF999999))),
                 )
               : StreamBuilder<List<Appointment>>(
@@ -60,7 +60,7 @@ class _FamilyHospitalScreenState extends State<FamilyHospitalScreen> {
                             Icon(Icons.local_hospital_outlined,
                                 size: 72, color: Color(0xFFCCCCCC)),
                             SizedBox(height: 16),
-                            Text('?�약??병원???�어??,
+                            Text('예약된 병원이 없어요',
                                 style: TextStyle(fontSize: 20, color: Color(0xFF999999))),
                           ],
                         ),
@@ -111,7 +111,7 @@ class _FamilyHospitalScreenState extends State<FamilyHospitalScreen> {
             const SizedBox(height: 16),
             _Row(
                 icon: Icons.calendar_today_rounded,
-                text: '${d.year}??${d.month}??${d.day}??),
+                text: '${d.year}년 ${d.month}월 ${d.day}일'),
             const SizedBox(height: 10),
             _Row(
               icon: Icons.access_time_rounded,

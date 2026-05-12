@@ -20,7 +20,7 @@ class SeniorHospitalDetailScreen extends StatelessWidget {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          '병원 ?�세',
+          '병원 상세',
           style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
         ),
       ),
@@ -55,7 +55,7 @@ class SeniorHospitalDetailScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                   _InfoRow(
                     icon: Icons.calendar_today_rounded,
-                    text: '${d.year}??${d.month}??${d.day}??,
+                    text: '${d.year}년 ${d.month}월 ${d.day}일',
                   ),
                   const SizedBox(height: 12),
                   _InfoRow(
@@ -91,7 +91,7 @@ class SeniorHospitalDetailScreen extends StatelessWidget {
                         ),
                       ),
                       child: const Text(
-                        '?�정',
+                        '수정',
                         style: TextStyle(fontSize: 22, color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -110,7 +110,7 @@ class SeniorHospitalDetailScreen extends StatelessWidget {
                         ),
                       ),
                       child: const Text(
-                        '??��',
+                        '삭제',
                         style: TextStyle(fontSize: 22, color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -128,9 +128,9 @@ class SeniorHospitalDetailScreen extends StatelessWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('?�약 ??��', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+        title: const Text('예약 삭제', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
         content: Text(
-          '${appointment.hospitalName} ?�약????��?�까??',
+          '${appointment.hospitalName} 예약을 삭제할까요?',
           style: const TextStyle(fontSize: 18),
         ),
         actions: [
@@ -140,7 +140,7 @@ class SeniorHospitalDetailScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('??��', style: TextStyle(fontSize: 18, color: Color(0xFFE53935))),
+            child: const Text('삭제', style: TextStyle(fontSize: 18, color: Color(0xFFE53935))),
           ),
         ],
       ),

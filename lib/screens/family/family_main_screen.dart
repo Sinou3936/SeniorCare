@@ -36,11 +36,11 @@ class _FamilyMainScreenState extends State<FamilyMainScreen> {
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_rounded),
-            label: '??,
+            label: '홈',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.notifications_rounded),
-            label: '?�림',
+            label: '알림',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.local_hospital_rounded),
@@ -48,7 +48,7 @@ class _FamilyMainScreenState extends State<FamilyMainScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_rounded),
-            label: '?�정',
+            label: '설정',
           ),
         ],
       ),

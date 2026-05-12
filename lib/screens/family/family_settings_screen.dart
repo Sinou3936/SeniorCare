@@ -56,14 +56,14 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
                       children: [
                         const SizedBox(height: 20),
 
-                        // ?€?€ ?…ê·¸?ˆì´??CTA ë°°ë„ˆ ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
+                        // â”€â”€ ì—…ê·¸ë ˆì´ë“œ CTA ë°°ë„ˆ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
                         _UpgradeBanner(
                             onTap: () =>
                                 _linkWithGoogle()),
                         const SizedBox(height: 24),
 
-                        // ?€?€ ë¶€ëª¨ë‹˜ ?°ê²° ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
-                        _SectionTitle('ë¶€ëª¨ë‹˜ ?°ê²°'),
+                        // â”€â”€ ë¶€ëª¨ë‹˜ ì—°ê²° â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                        _SectionTitle('ë¶€ëª¨ë‹˜ ì—°ê²°'),
                         const SizedBox(height: 10),
                         _LinkedSeniorCard(
                           linkedUid: _linkedSeniorUid,
@@ -72,15 +72,15 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
 
                         const SizedBox(height: 24),
 
-                        // ?€?€ ??ê¸°ëŠ¥ ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
-                        _SectionTitle('??ê¸°ëŠ¥'),
+                        // â”€â”€ ì•± ê¸°ëŠ¥ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                        _SectionTitle('ì•± ê¸°ëŠ¥'),
                         const SizedBox(height: 10),
                         _Card(children: [
                           _SwitchTile(
                             icon: Icons.notifications_outlined,
                             iconColor: const Color(0xFFE8896A),
-                            title: 'ë¯¸ë³µ???Œë¦¼',
-                            subtitle: 'ë¶€ëª¨ë‹˜???½ì„ ???œì…¨?????Œë¦¼',
+                            title: 'ë¯¸ë³µìš© ì•Œë¦¼',
+                            subtitle: 'ë¶€ëª¨ë‹˜ì´ ì•½ì„ ì•ˆ ë“œì…¨ì„ ë•Œ ì•Œë¦¼',
                             value: _notificationEnabled,
                             onChanged: (v) async {
                               setState(() => _notificationEnabled = v);
@@ -105,7 +105,7 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
                             icon: const Icon(Icons.swap_horiz_rounded,
                                 color: Color(0xFF999999)),
                             label: const Text(
-                              'ëª¨ë“œ ? íƒ ?”ë©´?¼ë¡œ ?Œì•„ê°€ê¸?,
+                              'ëª¨ë“œ ì„ íƒ í™”ë©´ìœ¼ë¡œ ëŒì•„ê°€ê¸°',
                               style: TextStyle(
                                   fontSize: 16, color: Color(0xFF999999)),
                             ),
@@ -133,10 +133,10 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('?°ê²° ?´ì œ',
+        title: const Text('ì—°ê²° í•´ì œ',
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
         content: const Text(
-          '?°ê²°???´ì œ?˜ë©´ ë¶€ëª¨ë‹˜??në³µìš© ?„í™©?????´ìƒ ë³????†ì–´??',
+          'ì—°ê²°ì„ í•´ì œí•˜ë©´ ë¶€ëª¨ë‹˜ì˜\në³µìš© í˜„í™©ì„ ë” ì´ìƒ ë³¼ ìˆ˜ ì—†ì–´ìš”.',
           style: TextStyle(fontSize: 18, height: 1.5),
         ),
         actions: [
@@ -146,7 +146,7 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('?´ì œ',
+            child: const Text('í•´ì œ',
                 style: TextStyle(fontSize: 18, color: Color(0xFFE53935))),
           ),
         ],
@@ -183,7 +183,7 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
       case 'success':
         setState(() {});
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Google ê³„ì •???°ê²°?ì–´?? ?¬ì„¤ì¹˜í•´???°ê²°??? ì??¼ìš”.',
+          content: Text('Google ê³„ì •ì´ ì—°ê²°ëì–´ìš”! ì¬ì„¤ì¹˜í•´ë„ ì—°ê²°ì´ ìœ ì§€ë¼ìš”.',
               style: TextStyle(fontSize: 16)),
           duration: Duration(seconds: 3),
           behavior: SnackBarBehavior.floating,
@@ -192,13 +192,13 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
         break;
       case 'already_in_use':
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('?´ë? ?¤ë¥¸ ê³„ì •???°ê²°??Google ê³„ì •?´ì—??',
+          content: Text('ì´ë¯¸ ë‹¤ë¥¸ ê³„ì •ì— ì—°ê²°ëœ Google ê³„ì •ì´ì—ìš”.',
               style: TextStyle(fontSize: 16)),
           behavior: SnackBarBehavior.floating,
         ));
       default:
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('?°ê²° ì¤??¤ë¥˜ê°€ ë°œìƒ?ˆì–´?? ?¤ì‹œ ?œë„?´ì£¼?¸ìš”.',
+          content: Text('ì—°ê²° ì¤‘ ì˜¤ë¥˜ê°€ ë°œìƒí–ˆì–´ìš”. ë‹¤ì‹œ ì‹œë„í•´ì£¼ì„¸ìš”.',
               style: TextStyle(fontSize: 16)),
           behavior: SnackBarBehavior.floating,
         ));
@@ -207,7 +207,7 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
 
 }
 
-// ?€?€ Header ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
+// â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class _Header extends StatelessWidget {
   const _Header();
@@ -232,7 +232,7 @@ class _Header extends StatelessWidget {
               Row(
                 children: [
                   const Text(
-                    '?¤ì •',
+                    'ì„¤ì •',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 26,
@@ -275,7 +275,7 @@ class _Header extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'ê°€ì¡?ë³µìš© ?•ì¸',
+                          'ê°€ì¡± ë³µìš© í™•ì¸',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 22,
@@ -295,7 +295,7 @@ class _Header extends StatelessWidget {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              'ë³´í˜¸??ëª¨ë“œ',
+                              'ë³´í˜¸ì ëª¨ë“œ',
                               style: TextStyle(
                                 color: Colors.white.withValues(alpha: 0.9),
                                 fontSize: 16,
@@ -316,7 +316,7 @@ class _Header extends StatelessWidget {
   }
 }
 
-// ?€?€ ?…ê·¸?ˆì´??CTA ë°°ë„ˆ ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
+// â”€â”€ ì—…ê·¸ë ˆì´ë“œ CTA ë°°ë„ˆ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class _UpgradeBanner extends StatelessWidget {
   final VoidCallback onTap;
@@ -344,7 +344,7 @@ class _UpgradeBanner extends StatelessWidget {
                   color: Color(0xFF1565C0), size: 22),
               const SizedBox(width: 8),
               const Text(
-                '?¬ì‹¤?‰ë§ˆ??ì½”ë“œë¥??¤ì‹œ ?…ë ¥?´ì•¼ ?´ìš”',
+                'ì¬ì‹¤í–‰ë§ˆë‹¤ ì½”ë“œë¥¼ ë‹¤ì‹œ ì…ë ¥í•´ì•¼ í•´ìš”',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -355,7 +355,7 @@ class _UpgradeBanner extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Google ê³„ì •???°ê²°?˜ë©´ ?±ì„ ê»ë‹¤ ì¼œë„\në¶€ëª¨ë‹˜ê³??ë™?¼ë¡œ ?°ê²°?¼ìš”.',
+            'Google ê³„ì •ì„ ì—°ê²°í•˜ë©´ ì•±ì„ ê»ë‹¤ ì¼œë„\në¶€ëª¨ë‹˜ê³¼ ìë™ìœ¼ë¡œ ì—°ê²°ë¼ìš”.',
             style: TextStyle(
               fontSize: 15,
               color: Color(0xFF1976D2),
@@ -377,7 +377,7 @@ class _UpgradeBanner extends StatelessWidget {
               ),
               icon: const Icon(Icons.g_mobiledata_rounded, size: 22),
               label: const Text(
-                'Googleë¡??êµ¬ ?°ê²°?˜ê¸°',
+                'Googleë¡œ ì˜êµ¬ ì—°ê²°í•˜ê¸°',
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
               ),
             ),
@@ -388,7 +388,7 @@ class _UpgradeBanner extends StatelessWidget {
   }
 }
 
-// ?€?€ ë¶€ëª¨ë‹˜ ?°ê²° ì¹´ë“œ ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
+// â”€â”€ ë¶€ëª¨ë‹˜ ì—°ê²° ì¹´ë“œ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class _LinkedSeniorCard extends StatelessWidget {
   final String? linkedUid;
@@ -435,7 +435,7 @@ class _LinkedSeniorCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'ë¶€ëª¨ë‹˜ ?°ê²° ?íƒœ',
+                    'ë¶€ëª¨ë‹˜ ì—°ê²° ìƒíƒœ',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -443,7 +443,7 @@ class _LinkedSeniorCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    isLinked ? '?°ê²°?? : '?°ê²°??ë¶€ëª¨ë‹˜???†ì–´??,
+                    isLinked ? 'ì—°ê²°ë¨' : 'ì—°ê²°ëœ ë¶€ëª¨ë‹˜ì´ ì—†ì–´ìš”',
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight:
@@ -472,7 +472,7 @@ class _LinkedSeniorCard extends StatelessWidget {
                 ),
                 icon: const Icon(Icons.link_off_rounded, size: 20),
                 label: const Text(
-                  '?°ê²° ?´ì œ',
+                  'ì—°ê²° í•´ì œ',
                   style:
                       TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                 ),
@@ -485,7 +485,7 @@ class _LinkedSeniorCard extends StatelessWidget {
   }
 }
 
-// ?€?€ ê³µí†µ ?„ì ¯ ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
+// â”€â”€ ê³µí†µ ìœ„ì ¯ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
 class _SectionTitle extends StatelessWidget {
   final String text;

@@ -18,15 +18,15 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
   DateTime? _endDate;
 
   final Map<String, int> _times = {
-    '?�침': 8 * 60,
-    '?�심': 12 * 60,
-    '?�??: 18 * 60,
+    '아침': 8 * 60,
+    '점심': 12 * 60,
+    '저녁': 18 * 60,
     '취침': 21 * 60,
   };
   final Map<String, bool> _timeEnabled = {
-    '?�침': true,
-    '?�심': true,
-    '?�??: true,
+    '아침': true,
+    '점심': true,
+    '저녁': true,
     '취침': false,
   };
 
@@ -93,7 +93,7 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          '??추�?',
+          '약 추가',
           style: TextStyle(
               color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
         ),
@@ -103,7 +103,7 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('???�름',
+            const Text('약 이름',
                 style: TextStyle(fontSize: 18, color: Color(0xFF666666))),
             const SizedBox(height: 8),
             TextField(
@@ -111,7 +111,7 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
               style: const TextStyle(
                   fontSize: 22, fontWeight: FontWeight.bold),
               decoration: InputDecoration(
-                hintText: '???�름 ?�력',
+                hintText: '약 이름 입력',
                 hintStyle: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -127,7 +127,7 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
             ),
             const SizedBox(height: 24),
             const Text(
-              '복용 ?�간 ?�정',
+              '복용 시간 설정',
               style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
@@ -143,7 +143,7 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
                 )),
             const SizedBox(height: 24),
             const Text(
-              '복용 종료??,
+              '복용 종료일',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1A1A2E)),
             ),
             const SizedBox(height: 12),
@@ -178,8 +178,8 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
                     Expanded(
                       child: Text(
                         _endDate != null
-                            ? '${_endDate!.year}??${_endDate!.month}??${_endDate!.day}?�까지'
-                            : '종료???�음 (계속 복용)',
+                            ? '${_endDate!.year}년 ${_endDate!.month}월 ${_endDate!.day}일까지'
+                            : '종료일 없음 (계속 복용)',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
@@ -208,7 +208,7 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
                       borderRadius: BorderRadius.circular(14)),
                 ),
                 child: const Text(
-                  '?�??,
+                  '저장',
                   style: TextStyle(
                       fontSize: 24,
                       color: Colors.white,
