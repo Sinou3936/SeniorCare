@@ -4,6 +4,7 @@ import '../models/medicine.dart';
 import '../models/medicine_log.dart';
 import '../models/appointment.dart';
 import '../models/app_notification.dart';
+import '../utils/time_utils.dart';
 import 'auth_service.dart';
 
 class FirestoreService {
@@ -55,7 +56,7 @@ class FirestoreService {
         final codeData = codeDoc.data() as Map<String, dynamic>;
         final createdAt = (codeData['createdAt'] as Timestamp?)?.toDate();
         if (createdAt != null) {
-          final isExpired = DateTime.now().difference(createdAt).inMinutes >=
+          final isExpired = kstNow().difference(createdAt).inMinutes >=
               _codeExpireMinutes;
           return (code: code, isExpired: isExpired);
         }
@@ -86,7 +87,7 @@ class FirestoreService {
     final data = doc.data() as Map<String, dynamic>;
     final createdAt = (data['createdAt'] as Timestamp?)?.toDate();
     if (createdAt != null) {
-      final isExpired = DateTime.now().difference(createdAt).inMinutes >=
+      final isExpired = kstNow().difference(createdAt).inMinutes >=
           _codeExpireMinutes;
       if (isExpired) return 'expired';
     }
@@ -163,9 +164,16 @@ class FirestoreService {
   }
 
   static Stream<List<Medicine>> watchMedicines() {
-    return _medicines.orderBy('name').snapshots().map(
-          (s) => s.docs.map((d) => Medicine.fromFirestore(d)).toList(),
-        );
+    return _medicines.orderBy('name').snapshots().map((s) {
+      final today = kstNow();
+      final todayDate = DateTime(today.year, today.month, today.day);
+      return s.docs
+          .map((d) => Medicine.fromFirestore(d))
+          .where((m) =>
+              m.endDate == null ||
+              !m.endDate!.isBefore(todayDate))
+          .toList();
+    });
   }
 
   static Future<void> addMedicine(Medicine m) async {
@@ -212,6 +220,62 @@ class FirestoreService {
       }
       return map;
     });
+  }
+
+  /// 해당 날짜에 약별 로그가 없으면 자동 생성 (기존 로그가 있어도 누락된 약만 추가)
+  static Future<void> generateLogsForDate(DateTime date) async {
+    final start = DateTime(date.year, date.month, date.day);
+    final end = start.add(const Duration(days: 1));
+
+    final results = await Future.wait([
+      _logs
+          .where('scheduledTime', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
+          .where('scheduledTime', isLessThan: Timestamp.fromDate(end))
+          .get(),
+      _medicines.get(),
+    ]);
+
+    final existingSnap = results[0];
+    final medicinesSnap = results[1];
+
+    // 이미 로그가 있는 약 ID 집합
+    final existingMedicineIds = existingSnap.docs
+        .map((d) => (d.data() as Map<String, dynamic>)['medicineId'] as String)
+        .toSet();
+
+    final batch = _db.batch();
+    bool hasNew = false;
+
+    for (final doc in medicinesSnap.docs) {
+      final medicine = Medicine.fromFirestore(doc);
+      if (existingMedicineIds.contains(medicine.id)) continue;
+
+      final startDay = DateTime(medicine.startDate.year, medicine.startDate.month, medicine.startDate.day);
+      if (start.isBefore(startDay)) continue;
+      if (medicine.endDate != null) {
+        final endDay = DateTime(medicine.endDate!.year, medicine.endDate!.month, medicine.endDate!.day);
+        if (start.isAfter(endDay)) continue;
+      }
+
+      for (final time in medicine.times) {
+        final parts = time.split(':');
+        if (parts.length != 2) continue;
+        final h = int.tryParse(parts[0]);
+        final m = int.tryParse(parts[1]);
+        if (h == null || m == null) continue;
+        final scheduled = DateTime(start.year, start.month, start.day, h, m);
+        final logRef = _logs.doc();
+        batch.set(logRef, MedicineLog(
+          id: logRef.id,
+          medicineId: medicine.id,
+          medicineName: medicine.name,
+          scheduledTime: scheduled,
+          taken: false,
+        ).toMap());
+        hasNew = true;
+      }
+    }
+    if (hasNew) await batch.commit();
   }
 
   static Stream<List<MedicineLog>> watchLogsForDate(DateTime date) {

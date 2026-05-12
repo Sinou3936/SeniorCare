@@ -87,6 +87,10 @@ class _SeniorHospitalAddScreenState extends State<SeniorHospitalAddScreen> {
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
               decoration: InputDecoration(
                 hintText: '병원 이름 입력',
+                hintStyle: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFCCCCCC)),
                 filled: true,
                 fillColor: Colors.white,
                 border: OutlineInputBorder(
@@ -164,6 +168,7 @@ class _SeniorHospitalAddScreenState extends State<SeniorHospitalAddScreen> {
               maxLines: 3,
               decoration: InputDecoration(
                 hintText: '메모를 입력하세요',
+                hintStyle: const TextStyle(fontSize: 18, color: Color(0xFFCCCCCC)),
                 filled: true,
                 fillColor: Colors.white,
                 border: OutlineInputBorder(

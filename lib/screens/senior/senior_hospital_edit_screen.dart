@@ -177,6 +177,7 @@ class _SeniorHospitalEditScreenState extends State<SeniorHospitalEditScreen> {
               maxLines: 3,
               decoration: InputDecoration(
                 hintText: '메모를 입력하세요',
+                hintStyle: const TextStyle(fontSize: 18, color: Color(0xFFCCCCCC)),
                 filled: true,
                 fillColor: Colors.white,
                 border: OutlineInputBorder(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/medicine_log.dart';
 import '../../services/firestore_service.dart';
+import '../../utils/time_utils.dart';
 import '../../widgets/weekly_calendar.dart';
 import 'senior_my_code_screen.dart';
 
@@ -12,7 +13,7 @@ class SeniorHomeScreen extends StatefulWidget {
 }
 
 class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
-  DateTime _selectedDate = DateTime.now();
+  DateTime _selectedDate = kstNow();
 
   DateTime get _weekStart {
     final wd = _selectedDate.weekday;
@@ -60,6 +61,23 @@ class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    _generateLogsForWeek();
+  }
+
+  Future<void> _generateLogsForWeek() async {
+    for (int i = 0; i < 7; i++) {
+      await FirestoreService.generateLogsForDate(_weekStart.add(Duration(days: i)));
+    }
+  }
+
+  void _onDateSelected(DateTime date) {
+    setState(() => _selectedDate = date);
+    FirestoreService.generateLogsForDate(date);
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
@@ -89,7 +107,7 @@ class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
     Map<String, List<MedicineLog>> grouped,
     Map<DateTime, bool?> statusMap,
   ) {
-    final now = DateTime.now();
+    final now = kstNow();
     return Column(
             children: [
               Container(
@@ -171,23 +189,23 @@ class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
               ),
               WeeklyCalendar(
                 selectedDate: _selectedDate,
-                onDateSelected: (d) => setState(() => _selectedDate = d),
+                onDateSelected: _onDateSelected,
                 statusMap: statusMap,
               ),
               Expanded(
                 child: logs.isEmpty
                         ? const Center(
                             child: Text(
-                              '오늘 복용할 약이 없어요',
+                              '복용 기록이 없어요',
                               style: TextStyle(fontSize: 18, color: Color(0xFF999999)),
                             ),
                           )
                         : ListView(
                             padding: const EdgeInsets.all(16),
                             children: [
-                              const Text(
-                                '오늘 복용 현황',
-                                style: TextStyle(
+                              Text(
+                                '${_selectedDate.month}월 ${_selectedDate.day}일 복용 현황',
+                                style: const TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold,
                                   color: Color(0xFF1A1A2E),

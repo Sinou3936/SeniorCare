@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/medicine_log.dart';
 import '../../services/firestore_service.dart';
+import '../../utils/time_utils.dart';
 import '../../widgets/weekly_calendar.dart';
 
 class FamilyHomeScreen extends StatefulWidget {
@@ -11,7 +12,7 @@ class FamilyHomeScreen extends StatefulWidget {
 }
 
 class _FamilyHomeScreenState extends State<FamilyHomeScreen> {
-  DateTime _selectedDate = DateTime.now();
+  DateTime _selectedDate = kstNow();
   String? _seniorUid;
   bool _loading = true;
 

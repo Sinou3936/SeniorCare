@@ -50,6 +50,12 @@ class NotificationService {
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
 
+    // 정확한 알람 권한 요청 (Android 12+)
+    await _local
+        .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin>()
+        ?.requestExactAlarmsPermission();
+
     FirebaseMessaging.onMessage.listen(_showLocal);
 
     final token = await _messaging.getToken();
@@ -76,15 +82,28 @@ class NotificationService {
       final id = _notificationId(medicineId, i);
       final scheduledTime = _nextOccurrence(hour, minute);
 
-      await _local.zonedSchedule(
-        id: id,
-        title: '복약 알림',
-        body: '$medicineName 드실 시간이에요!',
-        scheduledDate: scheduledTime,
-        notificationDetails: _notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-        matchDateTimeComponents: DateTimeComponents.time, // 매일 반복
-      );
+      try {
+        await _local.zonedSchedule(
+          id: id,
+          title: '복약 알림',
+          body: '$medicineName 드실 시간이에요!',
+          scheduledDate: scheduledTime,
+          notificationDetails: _notificationDetails,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          matchDateTimeComponents: DateTimeComponents.time,
+        );
+      } catch (_) {
+        // 정확한 알람 권한 없을 때 inexact로 폴백
+        await _local.zonedSchedule(
+          id: id,
+          title: '복약 알림',
+          body: '$medicineName 드실 시간이에요!',
+          scheduledDate: scheduledTime,
+          notificationDetails: _notificationDetails,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          matchDateTimeComponents: DateTimeComponents.time,
+        );
+      }
     }
   }
 

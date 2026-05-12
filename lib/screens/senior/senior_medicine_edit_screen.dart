@@ -19,6 +19,7 @@ class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
 
   late final Map<String, int> _times;
   late final Map<String, bool> _timeEnabled;
+  late DateTime? _endDate;
 
   bool _isSaving = false;
 
@@ -44,6 +45,7 @@ class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
       for (final slot in _defaultMinutes.keys)
         slot: existingTimes.containsKey(slot),
     };
+    _endDate = widget.medicine.endDate;
   }
 
   @override
@@ -87,7 +89,7 @@ class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
       photoUrl: widget.medicine.photoUrl,
       times: enabledTimes,
       startDate: widget.medicine.startDate,
-      endDate: widget.medicine.endDate,
+      endDate: _endDate,
     );
 
     await FirestoreService.updateMedicine(updated);
@@ -147,6 +149,61 @@ class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
                   onToggle: (v) => setState(() => _timeEnabled[slot] = v),
                   onAdjust: (delta) => _adjustTime(slot, delta),
                 )),
+            const SizedBox(height: 24),
+            const Text(
+              '복용 종료일',
+              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1A1A2E)),
+            ),
+            const SizedBox(height: 12),
+            GestureDetector(
+              onTap: () async {
+                final picked = await showDatePicker(
+                  context: context,
+                  initialDate: _endDate ?? DateTime.now().add(const Duration(days: 30)),
+                  firstDate: DateTime.now(),
+                  lastDate: DateTime.now().add(const Duration(days: 365 * 3)),
+                );
+                if (picked != null) setState(() => _endDate = picked);
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(
+                    color: _endDate != null ? const Color(0xFF4A90D9) : const Color(0xFFE0E0E0),
+                    width: 1.5,
+                  ),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Icons.calendar_today_rounded,
+                      color: _endDate != null ? const Color(0xFF4A90D9) : const Color(0xFFCCCCCC),
+                      size: 26,
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        _endDate != null
+                            ? '${_endDate!.year}년 ${_endDate!.month}월 ${_endDate!.day}일까지'
+                            : '종료일 없음 (계속 복용)',
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: _endDate != null ? const Color(0xFF1A1A2E) : const Color(0xFFCCCCCC),
+                        ),
+                      ),
+                    ),
+                    if (_endDate != null)
+                      GestureDetector(
+                        onTap: () => setState(() => _endDate = null),
+                        child: const Icon(Icons.close_rounded, color: Color(0xFF999999), size: 22),
+                      ),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(height: 32),
             SizedBox(
               width: double.infinity,

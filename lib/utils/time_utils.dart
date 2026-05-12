@@ -1,3 +1,8 @@
+import 'package:timezone/timezone.dart' as tz;
+
+/// 현재 시각을 KST 기준으로 반환 (기기 timezone 설정 무관)
+DateTime kstNow() => tz.TZDateTime.now(tz.getLocation('Asia/Seoul'));
+
 /// 슬롯 라벨 (아침/점심/저녁/취침)
 String slotLabel(DateTime dt) {
   if (dt.hour < 10) return '아침';
@@ -12,7 +17,7 @@ DateTime weekStart(DateTime date) =>
 
 /// DateTime → "N분 전 / N시간 전 / N일 전"
 String formatRelativeTime(DateTime dt) {
-  final diff = DateTime.now().difference(dt);
+  final diff = kstNow().difference(dt);
   if (diff.inMinutes < 60) return '${diff.inMinutes}분 전';
   if (diff.inHours < 24) return '${diff.inHours}시간 전';
   return '${diff.inDays}일 전';

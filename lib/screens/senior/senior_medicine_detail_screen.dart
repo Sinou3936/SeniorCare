@@ -54,21 +54,6 @@ class _DetailView extends StatelessWidget {
           children: [
             Container(
               width: double.infinity,
-              height: 200,
-              decoration: BoxDecoration(
-                color: const Color(0xFF4A90D9).withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: medicine.photoUrl != null
-                  ? ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: Image.network(medicine.photoUrl!, fit: BoxFit.cover),
-                    )
-                  : const Icon(Icons.medication_rounded, size: 80, color: Color(0xFF4A90D9)),
-            ),
-            const SizedBox(height: 20),
-            Container(
-              width: double.infinity,
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: Colors.white,
@@ -108,6 +93,13 @@ class _DetailView extends StatelessWidget {
                   const SizedBox(height: 16),
                   Text(
                     '복용 시작: ${medicine.startDate.year}년 ${medicine.startDate.month}월 ${medicine.startDate.day}일',
+                    style: const TextStyle(fontSize: 16, color: Color(0xFF666666)),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    medicine.endDate != null
+                        ? '복용 종료: ${medicine.endDate!.year}년 ${medicine.endDate!.month}월 ${medicine.endDate!.day}일'
+                        : '복용 종료: 미설정 (계속 복용)',
                     style: const TextStyle(fontSize: 16, color: Color(0xFF666666)),
                   ),
                 ],

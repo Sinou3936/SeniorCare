@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/time_utils.dart';
 
 class WeeklyCalendar extends StatelessWidget {
   final DateTime selectedDate;
@@ -32,7 +33,7 @@ class WeeklyCalendar extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: List.generate(7, (i) {
           final day = weekStart.add(Duration(days: i));
-          final isToday = _isSameDay(day, DateTime.now());
+          final isToday = _isSameDay(day, kstNow());
           final isSelected = _isSameDay(day, selectedDate);
           final key = DateTime(day.year, day.month, day.day);
           final status = statusMap[key];
@@ -75,9 +76,9 @@ class WeeklyCalendar extends StatelessWidget {
                       shape: BoxShape.circle,
                       color: status == null
                           ? Colors.transparent
-                          : status
-                              ? Colors.greenAccent
-                              : Colors.redAccent,
+                          : status == true
+                              ? const Color(0xFF4CAF50)
+                              : Colors.white.withValues(alpha: 0.5),
                     ),
                   ),
                 ],

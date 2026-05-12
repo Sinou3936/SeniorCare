@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import '../utils/time_utils.dart';
 
 class AppNotification {
   final String id;
@@ -24,7 +25,7 @@ class AppNotification {
       isRead: d['isRead'] as bool? ?? false,
       createdAt: d['createdAt'] != null
           ? (d['createdAt'] as Timestamp).toDate()
-          : DateTime.now(),
+          : kstNow(),
     );
   }
 }
