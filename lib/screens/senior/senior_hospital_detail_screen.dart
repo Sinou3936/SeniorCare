@@ -14,13 +14,13 @@ class SeniorHospitalDetailScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF4A90D9),
+        backgroundColor: const Color(0xFFE8896A),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white, size: 24),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
-          '병원 상세',
+          '병원 ?�세',
           style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
         ),
       ),
@@ -41,7 +41,7 @@ class SeniorHospitalDetailScreen extends StatelessWidget {
                   const Icon(
                     Icons.local_hospital_rounded,
                     size: 48,
-                    color: Color(0xFF4A90D9),
+                    color: Color(0xFFE8896A),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -55,7 +55,7 @@ class SeniorHospitalDetailScreen extends StatelessWidget {
                   const SizedBox(height: 20),
                   _InfoRow(
                     icon: Icons.calendar_today_rounded,
-                    text: '${d.year}년 ${d.month}월 ${d.day}일',
+                    text: '${d.year}??${d.month}??${d.day}??,
                   ),
                   const SizedBox(height: 12),
                   _InfoRow(
@@ -85,13 +85,13 @@ class SeniorHospitalDetailScreen extends StatelessWidget {
                         ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF4A90D9),
+                        backgroundColor: const Color(0xFFE8896A),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
                       child: const Text(
-                        '수정',
+                        '?�정',
                         style: TextStyle(fontSize: 22, color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -110,7 +110,7 @@ class SeniorHospitalDetailScreen extends StatelessWidget {
                         ),
                       ),
                       child: const Text(
-                        '삭제',
+                        '??��',
                         style: TextStyle(fontSize: 22, color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                     ),
@@ -128,9 +128,9 @@ class SeniorHospitalDetailScreen extends StatelessWidget {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('예약 삭제', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+        title: const Text('?�약 ??��', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
         content: Text(
-          '${appointment.hospitalName} 예약을 삭제할까요?',
+          '${appointment.hospitalName} ?�약????��?�까??',
           style: const TextStyle(fontSize: 18),
         ),
         actions: [
@@ -140,7 +140,7 @@ class SeniorHospitalDetailScreen extends StatelessWidget {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('삭제', style: TextStyle(fontSize: 18, color: Color(0xFFE53935))),
+            child: const Text('??��', style: TextStyle(fontSize: 18, color: Color(0xFFE53935))),
           ),
         ],
       ),
@@ -163,7 +163,7 @@ class _InfoRow extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, size: 24, color: const Color(0xFF4A90D9)),
+        Icon(icon, size: 24, color: const Color(0xFFE8896A)),
         const SizedBox(width: 12),
         Expanded(
           child: Text(

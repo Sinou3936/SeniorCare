@@ -16,8 +16,8 @@ class AuthService {
     await _auth.signInAnonymously();
   }
 
-  /// 익명 계정 → Google 계정 연결 (업그레이드)
-  /// 반환값: 'success' | 'cancelled' | 'already_in_use' | 'error'
+  /// ?�명 계정 ??Google 계정 ?�결 (?�그?�이??
+  /// 반환�? 'success' | 'cancelled' | 'already_in_use' | 'error'
   static Future<String> linkWithGoogle() async {
     try {
       final googleUser = await _googleSignIn.signIn();
@@ -39,7 +39,7 @@ class AuthService {
     }
   }
 
-  /// Google 로그아웃 (계정 연결 해제 시)
+  /// Google 로그?�웃 (계정 ?�결 ?�제 ??
   static Future<void> signOut() async {
     await _googleSignIn.signOut();
     await _auth.signOut();

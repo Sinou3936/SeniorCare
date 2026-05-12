@@ -21,11 +21,11 @@ class _FamilyHomeScreenState extends State<FamilyHomeScreen> {
     return now.subtract(Duration(days: now.weekday - 1));
   }
 
-  static const _slotOrder = ['아침', '점심', '저녁', '취침'];
+  static const _slotOrder = ['?�침', '?�심', '?�??, '취침'];
   static const _slotIcons = {
-    '아침': Icons.wb_sunny_outlined,
-    '점심': Icons.light_mode_outlined,
-    '저녁': Icons.nights_stay_outlined,
+    '?�침': Icons.wb_sunny_outlined,
+    '?�심': Icons.light_mode_outlined,
+    '?�??: Icons.nights_stay_outlined,
     '취침': Icons.bedtime_outlined,
   };
 
@@ -41,9 +41,9 @@ class _FamilyHomeScreenState extends State<FamilyHomeScreen> {
   }
 
   String _slotLabel(DateTime dt) {
-    if (dt.hour < 10) return '아침';
-    if (dt.hour < 14) return '점심';
-    if (dt.hour < 20) return '저녁';
+    if (dt.hour < 10) return '?�침';
+    if (dt.hour < 14) return '?�심';
+    if (dt.hour < 20) return '?�??;
     return '취침';
   }
 
@@ -62,13 +62,13 @@ class _FamilyHomeScreenState extends State<FamilyHomeScreen> {
   Widget build(BuildContext context) {
     if (_loading) {
       return const Scaffold(
-        body: Center(child: CircularProgressIndicator(color: Color(0xFF4A90D9))),
+        body: Center(child: CircularProgressIndicator(color: Color(0xFFE8896A))),
       );
     }
     if (_seniorUid == null) {
       return const Scaffold(
         body: Center(
-          child: Text('연결된 부모님이 없어요',
+          child: Text('?�결??부모님???�어??,
               style: TextStyle(fontSize: 20, color: Color(0xFF999999))),
         ),
       );
@@ -91,7 +91,7 @@ class _FamilyHomeScreenState extends State<FamilyHomeScreen> {
               return Column(
                 children: [
                   Container(
-                    color: const Color(0xFF4A90D9),
+                    color: const Color(0xFFE8896A),
                     child: SafeArea(
                       bottom: false,
                       child: Padding(
@@ -102,7 +102,7 @@ class _FamilyHomeScreenState extends State<FamilyHomeScreen> {
                             const Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('부모님 복용 현황',
+                                Text('부모님 복용 ?�황',
                                     style: TextStyle(
                                         color: Colors.white70, fontSize: 15)),
                                 Text('부모님',
@@ -142,10 +142,10 @@ class _FamilyHomeScreenState extends State<FamilyHomeScreen> {
                             snap.connectionState == ConnectionState.waiting
                         ? const Center(
                             child: CircularProgressIndicator(
-                                color: Color(0xFF4A90D9)))
+                                color: Color(0xFFE8896A)))
                         : logs.isEmpty
                             ? const Center(
-                                child: Text('복용 기록이 없어요',
+                                child: Text('복용 기록???�어??,
                                     style: TextStyle(
                                         fontSize: 18,
                                         color: Color(0xFF999999))),
@@ -154,7 +154,7 @@ class _FamilyHomeScreenState extends State<FamilyHomeScreen> {
                                 padding: const EdgeInsets.all(16),
                                 children: [
                                   const Text(
-                                    '오늘 복용 현황',
+                                    '?�늘 복용 ?�황',
                                     style: TextStyle(
                                         fontSize: 22,
                                         fontWeight: FontWeight.bold,
@@ -247,7 +247,7 @@ class _FamilySlotGroup extends StatelessWidget {
                     allTaken
                         ? '모두 복용'
                         : noneTaken
-                            ? '미복용'
+                            ? '미복??
                             : '$takenCount/${logs.length} 복용',
                     style: const TextStyle(
                         fontSize: 14,
@@ -308,7 +308,7 @@ class _FamilyMedicineRow extends StatelessWidget {
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
-              log.taken ? '완료' : '미복용',
+              log.taken ? '?�료' : '미복??,
               style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,

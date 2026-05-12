@@ -31,16 +31,16 @@ class _FamilyMainScreenState extends State<FamilyMainScreen> {
         selectedFontSize: 16,
         unselectedFontSize: 14,
         iconSize: 30,
-        selectedItemColor: const Color(0xFF4A90D9),
+        selectedItemColor: const Color(0xFFE8896A),
         unselectedItemColor: Colors.grey,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home_rounded),
-            label: '홈',
+            label: '??,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.notifications_rounded),
-            label: '알림',
+            label: '?�림',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.local_hospital_rounded),
@@ -48,7 +48,7 @@ class _FamilyMainScreenState extends State<FamilyMainScreen> {
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings_rounded),
-            label: '설정',
+            label: '?�정',
           ),
         ],
       ),

@@ -42,7 +42,7 @@ class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
     if (seniorUid == 'expired') {
       setState(() {
         _isLoading = false;
-        _errorMessage = '만료된 코드예요. 부모님께 새 코드를 요청하세요.';
+        _errorMessage = '만료??코드?�요. 부모님�???코드�??�청?�세??';
         _controller.clear();
       });
       _focusNode.requestFocus();
@@ -57,7 +57,7 @@ class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
     } else {
       setState(() {
         _isLoading = false;
-        _errorMessage = '코드를 찾을 수 없어요. 다시 확인해주세요.';
+        _errorMessage = '코드�?찾을 ???�어?? ?�시 ?�인?�주?�요.';
         _controller.clear();
       });
       _focusNode.requestFocus();
@@ -67,7 +67,7 @@ class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF4A90D9),
+      backgroundColor: const Color(0xFFE8896A),
       body: SafeArea(
         child: GestureDetector(
           onTap: () => _focusNode.requestFocus(),
@@ -85,7 +85,7 @@ class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
                 ),
                 const SizedBox(height: 24),
                 const Text(
-                  '부모님 코드를\n입력해주세요',
+                  '부모님 코드�?n?�력?�주?�요',
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 32,
@@ -95,13 +95,13 @@ class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
                 ),
                 const SizedBox(height: 12),
                 const Text(
-                  '부모님 앱의 "내 코드" 화면에서\n6자리 코드를 확인하세요',
+                  '부모님 ?�의 "??코드" ?�면?�서\n6?�리 코드�??�인?�세??,
                   style: TextStyle(
                       color: Colors.white70, fontSize: 17, height: 1.5),
                 ),
                 const SizedBox(height: 48),
 
-                // 숨겨진 TextField (실제 입력 처리)
+                // ?�겨�?TextField (?�제 ?�력 처리)
                 Opacity(
                   opacity: 0,
                   child: SizedBox(
@@ -129,7 +129,7 @@ class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
                   ),
                 ),
 
-                // 6개 시각적 박스
+                // 6�??�각??박스
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: List.generate(6, (i) {
@@ -171,15 +171,15 @@ class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
                     ),
                     child: _isLoading
                         ? const CircularProgressIndicator(
-                            color: Color(0xFF4A90D9))
+                            color: Color(0xFFE8896A))
                         : Text(
-                            '연결하기',
+                            '?�결?�기',
                             style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
                               color: _isFull
-                                  ? const Color(0xFF4A90D9)
-                                  : const Color(0xFF4A90D9)
+                                  ? const Color(0xFFE8896A)
+                                  : const Color(0xFFE8896A)
                                       .withValues(alpha: 0.4),
                             ),
                           ),
@@ -188,7 +188,7 @@ class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
                 const SizedBox(height: 16),
                 const Center(
                   child: Text(
-                    '코드는 부모님 앱 → 내 코드 에서 확인할 수 있어요',
+                    '코드??부모님 ??????코드 ?�서 ?�인?????�어??,
                     style: TextStyle(color: Colors.white60, fontSize: 14),
                     textAlign: TextAlign.center,
                   ),
@@ -240,7 +240,7 @@ class _CodeBox extends StatelessWidget {
               height: 8,
               decoration: BoxDecoration(
                 color: isCurrent
-                    ? const Color(0xFF4A90D9)
+                    ? const Color(0xFFE8896A)
                     : const Color(0xFFCCCCCC),
                 shape: BoxShape.circle,
               ),

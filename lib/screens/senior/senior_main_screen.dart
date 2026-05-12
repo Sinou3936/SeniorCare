@@ -31,13 +31,13 @@ class _SeniorMainScreenState extends State<SeniorMainScreen> {
         selectedFontSize: 16,
         unselectedFontSize: 14,
         iconSize: 32,
-        selectedItemColor: const Color(0xFF4A90D9),
+        selectedItemColor: const Color(0xFFE8896A),
         unselectedItemColor: Colors.grey,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: '홈'),
-          BottomNavigationBarItem(icon: Icon(Icons.medication_rounded), label: '약 관리'),
+          BottomNavigationBarItem(icon: Icon(Icons.home_rounded), label: '??),
+          BottomNavigationBarItem(icon: Icon(Icons.medication_rounded), label: '??관�?),
           BottomNavigationBarItem(icon: Icon(Icons.local_hospital_rounded), label: '병원'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings_rounded), label: '설정'),
+          BottomNavigationBarItem(icon: Icon(Icons.settings_rounded), label: '?�정'),
         ],
       ),
     );

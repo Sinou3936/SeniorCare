@@ -13,9 +13,9 @@ class SeniorHospitalScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF4A90D9),
+        backgroundColor: const Color(0xFFE8896A),
         title: const Text(
-          '병원 예약',
+          '병원 ?�약',
           style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
         ),
         automaticallyImplyLeading: false,
@@ -25,7 +25,7 @@ class SeniorHospitalScreen extends StatelessWidget {
         builder: (context, snap) {
           if (snap.connectionState == ConnectionState.waiting) {
             return const Center(
-                child: CircularProgressIndicator(color: Color(0xFF4A90D9)));
+                child: CircularProgressIndicator(color: Color(0xFFE8896A)));
           }
           final appointments = snap.data ?? [];
           if (appointments.isEmpty) {
@@ -36,7 +36,7 @@ class SeniorHospitalScreen extends StatelessWidget {
                   Icon(Icons.local_hospital_outlined,
                       size: 72, color: Color(0xFFCCCCCC)),
                   SizedBox(height: 16),
-                  Text('예약된 병원이 없어요',
+                  Text('?�약??병원???�어??,
                       style: TextStyle(fontSize: 20, color: Color(0xFF999999))),
                 ],
               ),
@@ -63,10 +63,10 @@ class SeniorHospitalScreen extends StatelessWidget {
           context,
           MaterialPageRoute(builder: (_) => const SeniorHospitalAddScreen()),
         ),
-        backgroundColor: const Color(0xFF4A90D9),
+        backgroundColor: const Color(0xFFE8896A),
         icon: const Icon(Icons.add, size: 28, color: Colors.white),
         label: const Text(
-          '예약 추가',
+          '?�약 추�?',
           style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),

@@ -13,7 +13,7 @@ class WeeklyCalendar extends StatelessWidget {
     this.statusMap = const {},
   });
 
-  static const _dayLabels = ['월', '화', '수', '목', '금', '토', '일'];
+  static const _dayLabels = ['??, '??, '??, '�?, '�?, '??, '??];
 
   DateTime get _weekStart {
     final wd = selectedDate.weekday;
@@ -27,7 +27,7 @@ class WeeklyCalendar extends StatelessWidget {
   Widget build(BuildContext context) {
     final weekStart = _weekStart;
     return Container(
-      color: const Color(0xFF4A90D9),
+      color: const Color(0xFFE8896A),
       padding: const EdgeInsets.fromLTRB(8, 4, 8, 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -53,7 +53,7 @@ class WeeklyCalendar extends StatelessWidget {
                   Text(
                     _dayLabels[i],
                     style: TextStyle(
-                      color: isSelected ? const Color(0xFF4A90D9) : Colors.white70,
+                      color: isSelected ? const Color(0xFFE8896A) : Colors.white70,
                       fontSize: 13,
                     ),
                   ),
@@ -61,7 +61,7 @@ class WeeklyCalendar extends StatelessWidget {
                   Text(
                     '${day.day}',
                     style: TextStyle(
-                      color: isSelected ? const Color(0xFF4A90D9) : Colors.white,
+                      color: isSelected ? const Color(0xFFE8896A) : Colors.white,
                       fontSize: 20,
                       fontWeight: isToday || isSelected
                           ? FontWeight.bold

@@ -31,7 +31,7 @@ class MedicineCard extends StatelessWidget {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: const Color(0xFF4A90D9).withValues(alpha: 0.1),
+                color: const Color(0xFFE8896A).withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(14),
               ),
               child: medicine.photoUrl != null
@@ -39,7 +39,7 @@ class MedicineCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(14),
                       child: Image.network(medicine.photoUrl!, fit: BoxFit.cover),
                     )
-                  : const Icon(Icons.medication, size: 44, color: Color(0xFF4A90D9)),
+                  : const Icon(Icons.medication, size: 44, color: Color(0xFFE8896A)),
             ),
             const SizedBox(width: 16),
             Expanded(
@@ -79,14 +79,14 @@ class _TimeChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: const Color(0xFF4A90D9).withValues(alpha: 0.1),
+        color: const Color(0xFFE8896A).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Text(
         label,
         style: const TextStyle(
           fontSize: 15,
-          color: Color(0xFF4A90D9),
+          color: Color(0xFFE8896A),
           fontWeight: FontWeight.w600,
         ),
       ),

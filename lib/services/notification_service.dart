@@ -12,7 +12,7 @@ class NotificationService {
   static final _local = FlutterLocalNotificationsPlugin();
 
   static const _channelId = 'medicine_reminders';
-  static const _channelName = '복약 알림';
+  static const _channelName = '복약 ?�림';
 
   static const _androidDetails = AndroidNotificationDetails(
     _channelId,
@@ -28,8 +28,7 @@ class NotificationService {
 
     await _messaging.requestPermission(alert: true, badge: true, sound: true);
 
-    // timezone 초기화
-    tz_data.initializeTimeZones();
+    // timezone 초기??    tz_data.initializeTimeZones();
     tz.setLocalLocation(tz.getLocation('Asia/Seoul'));
 
     const androidSettings =
@@ -50,7 +49,7 @@ class NotificationService {
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
 
-    // 정확한 알람 권한 요청 (Android 12+)
+    // ?�확???�람 권한 ?�청 (Android 12+)
     await _local
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>()
@@ -63,12 +62,11 @@ class NotificationService {
     _messaging.onTokenRefresh.listen(FirestoreService.saveFcmToken);
   }
 
-  /// 약 복용 알림 스케줄링 — 약 추가/수정 시 호출
-  /// [medicineId] 기준으로 기존 알림 취소 후 재등록
-  static Future<void> scheduleMedicineAlarms({
+  /// ??복용 ?�림 ?��?줄링 ????추�?/?�정 ???�출
+  /// [medicineId] 기�??�로 기존 ?�림 취소 ???�등�?  static Future<void> scheduleMedicineAlarms({
     required String medicineId,
     required String medicineName,
-    required List<String> times, // "HH:mm" 형식
+    required List<String> times, // "HH:mm" ?�식
   }) async {
     await cancelMedicineAlarms(medicineId);
 
@@ -85,19 +83,19 @@ class NotificationService {
       try {
         await _local.zonedSchedule(
           id: id,
-          title: '복약 알림',
-          body: '$medicineName 드실 시간이에요!',
+          title: '복약 ?�림',
+          body: '$medicineName ?�실 ?�간?�에??',
           scheduledDate: scheduledTime,
           notificationDetails: _notificationDetails,
           androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
           matchDateTimeComponents: DateTimeComponents.time,
         );
       } catch (_) {
-        // 정확한 알람 권한 없을 때 inexact로 폴백
+        // ?�확???�람 권한 ?�을 ??inexact�??�백
         await _local.zonedSchedule(
           id: id,
-          title: '복약 알림',
-          body: '$medicineName 드실 시간이에요!',
+          title: '복약 ?�림',
+          body: '$medicineName ?�실 ?�간?�에??',
           scheduledDate: scheduledTime,
           notificationDetails: _notificationDetails,
           androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
@@ -107,15 +105,15 @@ class NotificationService {
     }
   }
 
-  /// 약 삭제 시 해당 약의 모든 알림 취소
+  /// ????�� ???�당 ?�의 모든 ?�림 취소
   static Future<void> cancelMedicineAlarms(String medicineId) async {
-    // 최대 시간대 수만큼 취소 시도 (아침/점심/저녁/취침 = 최대 4개)
+    // 최�? ?�간?� ?�만??취소 ?�도 (?�침/?�심/?�??취침 = 최�? 4�?
     for (int i = 0; i < 10; i++) {
       await _local.cancel(id: _notificationId(medicineId, i));
     }
   }
 
-  /// medicineId + 시간대 인덱스로 고유 알림 ID 생성
+  /// medicineId + ?�간?� ?�덱?�로 고유 ?�림 ID ?�성
   static int _notificationId(String medicineId, int timeIndex) {
     return (medicineId.hashCode.abs() % 100000) * 10 + timeIndex;
   }
@@ -124,7 +122,7 @@ class NotificationService {
   static int notificationIdForTest(String medicineId, int timeIndex) =>
       _notificationId(medicineId, timeIndex);
 
-  /// 오늘 해당 시각이 지났으면 내일로 설정
+  /// ?�늘 ?�당 ?�각??지?�으�??�일�??�정
   static tz.TZDateTime _nextOccurrence(int hour, int minute) {
     final now = tz.TZDateTime.now(tz.local);
     var scheduled = tz.TZDateTime(

@@ -42,14 +42,14 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
                 children: [
                   const SizedBox(height: 20),
 
-                  // â”€â”€ ì—…ê·¸ë ˆì´ë“œ CTA ë°°ë„ˆ (ìµëª…ì¼ ë•Œë§Œ) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+                  // ?€?€ ?…ê·¸?ˆì´??CTA ë°°ë„ˆ (?µëª…???Œë§Œ) ?€?€?€?€?€?€?€?€?€?€?€?€?€?€
                   if (isAnonymous) ...[
                     _UpgradeBanner(onTap: () => _linkWithGoogle()),
                     const SizedBox(height: 24),
                   ],
 
-                  // â”€â”€ ë³´í˜¸ì ê´€ë¦¬ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-                  _SectionTitle('ë³´í˜¸ì ê´€ë¦¬'),
+                  // ?€?€ ë³´í˜¸??ê´€ë¦??€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
+                  _SectionTitle('ë³´í˜¸??ê´€ë¦?),
                   const SizedBox(height: 10),
                   _GuardianCard(
                     linkedCount: _linkedFamilyCount,
@@ -62,26 +62,26 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
 
                   const SizedBox(height: 24),
 
-                  // â”€â”€ ë°ì´í„° ê´€ë¦¬ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-                  _SectionTitle('ë°ì´í„° ê´€ë¦¬'),
+                  // ?€?€ ?°ì´??ê´€ë¦??€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
+                  _SectionTitle('?°ì´??ê´€ë¦?),
                   const SizedBox(height: 10),
                   _DataActionGrid(
-                    onBackup: () => _showComingSoon('ë°ì´í„° ë°±ì—…'),
+                    onBackup: () => _showComingSoon('?°ì´??ë°±ì—…'),
                     onDeviceChange: () => _showDeviceChangeInfo(),
                     onReset: () => _confirmClearData(),
                   ),
 
                   const SizedBox(height: 24),
 
-                  // â”€â”€ ì•± ê¸°ëŠ¥ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-                  _SectionTitle('ì•± ê¸°ëŠ¥'),
+                  // ?€?€ ??ê¸°ëŠ¥ ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
+                  _SectionTitle('??ê¸°ëŠ¥'),
                   const SizedBox(height: 10),
                   _Card(children: [
                     _SwitchTile(
                       icon: Icons.notifications_outlined,
-                      iconColor: const Color(0xFF4A90D9),
-                      title: 'ë³µì•½ ì•Œë¦¼',
-                      subtitle: 'ì•½ ë“œì‹¤ ì‹œê°„ì— ì•Œë¦¼ì„ ë³´ë‚´ë“œë ¤ìš”',
+                      iconColor: const Color(0xFFE8896A),
+                      title: 'ë³µì•½ ?Œë¦¼',
+                      subtitle: '???œì‹¤ ?œê°„???Œë¦¼??ë³´ë‚´?œë ¤??,
                       value: _notificationEnabled,
                       onChanged: (v) async {
                         setState(() => _notificationEnabled = v);
@@ -104,7 +104,7 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
                       icon: const Icon(Icons.swap_horiz_rounded,
                           color: Color(0xFF999999)),
                       label: const Text(
-                        'ëª¨ë“œ ì„ íƒ í™”ë©´ìœ¼ë¡œ ëŒì•„ê°€ê¸°',
+                        'ëª¨ë“œ ? íƒ ?”ë©´?¼ë¡œ ?Œì•„ê°€ê¸?,
                         style: TextStyle(fontSize: 16, color: Color(0xFF999999)),
                       ),
                     ),
@@ -132,20 +132,20 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('ì—°ê²°ëœ ë³´í˜¸ì',
+        title: const Text('?°ê²°??ë³´í˜¸??,
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
         content: uids.isEmpty
-            ? const Text('ì—°ê²°ëœ ë³´í˜¸ìê°€ ì—†ì–´ìš”',
+            ? const Text('?°ê²°??ë³´í˜¸?ê? ?†ì–´??,
                 style: TextStyle(fontSize: 18, color: Color(0xFF999999)))
             : Column(
                 mainAxisSize: MainAxisSize.min,
                 children: uids.asMap().entries.map((e) {
                   return ListTile(
                     leading: const CircleAvatar(
-                      backgroundColor: Color(0xFF4A90D9),
+                      backgroundColor: Color(0xFFE8896A),
                       child: Icon(Icons.person, color: Colors.white),
                     ),
-                    title: Text('ë³´í˜¸ì ${e.key + 1}',
+                    title: Text('ë³´í˜¸??${e.key + 1}',
                         style: const TextStyle(
                             fontSize: 18, fontWeight: FontWeight.w600)),
                     subtitle: Text(
@@ -158,7 +158,7 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
                         Navigator.pop(context);
                         await _confirmUnlinkFamily(e.value, e.key + 1);
                       },
-                      child: const Text('í•´ì œ',
+                      child: const Text('?´ì œ',
                           style: TextStyle(
                               color: Color(0xFFE53935), fontSize: 16)),
                     ),
@@ -168,7 +168,7 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('ë‹«ê¸°', style: TextStyle(fontSize: 18)),
+            child: const Text('?«ê¸°', style: TextStyle(fontSize: 18)),
           ),
         ],
       ),
@@ -179,10 +179,10 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('ë³´í˜¸ì ì—°ê²° í•´ì œ',
+        title: const Text('ë³´í˜¸???°ê²° ?´ì œ',
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
         content: Text(
-          'ë³´í˜¸ì $index ì˜ ì—°ê²°ì„ í•´ì œí• ê¹Œìš”?',
+          'ë³´í˜¸??$index ???°ê²°???´ì œ? ê¹Œ??',
           style: const TextStyle(fontSize: 18),
         ),
         actions: [
@@ -192,7 +192,7 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('í•´ì œ',
+            child: const Text('?´ì œ',
                 style: TextStyle(fontSize: 18, color: Color(0xFFE53935))),
           ),
         ],
@@ -205,7 +205,7 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
         setState(() => _linkedFamilyCount = uids.length);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('ë³´í˜¸ì ì—°ê²°ì´ í•´ì œëì–´ìš”', style: TextStyle(fontSize: 16)),
+            content: Text('ë³´í˜¸???°ê²°???´ì œ?ì–´??, style: TextStyle(fontSize: 16)),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -231,7 +231,7 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
       case 'success':
         setState(() {});
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('Google ê³„ì •ì´ ì—°ê²°ëì–´ìš”! ì´ì œ ê¸°ê¸°ë¥¼ ë°”ê¿”ë„ ë°ì´í„°ê°€ ìœ ì§€ë¼ìš”.',
+          content: Text('Google ê³„ì •???°ê²°?ì–´?? ?´ì œ ê¸°ê¸°ë¥?ë°”ê¿”???°ì´?°ê? ? ì??¼ìš”.',
               style: TextStyle(fontSize: 16)),
           duration: Duration(seconds: 3),
           behavior: SnackBarBehavior.floating,
@@ -240,13 +240,13 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
         break;
       case 'already_in_use':
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('ì´ë¯¸ ë‹¤ë¥¸ ê³„ì •ì— ì—°ê²°ëœ Google ê³„ì •ì´ì—ìš”.',
+          content: Text('?´ë? ?¤ë¥¸ ê³„ì •???°ê²°??Google ê³„ì •?´ì—??',
               style: TextStyle(fontSize: 16)),
           behavior: SnackBarBehavior.floating,
         ));
       default:
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text('ì—°ê²° ì¤‘ ì˜¤ë¥˜ê°€ ë°œìƒí–ˆì–´ìš”. ë‹¤ì‹œ ì‹œë„í•´ì£¼ì„¸ìš”.',
+          content: Text('?°ê²° ì¤??¤ë¥˜ê°€ ë°œìƒ?ˆì–´?? ?¤ì‹œ ?œë„?´ì£¼?¸ìš”.',
               style: TextStyle(fontSize: 16)),
           behavior: SnackBarBehavior.floating,
         ));
@@ -256,7 +256,7 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
   void _showComingSoon(String feature) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$feature ê¸°ëŠ¥ì€ ì¤€ë¹„ ì¤‘ì´ì—ìš”',
+        content: Text('$feature ê¸°ëŠ¥?€ ì¤€ë¹?ì¤‘ì´?ìš”',
             style: const TextStyle(fontSize: 16)),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
@@ -268,10 +268,10 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('ë°ì´í„° ì´ˆê¸°í™”',
+        title: const Text('?°ì´??ì´ˆê¸°??,
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
         content: const Text(
-          'ëª¨ë“  ì•½ê³¼ ë³‘ì› ì˜ˆì•½ ì •ë³´ê°€\nì˜êµ¬ì ìœ¼ë¡œ ì‚­ì œë¼ìš”.\n\nì´ ì‘ì—…ì€ ë˜ëŒë¦´ ìˆ˜ ì—†ì–´ìš”.',
+          'ëª¨ë“  ?½ê³¼ ë³‘ì› ?ˆì•½ ?•ë³´ê°€\n?êµ¬?ìœ¼ë¡??? œ?¼ìš”.\n\n???‘ì—…?€ ?˜ëŒë¦????†ì–´??',
           style: TextStyle(fontSize: 18, height: 1.5),
         ),
         actions: [
@@ -281,7 +281,7 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
-            child: const Text('ì´ˆê¸°í™”',
+            child: const Text('ì´ˆê¸°??,
                 style: TextStyle(fontSize: 18, color: Color(0xFFE53935))),
           ),
         ],
@@ -292,7 +292,7 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('ëª¨ë“  ë°ì´í„°ê°€ ì´ˆê¸°í™”ëì–´ìš”', style: TextStyle(fontSize: 16)),
+            content: Text('ëª¨ë“  ?°ì´?°ê? ì´ˆê¸°?”ë?´ìš”', style: TextStyle(fontSize: 16)),
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -304,7 +304,7 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: const Text('ê¸°ê¸° ë³€ê²½ ì•ˆë‚´',
+        title: const Text('ê¸°ê¸° ë³€ê²??ˆë‚´',
             style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -313,33 +313,33 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
             _InfoItem(
               icon: Icons.warning_amber_rounded,
               color: const Color(0xFFFF9800),
-              text: 'í˜„ì¬ ìµëª… ë¡œê·¸ì¸ ìƒíƒœì˜ˆìš”.',
+              text: '?„ì¬ ?µëª… ë¡œê·¸???íƒœ?ˆìš”.',
             ),
             const SizedBox(height: 12),
             _InfoItem(
               icon: Icons.smartphone_rounded,
               color: const Color(0xFFE53935),
-              text: 'ê¸°ê¸°ë¥¼ ë°”ê¾¸ë©´ ì•½Â·ë³‘ì› ë°ì´í„°ê°€\nëª¨ë‘ ì‚¬ë¼ì ¸ìš”.',
+              text: 'ê¸°ê¸°ë¥?ë°”ê¾¸ë©??½Â·ë³‘???°ì´?°ê?\nëª¨ë‘ ?¬ë¼?¸ìš”.',
             ),
             const SizedBox(height: 12),
             _InfoItem(
               icon: Icons.g_mobiledata_rounded,
               color: const Color(0xFF4285F4),
-              text: 'Google ê³„ì •ì„ ì—°ê²°í•˜ë©´\nì–´ë–¤ ê¸°ê¸°ì—ì„œë„ ì´ì–´ì„œ ì‚¬ìš©í•  ìˆ˜ ìˆì–´ìš”.',
+              text: 'Google ê³„ì •???°ê²°?˜ë©´\n?´ë–¤ ê¸°ê¸°?ì„œ???´ì–´???¬ìš©?????ˆì–´??',
             ),
           ],
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('ë‹«ê¸°', style: TextStyle(fontSize: 18)),
+            child: const Text('?«ê¸°', style: TextStyle(fontSize: 18)),
           ),
           TextButton(
             onPressed: () {
               Navigator.pop(context);
               _linkWithGoogle();
             },
-            child: const Text('Google ì—°ê²°',
+            child: const Text('Google ?°ê²°',
                 style: TextStyle(fontSize: 18, color: Color(0xFF4285F4))),
           ),
         ],
@@ -348,7 +348,7 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
   }
 }
 
-// â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€ Header ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 
 class _Header extends StatelessWidget {
   final bool isAnonymous;
@@ -360,7 +360,7 @@ class _Header extends StatelessWidget {
       width: double.infinity,
       decoration: const BoxDecoration(
         gradient: LinearGradient(
-          colors: [Color(0xFF4A90D9), Color(0xFF6BAEE8)],
+          colors: [Color(0xFFE8896A), Color(0xFF6BAEE8)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -374,7 +374,7 @@ class _Header extends StatelessWidget {
               Row(
                 children: [
                   const Text(
-                    'ì„¤ì •',
+                    '?¤ì •',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 26,
@@ -417,7 +417,7 @@ class _Header extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'ë‚´ ê±´ê°• ê´€ë¦¬',
+                          '??ê±´ê°• ê´€ë¦?,
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 22,
@@ -439,7 +439,7 @@ class _Header extends StatelessWidget {
                             ),
                             const SizedBox(width: 6),
                             Text(
-                              isAnonymous ? 'ìµëª…ìœ¼ë¡œ ì‚¬ìš© ì¤‘' : 'Google ê³„ì • ì—°ê²°ë¨',
+                              isAnonymous ? '?µëª…?¼ë¡œ ?¬ìš© ì¤? : 'Google ê³„ì • ?°ê²°??,
                               style: TextStyle(
                                 color: Colors.white.withValues(alpha: 0.9),
                                 fontSize: 16,
@@ -460,7 +460,7 @@ class _Header extends StatelessWidget {
   }
 }
 
-// â”€â”€ ì—…ê·¸ë ˆì´ë“œ CTA ë°°ë„ˆ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€ ?…ê·¸?ˆì´??CTA ë°°ë„ˆ ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 
 class _UpgradeBanner extends StatelessWidget {
   final VoidCallback onTap;
@@ -488,7 +488,7 @@ class _UpgradeBanner extends StatelessWidget {
                   color: Color(0xFFFF9800), size: 22),
               const SizedBox(width: 8),
               const Text(
-                'ê¸°ê¸°ë¥¼ ë°”ê¾¸ë©´ ë°ì´í„°ê°€ ì‚¬ë¼ì ¸ìš”',
+                'ê¸°ê¸°ë¥?ë°”ê¾¸ë©??°ì´?°ê? ?¬ë¼?¸ìš”',
                 style: TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.bold,
@@ -499,7 +499,7 @@ class _UpgradeBanner extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Google ê³„ì •ì„ ì—°ê²°í•˜ë©´ ê¸°ê¸°ë¥¼ ë°”ê¿”ë„\nì•½Â·ë³‘ì› ì •ë³´ê°€ ê·¸ëŒ€ë¡œ ìœ ì§€ë¼ìš”.',
+            'Google ê³„ì •???°ê²°?˜ë©´ ê¸°ê¸°ë¥?ë°”ê¿”??n?½Â·ë³‘???•ë³´ê°€ ê·¸ë?ë¡?? ì??¼ìš”.',
             style: TextStyle(
               fontSize: 15,
               color: Color(0xFF795548),
@@ -521,7 +521,7 @@ class _UpgradeBanner extends StatelessWidget {
               ),
               icon: const Icon(Icons.g_mobiledata_rounded, size: 22),
               label: const Text(
-                'Google ê³„ì • ì—°ê²°í•˜ê¸°',
+                'Google ê³„ì • ?°ê²°?˜ê¸°',
                 style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
               ),
             ),
@@ -532,7 +532,7 @@ class _UpgradeBanner extends StatelessWidget {
   }
 }
 
-// â”€â”€ ë³´í˜¸ì ì¹´ë“œ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€ ë³´í˜¸??ì¹´ë“œ ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 
 class _GuardianCard extends StatelessWidget {
   final int linkedCount;
@@ -562,18 +562,18 @@ class _GuardianCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF4A90D9).withValues(alpha: 0.1),
+                  color: const Color(0xFFE8896A).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(Icons.people_rounded,
-                    color: Color(0xFF4A90D9), size: 24),
+                    color: Color(0xFFE8896A), size: 24),
               ),
               const SizedBox(width: 14),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'ì—°ê²°ëœ ë³´í˜¸ì',
+                    '?°ê²°??ë³´í˜¸??,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -581,12 +581,12 @@ class _GuardianCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    linkedCount == 0 ? 'ì•„ì§ ì—°ê²°ëœ ë³´í˜¸ìê°€ ì—†ì–´ìš”' : '$linkedCountëª… ì—°ê²°ë¨',
+                    linkedCount == 0 ? '?„ì§ ?°ê²°??ë³´í˜¸?ê? ?†ì–´?? : '$linkedCountëª??°ê²°??,
                     style: TextStyle(
                       fontSize: 14,
                       color: linkedCount == 0
                           ? const Color(0xFF999999)
-                          : const Color(0xFF4A90D9),
+                          : const Color(0xFFE8896A),
                       fontWeight: linkedCount > 0
                           ? FontWeight.w600
                           : FontWeight.normal,
@@ -602,8 +602,8 @@ class _GuardianCard extends StatelessWidget {
               Expanded(
                 child: _ActionButton(
                   icon: Icons.qr_code_rounded,
-                  label: 'ë‚´ ì½”ë“œ ë³´ê¸°',
-                  color: const Color(0xFF4A90D9),
+                  label: '??ì½”ë“œ ë³´ê¸°',
+                  color: const Color(0xFFE8896A),
                   onTap: onCodeTap,
                 ),
               ),
@@ -611,9 +611,9 @@ class _GuardianCard extends StatelessWidget {
               Expanded(
                 child: _ActionButton(
                   icon: Icons.manage_accounts_rounded,
-                  label: 'ë³´í˜¸ì ê´€ë¦¬',
+                  label: 'ë³´í˜¸??ê´€ë¦?,
                   color: linkedCount > 0
-                      ? const Color(0xFF4A90D9)
+                      ? const Color(0xFFE8896A)
                       : const Color(0xFFBBBBBB),
                   onTap: onManageTap,
                 ),
@@ -626,7 +626,7 @@ class _GuardianCard extends StatelessWidget {
   }
 }
 
-// â”€â”€ ë°ì´í„° ê´€ë¦¬ ê·¸ë¦¬ë“œ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€ ?°ì´??ê´€ë¦?ê·¸ë¦¬???€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 
 class _DataActionGrid extends StatelessWidget {
   final VoidCallback onBackup;
@@ -646,8 +646,8 @@ class _DataActionGrid extends StatelessWidget {
         Expanded(
           child: _DataActionTile(
             icon: Icons.cloud_upload_outlined,
-            label: 'ë°ì´í„° ë°±ì—…',
-            color: const Color(0xFF4A90D9),
+            label: '?°ì´??ë°±ì—…',
+            color: const Color(0xFFE8896A),
             badge: 'ì¤€ë¹„ì¤‘',
             onTap: onBackup,
           ),
@@ -656,7 +656,7 @@ class _DataActionGrid extends StatelessWidget {
         Expanded(
           child: _DataActionTile(
             icon: Icons.smartphone_rounded,
-            label: 'ê¸°ê¸° ë³€ê²½\nì•ˆë‚´',
+            label: 'ê¸°ê¸° ë³€ê²?n?ˆë‚´',
             color: const Color(0xFFFF9800),
             onTap: onDeviceChange,
           ),
@@ -665,7 +665,7 @@ class _DataActionGrid extends StatelessWidget {
         Expanded(
           child: _DataActionTile(
             icon: Icons.delete_outline_rounded,
-            label: 'ë°ì´í„°\nì´ˆê¸°í™”',
+            label: '?°ì´??nì´ˆê¸°??,
             color: const Color(0xFFE53935),
             onTap: onReset,
           ),
@@ -755,7 +755,7 @@ class _DataActionTile extends StatelessWidget {
   }
 }
 
-// â”€â”€ ê³µí†µ ìœ„ì ¯ â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+// ?€?€ ê³µí†µ ?„ì ¯ ?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€?€
 
 class _ActionButton extends StatelessWidget {
   final IconData icon;

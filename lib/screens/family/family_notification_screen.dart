@@ -17,9 +17,9 @@ class FamilyNotificationScreen extends StatelessWidget {
         return Scaffold(
           backgroundColor: const Color(0xFFF8F9FA),
           appBar: AppBar(
-            backgroundColor: const Color(0xFF4A90D9),
+            backgroundColor: const Color(0xFFE8896A),
             title: Text(
-              unreadCount > 0 ? '알림 ($unreadCount)' : '알림',
+              unreadCount > 0 ? '?�림 ($unreadCount)' : '?�림',
               style: const TextStyle(
                   color: Colors.white,
                   fontSize: 24,
@@ -31,7 +31,7 @@ class FamilyNotificationScreen extends StatelessWidget {
                 TextButton(
                   onPressed: () => FirestoreService.markAllNotificationsRead(),
                   child: const Text(
-                    '모두 읽음',
+                    '모두 ?�음',
                     style: TextStyle(color: Colors.white70, fontSize: 16),
                   ),
                 ),
@@ -39,10 +39,10 @@ class FamilyNotificationScreen extends StatelessWidget {
           ),
           body: snap.connectionState == ConnectionState.waiting
               ? const Center(
-                  child: CircularProgressIndicator(color: Color(0xFF4A90D9)))
+                  child: CircularProgressIndicator(color: Color(0xFFE8896A)))
               : notifications.isEmpty
                   ? const Center(
-                      child: Text('알림이 없어요',
+                      child: Text('?�림???�어??,
                           style: TextStyle(
                               fontSize: 20, color: Color(0xFF999999))),
                     )
@@ -114,7 +114,7 @@ class _NotificationCard extends StatelessWidget {
                       width: 12,
                       height: 12,
                       decoration: const BoxDecoration(
-                        color: Color(0xFF4A90D9),
+                        color: Color(0xFFE8896A),
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -127,7 +127,7 @@ class _NotificationCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${item.medicineName} 복용을 하지 않으셨어요',
+                    '${item.medicineName} 복용???��? ?�으?�어??,
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight:

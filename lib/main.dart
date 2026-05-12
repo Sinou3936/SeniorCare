@@ -33,16 +33,16 @@ class SeniorCareApp extends StatelessWidget {
     }
 
     return MaterialApp(
-      title: '약봄',
+      title: '?�봄',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF4A90D9),
+          seedColor: const Color(0xFFE8896A),
         ),
         useMaterial3: true,
         scaffoldBackgroundColor: const Color(0xFFF8F9FA),
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF4A90D9),
+          backgroundColor: Color(0xFFE8896A),
           foregroundColor: Colors.white,
           elevation: 0,
           titleTextStyle: TextStyle(

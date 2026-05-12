@@ -13,9 +13,9 @@ class SeniorMedicineScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF4A90D9),
+        backgroundColor: const Color(0xFFE8896A),
         title: const Text(
-          '내 약',
+          '????,
           style: TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.bold),
         ),
         automaticallyImplyLeading: false,
@@ -25,7 +25,7 @@ class SeniorMedicineScreen extends StatelessWidget {
         builder: (context, snap) {
           if (snap.connectionState == ConnectionState.waiting) {
             return const Center(
-                child: CircularProgressIndicator(color: Color(0xFF4A90D9)));
+                child: CircularProgressIndicator(color: Color(0xFFE8896A)));
           }
           final medicines = snap.data ?? [];
           if (medicines.isEmpty) {
@@ -35,7 +35,7 @@ class SeniorMedicineScreen extends StatelessWidget {
                 children: [
                   Icon(Icons.medication_outlined, size: 72, color: Color(0xFFCCCCCC)),
                   SizedBox(height: 16),
-                  Text('등록된 약이 없어요',
+                  Text('?�록???�이 ?�어??,
                       style: TextStyle(fontSize: 20, color: Color(0xFF999999))),
                 ],
               ),
@@ -61,10 +61,10 @@ class SeniorMedicineScreen extends StatelessWidget {
           context,
           MaterialPageRoute(builder: (_) => const SeniorMedicineAddScreen()),
         ),
-        backgroundColor: const Color(0xFF4A90D9),
+        backgroundColor: const Color(0xFFE8896A),
         icon: const Icon(Icons.add, size: 28, color: Colors.white),
         label: const Text(
-          '약 추가',
+          '??추�?',
           style: TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold),
         ),
       ),

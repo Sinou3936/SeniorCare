@@ -21,22 +21,22 @@ class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
     return DateTime(ws.year, ws.month, ws.day);
   }
 
-  static const _slotOrder = ['아침', '점심', '저녁', '취침'];
+  static const _slotOrder = ['?�침', '?�심', '?�??, '취침'];
   static const _slotIcons = {
-    '아침': Icons.wb_sunny_outlined,
-    '점심': Icons.light_mode_outlined,
-    '저녁': Icons.nights_stay_outlined,
+    '?�침': Icons.wb_sunny_outlined,
+    '?�심': Icons.light_mode_outlined,
+    '?�??: Icons.nights_stay_outlined,
     '취침': Icons.bedtime_outlined,
   };
 
   String _slotLabel(DateTime dt) {
-    if (dt.hour < 10) return '아침';
-    if (dt.hour < 14) return '점심';
-    if (dt.hour < 20) return '저녁';
+    if (dt.hour < 10) return '?�침';
+    if (dt.hour < 14) return '?�심';
+    if (dt.hour < 20) return '?�??;
     return '취침';
   }
 
-  String _weekdayStr(int wd) => ['월', '화', '수', '목', '금', '토', '일'][wd - 1];
+  String _weekdayStr(int wd) => ['??, '??, '??, '�?, '�?, '??, '??][wd - 1];
 
 
   Map<String, List<MedicineLog>> _grouped(List<MedicineLog> logs) {
@@ -111,7 +111,7 @@ class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
     return Column(
             children: [
               Container(
-                color: const Color(0xFF4A90D9),
+                color: const Color(0xFFE8896A),
                 child: SafeArea(
                   bottom: false,
                   child: Padding(
@@ -123,11 +123,11 @@ class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              '${now.month}월 ${now.day}일 ${_weekdayStr(now.weekday)}요일',
+                              '${now.month}??${now.day}??${_weekdayStr(now.weekday)}?�일',
                               style: const TextStyle(color: Colors.white70, fontSize: 15),
                             ),
                             const Text(
-                              '안녕하세요!',
+                              '?�녕?�세??',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 26,
@@ -170,7 +170,7 @@ class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
                                     Icon(Icons.qr_code_rounded, color: Colors.white, size: 20),
                                     SizedBox(width: 4),
                                     Text(
-                                      '내 코드',
+                                      '??코드',
                                       style: TextStyle(
                                           color: Colors.white,
                                           fontSize: 15,
@@ -196,7 +196,7 @@ class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
                 child: logs.isEmpty
                         ? const Center(
                             child: Text(
-                              '복용 기록이 없어요',
+                              '복용 기록???�어??,
                               style: TextStyle(fontSize: 18, color: Color(0xFF999999)),
                             ),
                           )
@@ -204,7 +204,7 @@ class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
                             padding: const EdgeInsets.all(16),
                             children: [
                               Text(
-                                '${_selectedDate.month}월 ${_selectedDate.day}일 복용 현황',
+                                '${_selectedDate.month}??${_selectedDate.day}??복용 ?�황',
                                 style: const TextStyle(
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold,
@@ -270,13 +270,13 @@ class _SlotGroup extends StatelessWidget {
             decoration: BoxDecoration(
               color: allTaken
                   ? const Color(0xFF4CAF50).withValues(alpha: 0.08)
-                  : const Color(0xFF4A90D9).withValues(alpha: 0.06),
+                  : const Color(0xFFE8896A).withValues(alpha: 0.06),
               borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
             ),
             child: Row(
               children: [
                 Icon(icon, size: 26,
-                    color: allTaken ? const Color(0xFF4CAF50) : const Color(0xFF4A90D9)),
+                    color: allTaken ? const Color(0xFF4CAF50) : const Color(0xFFE8896A)),
                 const SizedBox(width: 10),
                 Text(
                   slot,
@@ -295,7 +295,7 @@ class _SlotGroup extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: allTaken
                         ? const Color(0xFF4CAF50)
-                        : const Color(0xFF4A90D9).withValues(alpha: 0.15),
+                        : const Color(0xFFE8896A).withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -303,7 +303,7 @@ class _SlotGroup extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.bold,
-                      color: allTaken ? Colors.white : const Color(0xFF4A90D9),
+                      color: allTaken ? Colors.white : const Color(0xFFE8896A),
                     ),
                   ),
                 ),
@@ -320,7 +320,7 @@ class _SlotGroup extends StatelessWidget {
                 child: ElevatedButton(
                   onPressed: onTakeAll,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF4A90D9),
+                    backgroundColor: const Color(0xFFE8896A),
                     shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(14)),
                   ),
@@ -357,13 +357,13 @@ class _MedicineRow extends StatelessWidget {
             decoration: BoxDecoration(
               color: log.taken
                   ? const Color(0xFF4CAF50).withValues(alpha: 0.12)
-                  : const Color(0xFF4A90D9).withValues(alpha: 0.08),
+                  : const Color(0xFFE8896A).withValues(alpha: 0.08),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               Icons.medication_rounded,
               size: 24,
-              color: log.taken ? const Color(0xFF4CAF50) : const Color(0xFF4A90D9),
+              color: log.taken ? const Color(0xFF4CAF50) : const Color(0xFFE8896A),
             ),
           ),
           const SizedBox(width: 14),
