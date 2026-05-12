@@ -149,12 +149,15 @@ class _CodeBody extends StatelessWidget {
                       width: 2,
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: code
-                        .split('')
-                        .map((ch) => _CodeChar(char: ch, expired: isExpired))
-                        .toList(),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: code
+                          .split('')
+                          .map((ch) => _CodeChar(char: ch, expired: isExpired))
+                          .toList(),
+                    ),
                   ),
                 ),
                 if (!isExpired) ...[

@@ -44,7 +44,7 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
 
                   // ── 업그레이드 CTA 배너 (익명일 때만) ──────────────
                   if (isAnonymous) ...[
-                    _UpgradeBanner(onTap: () => _showComingSoon('Google 계정 연결')),
+                    _UpgradeBanner(onTap: () => _linkWithGoogle()),
                     const SizedBox(height: 24),
                   ],
 
@@ -224,6 +224,35 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
     }
   }
 
+  Future<void> _linkWithGoogle() async {
+    final result = await AuthService.linkWithGoogle();
+    if (!mounted) return;
+    switch (result) {
+      case 'success':
+        setState(() {});
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Google 계정이 연결됐어요! 이제 기기를 바꿔도 데이터가 유지돼요.',
+              style: TextStyle(fontSize: 16)),
+          duration: Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+        ));
+      case 'cancelled':
+        break;
+      case 'already_in_use':
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('이미 다른 계정에 연결된 Google 계정이에요.',
+              style: TextStyle(fontSize: 16)),
+          behavior: SnackBarBehavior.floating,
+        ));
+      default:
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('연결 중 오류가 발생했어요. 다시 시도해주세요.',
+              style: TextStyle(fontSize: 16)),
+          behavior: SnackBarBehavior.floating,
+        ));
+    }
+  }
+
   void _showComingSoon(String feature) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -308,7 +337,7 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              _showComingSoon('Google 계정 연결');
+              _linkWithGoogle();
             },
             child: const Text('Google 연결',
                 style: TextStyle(fontSize: 18, color: Color(0xFF4285F4))),

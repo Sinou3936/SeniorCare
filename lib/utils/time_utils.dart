@@ -10,6 +10,14 @@ String slotLabel(DateTime dt) {
 DateTime weekStart(DateTime date) =>
     date.subtract(Duration(days: date.weekday - 1));
 
+/// DateTime → "N분 전 / N시간 전 / N일 전"
+String formatRelativeTime(DateTime dt) {
+  final diff = DateTime.now().difference(dt);
+  if (diff.inMinutes < 60) return '${diff.inMinutes}분 전';
+  if (diff.inHours < 24) return '${diff.inHours}시간 전';
+  return '${diff.inDays}일 전';
+}
+
 /// "HH:mm" → 분
 int? parseTimeToMinutes(String time) {
   final parts = time.split(':');

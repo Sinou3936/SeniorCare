@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/prefs_service.dart';
 import '../mode_select_screen.dart';
@@ -58,7 +59,7 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
                         // ── 업그레이드 CTA 배너 ────────────────────────
                         _UpgradeBanner(
                             onTap: () =>
-                                _showComingSoon('Google 계정 연결')),
+                                _linkWithGoogle()),
                         const SizedBox(height: 24),
 
                         // ── 부모님 연결 ────────────────────────────────
@@ -175,16 +176,35 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
     }
   }
 
-  void _showComingSoon(String feature) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$feature 기능은 준비 중이에요',
-            style: const TextStyle(fontSize: 16)),
-        duration: const Duration(seconds: 2),
-        behavior: SnackBarBehavior.floating,
-      ),
-    );
+  Future<void> _linkWithGoogle() async {
+    final result = await AuthService.linkWithGoogle();
+    if (!mounted) return;
+    switch (result) {
+      case 'success':
+        setState(() {});
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('Google 계정이 연결됐어요! 재설치해도 연결이 유지돼요.',
+              style: TextStyle(fontSize: 16)),
+          duration: Duration(seconds: 3),
+          behavior: SnackBarBehavior.floating,
+        ));
+      case 'cancelled':
+        break;
+      case 'already_in_use':
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('이미 다른 계정에 연결된 Google 계정이에요.',
+              style: TextStyle(fontSize: 16)),
+          behavior: SnackBarBehavior.floating,
+        ));
+      default:
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text('연결 중 오류가 발생했어요. 다시 시도해주세요.',
+              style: TextStyle(fontSize: 16)),
+          behavior: SnackBarBehavior.floating,
+        ));
+    }
   }
+
 }
 
 // ── Header ──────────────────────────────────────────────────────────────────

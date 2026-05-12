@@ -48,6 +48,29 @@ void main() {
     });
   });
 
+  group('formatRelativeTime', () {
+    test('30분 전', () {
+      final dt = DateTime.now().subtract(const Duration(minutes: 30));
+      expect(formatRelativeTime(dt), '30분 전');
+    });
+    test('3시간 전', () {
+      final dt = DateTime.now().subtract(const Duration(hours: 3));
+      expect(formatRelativeTime(dt), '3시간 전');
+    });
+    test('2일 전', () {
+      final dt = DateTime.now().subtract(const Duration(days: 2));
+      expect(formatRelativeTime(dt), '2일 전');
+    });
+    test('59분 → 분 단위', () {
+      final dt = DateTime.now().subtract(const Duration(minutes: 59));
+      expect(formatRelativeTime(dt), '59분 전');
+    });
+    test('23시간 → 시간 단위', () {
+      final dt = DateTime.now().subtract(const Duration(hours: 23));
+      expect(formatRelativeTime(dt), '23시간 전');
+    });
+  });
+
   group('parseTimeToMinutes', () {
     test('08:00 → 480', () {
       expect(parseTimeToMinutes('08:00'), 480);

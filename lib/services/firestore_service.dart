@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/medicine.dart';
 import '../models/medicine_log.dart';
 import '../models/appointment.dart';
+import '../models/app_notification.dart';
 import 'auth_service.dart';
 
 class FirestoreService {
@@ -308,6 +309,31 @@ class FirestoreService {
 
   static Future<void> deleteAppointment(String id) async {
     await _appointments.doc(id).delete();
+  }
+
+  // ── 알림 (Notifications) ────────────────────────────────────
+  static CollectionReference get _notifications =>
+      _users.doc(AuthService.uid).collection('notifications');
+
+  static Stream<List<AppNotification>> watchNotifications() {
+    return _notifications
+        .orderBy('createdAt', descending: true)
+        .snapshots()
+        .map((s) => s.docs.map((d) => AppNotification.fromFirestore(d)).toList());
+  }
+
+  static Future<void> markNotificationRead(String notificationId) async {
+    await _notifications.doc(notificationId).update({'isRead': true});
+  }
+
+  static Future<void> markAllNotificationsRead() async {
+    final snap = await _notifications.where('isRead', isEqualTo: false).get();
+    if (snap.docs.isEmpty) return;
+    final batch = _db.batch();
+    for (final doc in snap.docs) {
+      batch.update(doc.reference, {'isRead': true});
+    }
+    await batch.commit();
   }
 
   /// 모든 데이터 초기화 (medicines, medicine_logs, appointments)
