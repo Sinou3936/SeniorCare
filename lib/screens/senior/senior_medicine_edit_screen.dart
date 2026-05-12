@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/medicine.dart';
 import '../../services/firestore_service.dart';
+import '../../services/notification_service.dart';
 
 class SeniorMedicineEditScreen extends StatefulWidget {
   final Medicine medicine;
@@ -90,6 +91,11 @@ class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
     );
 
     await FirestoreService.updateMedicine(updated);
+    await NotificationService.scheduleMedicineAlarms(
+      medicineId: updated.id,
+      medicineName: updated.name,
+      times: enabledTimes,
+    );
     if (mounted) Navigator.pop(context);
   }
 

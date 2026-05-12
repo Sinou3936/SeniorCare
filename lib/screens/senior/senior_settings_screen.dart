@@ -14,13 +14,15 @@ class SeniorSettingsScreen extends StatefulWidget {
 
 class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
   bool _notificationEnabled = true;
+  int _linkedFamilyCount = 0;
 
   @override
   void initState() {
     super.initState();
-    PrefsService.loadNotificationEnabled().then(
-      (v) => setState(() => _notificationEnabled = v),
-    );
+    PrefsService.loadNotificationEnabled()
+        .then((v) => setState(() => _notificationEnabled = v));
+    FirestoreService.getLinkedFamilyUids()
+        .then((list) => setState(() => _linkedFamilyCount = list.length));
   }
 
   @override
@@ -38,111 +40,53 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 20),
 
-                  // ── 계정 ──────────────────────────────────────
-                  _SectionTitle('계정'),
-                  const SizedBox(height: 10),
-                  _Card(children: [
-                    _Tile(
-                      icon: Icons.account_circle_outlined,
-                      iconColor: const Color(0xFF4A90D9),
-                      title: '계정 상태',
-                      trailing: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: isAnonymous
-                              ? const Color(0xFFFF9800).withValues(alpha: 0.12)
-                              : const Color(0xFF4CAF50).withValues(alpha: 0.12),
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        child: Text(
-                          isAnonymous ? '익명 사용자' : 'Google 연결됨',
-                          style: TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: isAnonymous
-                                ? const Color(0xFFFF9800)
-                                : const Color(0xFF4CAF50),
-                          ),
-                        ),
-                      ),
-                    ),
-                    _divider(),
-                    _Tile(
-                      icon: Icons.g_mobiledata_rounded,
-                      iconColor: const Color(0xFF4285F4),
-                      title: 'Google 계정 연결',
-                      subtitle: '기기를 바꿔도 데이터가 유지돼요',
-                      onTap: () => _showComingSoon(context, 'Google 계정 연결'),
-                    ),
-                  ]),
+                  // ── 업그레이드 CTA 배너 (익명일 때만) ──────────────
+                  if (isAnonymous) ...[
+                    _UpgradeBanner(onTap: () => _showComingSoon('Google 계정 연결')),
+                    const SizedBox(height: 24),
+                  ],
 
-                  const SizedBox(height: 24),
-
-                  // ── 보호자 관리 ───────────────────────────────
+                  // ── 보호자 관리 ───────────────────────────────────
                   _SectionTitle('보호자 관리'),
                   const SizedBox(height: 10),
-                  _Card(children: [
-                    _Tile(
-                      icon: Icons.qr_code_rounded,
-                      iconColor: const Color(0xFF4A90D9),
-                      title: '내 연결 코드 보기',
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const SeniorMyCodeScreen()),
-                      ),
+                  _GuardianCard(
+                    linkedCount: _linkedFamilyCount,
+                    onCodeTap: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const SeniorMyCodeScreen()),
                     ),
-                    _divider(),
-                    _Tile(
-                      icon: Icons.people_outline_rounded,
-                      iconColor: const Color(0xFF4A90D9),
-                      title: '연결된 보호자 보기',
-                      onTap: () => _showLinkedFamilies(context),
-                    ),
-                  ]),
+                    onManageTap: () => _showLinkedFamilies(),
+                  ),
 
                   const SizedBox(height: 24),
 
-                  // ── 데이터 관리 ───────────────────────────────
+                  // ── 데이터 관리 ───────────────────────────────────
                   _SectionTitle('데이터 관리'),
                   const SizedBox(height: 10),
-                  _Card(children: [
-                    _Tile(
-                      icon: Icons.smartphone_rounded,
-                      iconColor: const Color(0xFF4A90D9),
-                      title: '기기 변경 안내',
-                      onTap: () => _showDeviceChangeInfo(context),
-                    ),
-                    _divider(),
-                    _Tile(
-                      icon: Icons.delete_outline_rounded,
-                      iconColor: const Color(0xFFE53935),
-                      title: '데이터 초기화',
-                      subtitle: '모든 약·병원 정보가 삭제돼요',
-                      titleColor: const Color(0xFFE53935),
-                      onTap: () => _confirmClearData(context),
-                    ),
-                  ]),
+                  _DataActionGrid(
+                    onBackup: () => _showComingSoon('데이터 백업'),
+                    onDeviceChange: () => _showDeviceChangeInfo(),
+                    onReset: () => _confirmClearData(),
+                  ),
 
                   const SizedBox(height: 24),
 
-                  // ── 앱 설정 ───────────────────────────────────
-                  _SectionTitle('앱 설정'),
+                  // ── 앱 기능 ───────────────────────────────────────
+                  _SectionTitle('앱 기능'),
                   const SizedBox(height: 10),
                   _Card(children: [
-                    _Tile(
+                    _SwitchTile(
                       icon: Icons.notifications_outlined,
                       iconColor: const Color(0xFF4A90D9),
                       title: '복약 알림',
-                      trailing: Switch(
-                        value: _notificationEnabled,
-                        onChanged: (v) async {
-                          setState(() => _notificationEnabled = v);
-                          await PrefsService.saveNotificationEnabled(v);
-                        },
-                        activeThumbColor: const Color(0xFF4A90D9),
-                      ),
+                      subtitle: '약 드실 시간에 알림을 보내드려요',
+                      value: _notificationEnabled,
+                      onChanged: (v) async {
+                        setState(() => _notificationEnabled = v);
+                        await PrefsService.saveNotificationEnabled(v);
+                      },
                     ),
                   ]),
 
@@ -151,7 +95,7 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
                     width: double.infinity,
                     height: 56,
                     child: OutlinedButton.icon(
-                      onPressed: () => _switchMode(context),
+                      onPressed: () => _switchMode(),
                       style: OutlinedButton.styleFrom(
                         side: const BorderSide(color: Color(0xFFCCCCCC)),
                         shape: RoundedRectangleBorder(
@@ -182,9 +126,9 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
     );
   }
 
-  Future<void> _showLinkedFamilies(BuildContext context) async {
+  Future<void> _showLinkedFamilies() async {
     final uids = await FirestoreService.getLinkedFamilyUids();
-    if (!context.mounted) return;
+    if (!mounted) return;
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -206,15 +150,17 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
                             fontSize: 18, fontWeight: FontWeight.w600)),
                     subtitle: Text(
                       '${e.value.substring(0, 8)}...',
-                      style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
+                      style: const TextStyle(
+                          fontSize: 13, color: Color(0xFF999999)),
                     ),
                     trailing: TextButton(
                       onPressed: () async {
                         Navigator.pop(context);
-                        await _confirmUnlinkFamily(context, e.value, e.key + 1);
+                        await _confirmUnlinkFamily(e.value, e.key + 1);
                       },
                       child: const Text('해제',
-                          style: TextStyle(color: Color(0xFFE53935), fontSize: 16)),
+                          style: TextStyle(
+                              color: Color(0xFFE53935), fontSize: 16)),
                     ),
                   );
                 }).toList(),
@@ -229,8 +175,7 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
     );
   }
 
-  Future<void> _confirmUnlinkFamily(
-      BuildContext context, String familyUid, int index) async {
+  Future<void> _confirmUnlinkFamily(String familyUid, int index) async {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -253,9 +198,11 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
         ],
       ),
     );
-    if (ok == true && context.mounted) {
+    if (ok == true && mounted) {
       await FirestoreService.unlinkFamily(familyUid);
-      if (context.mounted) {
+      final uids = await FirestoreService.getLinkedFamilyUids();
+      if (mounted) {
+        setState(() => _linkedFamilyCount = uids.length);
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('보호자 연결이 해제됐어요', style: TextStyle(fontSize: 16)),
@@ -266,9 +213,9 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
     }
   }
 
-  Future<void> _switchMode(BuildContext context) async {
+  Future<void> _switchMode() async {
     await PrefsService.clearMode();
-    if (context.mounted) {
+    if (mounted) {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const ModeSelectScreen()),
@@ -277,19 +224,18 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
     }
   }
 
-  Widget _divider() => const Divider(height: 1, indent: 56, color: Color(0xFFF0F0F0));
-
-  void _showComingSoon(BuildContext context, String feature) {
+  void _showComingSoon(String feature) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('$feature 기능은 준비 중이에요', style: const TextStyle(fontSize: 16)),
+        content: Text('$feature 기능은 준비 중이에요',
+            style: const TextStyle(fontSize: 16)),
         duration: const Duration(seconds: 2),
         behavior: SnackBarBehavior.floating,
       ),
     );
   }
 
-  Future<void> _confirmClearData(BuildContext context) async {
+  Future<void> _confirmClearData() async {
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -312,9 +258,9 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
         ],
       ),
     );
-    if (ok == true && context.mounted) {
+    if (ok == true && mounted) {
       await FirestoreService.clearAllData();
-      if (context.mounted) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('모든 데이터가 초기화됐어요', style: TextStyle(fontSize: 16)),
@@ -325,7 +271,7 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
     }
   }
 
-  void _showDeviceChangeInfo(BuildContext context) {
+  void _showDeviceChangeInfo() {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
@@ -352,12 +298,6 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
               color: const Color(0xFF4285F4),
               text: 'Google 계정을 연결하면\n어떤 기기에서도 이어서 사용할 수 있어요.',
             ),
-            const SizedBox(height: 12),
-            _InfoItem(
-              icon: Icons.backup_rounded,
-              color: const Color(0xFF4A90D9),
-              text: '기기 변경 전 Google 계정 연결을\n먼저 해두세요.',
-            ),
           ],
         ),
         actions: [
@@ -368,7 +308,7 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
           TextButton(
             onPressed: () {
               Navigator.pop(context);
-              _showComingSoon(context, 'Google 계정 연결');
+              _showComingSoon('Google 계정 연결');
             },
             child: const Text('Google 연결',
                 style: TextStyle(fontSize: 18, color: Color(0xFF4285F4))),
@@ -379,7 +319,7 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
   }
 }
 
-// ── Header ─────────────────────────────────────────────────────────────────
+// ── Header ──────────────────────────────────────────────────────────────────
 
 class _Header extends StatelessWidget {
   final bool isAnonymous;
@@ -419,7 +359,8 @@ class _Header extends StatelessWidget {
                       color: Colors.white.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.settings_rounded, color: Colors.white, size: 28),
+                    child: const Icon(Icons.settings_rounded,
+                        color: Colors.white, size: 28),
                   ),
                 ],
               ),
@@ -439,11 +380,8 @@ class _Header extends StatelessWidget {
                         color: Colors.white.withValues(alpha: 0.25),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
-                        Icons.elderly_rounded,
-                        size: 44,
-                        color: Colors.white,
-                      ),
+                      child: const Icon(Icons.elderly_rounded,
+                          size: 44, color: Colors.white),
                     ),
                     const SizedBox(width: 20),
                     Column(
@@ -493,7 +431,346 @@ class _Header extends StatelessWidget {
   }
 }
 
+// ── 업그레이드 CTA 배너 ──────────────────────────────────────────────────────
+
+class _UpgradeBanner extends StatelessWidget {
+  final VoidCallback onTap;
+  const _UpgradeBanner({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFFF3E0), Color(0xFFFFE0B2)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFFFB74D), width: 1.5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(Icons.warning_amber_rounded,
+                  color: Color(0xFFFF9800), size: 22),
+              const SizedBox(width: 8),
+              const Text(
+                '기기를 바꾸면 데이터가 사라져요',
+                style: TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFFE65100),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'Google 계정을 연결하면 기기를 바꿔도\n약·병원 정보가 그대로 유지돼요.',
+            style: TextStyle(
+              fontSize: 15,
+              color: Color(0xFF795548),
+              height: 1.5,
+            ),
+          ),
+          const SizedBox(height: 14),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton.icon(
+              onPressed: onTap,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF4285F4),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
+                elevation: 0,
+              ),
+              icon: const Icon(Icons.g_mobiledata_rounded, size: 22),
+              label: const Text(
+                'Google 계정 연결하기',
+                style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── 보호자 카드 ──────────────────────────────────────────────────────────────
+
+class _GuardianCard extends StatelessWidget {
+  final int linkedCount;
+  final VoidCallback onCodeTap;
+  final VoidCallback onManageTap;
+
+  const _GuardianCard({
+    required this.linkedCount,
+    required this.onCodeTap,
+    required this.onManageTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF4A90D9).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.people_rounded,
+                    color: Color(0xFF4A90D9), size: 24),
+              ),
+              const SizedBox(width: 14),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    '연결된 보호자',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1A1A2E),
+                    ),
+                  ),
+                  Text(
+                    linkedCount == 0 ? '아직 연결된 보호자가 없어요' : '$linkedCount명 연결됨',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: linkedCount == 0
+                          ? const Color(0xFF999999)
+                          : const Color(0xFF4A90D9),
+                      fontWeight: linkedCount > 0
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _ActionButton(
+                  icon: Icons.qr_code_rounded,
+                  label: '내 코드 보기',
+                  color: const Color(0xFF4A90D9),
+                  onTap: onCodeTap,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _ActionButton(
+                  icon: Icons.manage_accounts_rounded,
+                  label: '보호자 관리',
+                  color: linkedCount > 0
+                      ? const Color(0xFF4A90D9)
+                      : const Color(0xFFBBBBBB),
+                  onTap: onManageTap,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ── 데이터 관리 그리드 ────────────────────────────────────────────────────────
+
+class _DataActionGrid extends StatelessWidget {
+  final VoidCallback onBackup;
+  final VoidCallback onDeviceChange;
+  final VoidCallback onReset;
+
+  const _DataActionGrid({
+    required this.onBackup,
+    required this.onDeviceChange,
+    required this.onReset,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _DataActionTile(
+            icon: Icons.cloud_upload_outlined,
+            label: '데이터 백업',
+            color: const Color(0xFF4A90D9),
+            badge: '준비중',
+            onTap: onBackup,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _DataActionTile(
+            icon: Icons.smartphone_rounded,
+            label: '기기 변경\n안내',
+            color: const Color(0xFFFF9800),
+            onTap: onDeviceChange,
+          ),
+        ),
+        const SizedBox(width: 10),
+        Expanded(
+          child: _DataActionTile(
+            icon: Icons.delete_outline_rounded,
+            label: '데이터\n초기화',
+            color: const Color(0xFFE53935),
+            onTap: onReset,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DataActionTile extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final String? badge;
+  final VoidCallback onTap;
+
+  const _DataActionTile({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+    this.badge,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Stack(
+              clipBehavior: Clip.none,
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Icon(icon, color: color, size: 26),
+                ),
+                if (badge != null)
+                  Positioned(
+                    top: -6,
+                    right: -6,
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF999999),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        badge!,
+                        style: const TextStyle(
+                            fontSize: 10,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            Text(
+              label,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: color,
+                height: 1.3,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 // ── 공통 위젯 ────────────────────────────────────────────────────────────────
+
+class _ActionButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final Color color;
+  final VoidCallback onTap;
+
+  const _ActionButton({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withValues(alpha: 0.2)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, color: color, size: 20),
+            const SizedBox(width: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: color,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class _SectionTitle extends StatelessWidget {
   final String text;
@@ -528,72 +805,59 @@ class _Card extends StatelessWidget {
   }
 }
 
-class _Tile extends StatelessWidget {
+class _SwitchTile extends StatelessWidget {
   final IconData icon;
   final Color iconColor;
   final String title;
   final String? subtitle;
-  final Color? titleColor;
-  final Widget? trailing;
-  final VoidCallback? onTap;
+  final bool value;
+  final ValueChanged<bool> onChanged;
 
-  const _Tile({
+  const _SwitchTile({
     required this.icon,
     required this.iconColor,
     required this.title,
+    required this.value,
+    required this.onChanged,
     this.subtitle,
-    this.titleColor,
-    this.trailing,
-    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-        child: Row(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: iconColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: iconColor, size: 22),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: titleColor ?? const Color(0xFF1A1A2E),
-                    ),
-                  ),
-                  if (subtitle != null) ...[
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle!,
-                      style: const TextStyle(fontSize: 13, color: Color(0xFF999999)),
-                    ),
-                  ],
-                ],
-              ),
+            child: Icon(icon, color: iconColor, size: 22),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title,
+                    style: const TextStyle(
+                        fontSize: 18, fontWeight: FontWeight.w600)),
+                if (subtitle != null)
+                  Text(subtitle!,
+                      style: const TextStyle(
+                          fontSize: 13, color: Color(0xFF999999))),
+              ],
             ),
-            if (trailing != null)
-              trailing!
-            else if (onTap != null)
-              const Icon(Icons.chevron_right_rounded, color: Color(0xFFCCCCCC), size: 24),
-          ],
-        ),
+          ),
+          Switch(
+            value: value,
+            onChanged: onChanged,
+            activeThumbColor: iconColor,
+          ),
+        ],
       ),
     );
   }

@@ -12,59 +12,21 @@ class FamilyCodeInputScreen extends StatefulWidget {
 }
 
 class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
-  final List<TextEditingController> _controllers =
-      List.generate(6, (i) => TextEditingController());
-  final List<FocusNode> _focusNodes = List.generate(6, (i) => FocusNode());
+  final TextEditingController _controller = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
 
   bool _isLoading = false;
   String? _errorMessage;
 
   @override
   void dispose() {
-    for (final c in _controllers) { c.dispose(); }
-    for (final f in _focusNodes) { f.dispose(); }
+    _controller.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
-  String get _code =>
-      _controllers.map((c) => c.text.toUpperCase()).join();
-
+  String get _code => _controller.text.toUpperCase();
   bool get _isFull => _code.length == 6;
-
-  void _onCharInput(int index, String value) {
-    if (value.isEmpty) {
-      if (index > 0) _focusNodes[index - 1].requestFocus();
-      return;
-    }
-
-    // 붙여넣기: 6자리 이상 입력되면 전체 분배
-    final cleaned = value.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toUpperCase();
-    if (cleaned.length > 1) {
-      final chars = cleaned.substring(0, cleaned.length.clamp(0, 6));
-      for (int i = 0; i < chars.length && i < 6; i++) {
-        _controllers[i].text = chars[i];
-      }
-      final lastFilled = (chars.length - 1).clamp(0, 5);
-      if (chars.length >= 6) {
-        _focusNodes[lastFilled].unfocus();
-      } else {
-        _focusNodes[lastFilled + 1].requestFocus();
-      }
-      setState(() => _errorMessage = null);
-      return;
-    }
-
-    _controllers[index].text = value.toUpperCase();
-    _controllers[index].selection = TextSelection.fromPosition(
-      TextPosition(offset: _controllers[index].text.length),
-    );
-    if (index < 5) {
-      _focusNodes[index + 1].requestFocus();
-    } else {
-      _focusNodes[index].unfocus();
-    }
-    setState(() => _errorMessage = null);
-  }
 
   Future<void> _connect() async {
     if (!_isFull) return;
@@ -81,9 +43,9 @@ class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
       setState(() {
         _isLoading = false;
         _errorMessage = '만료된 코드예요. 부모님께 새 코드를 요청하세요.';
-        for (final c in _controllers) { c.clear(); }
+        _controller.clear();
       });
-      _focusNodes[0].requestFocus();
+      _focusNode.requestFocus();
     } else if (seniorUid != null) {
       await FirestoreService.linkToSenior(seniorUid);
       await PrefsService.saveMode('family');
@@ -96,9 +58,9 @@ class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
       setState(() {
         _isLoading = false;
         _errorMessage = '코드를 찾을 수 없어요. 다시 확인해주세요.';
-        for (final c in _controllers) { c.clear(); }
+        _controller.clear();
       });
-      _focusNodes[0].requestFocus();
+      _focusNode.requestFocus();
     }
   }
 
@@ -107,91 +69,132 @@ class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF4A90D9),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(28),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              IconButton(
-                icon: const Icon(Icons.arrow_back_ios_rounded, color: Colors.white, size: 24),
-                onPressed: () => Navigator.pop(context),
-                padding: EdgeInsets.zero,
-              ),
-              const SizedBox(height: 24),
-              const Text(
-                '부모님 코드를\n입력해주세요',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  height: 1.3,
+        child: GestureDetector(
+          onTap: () => _focusNode.requestFocus(),
+          behavior: HitTestBehavior.opaque,
+          child: Padding(
+            padding: const EdgeInsets.all(28),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.arrow_back_ios_rounded,
+                      color: Colors.white, size: 24),
+                  onPressed: () => Navigator.pop(context),
+                  padding: EdgeInsets.zero,
                 ),
-              ),
-              const SizedBox(height: 12),
-              const Text(
-                '부모님 앱의 "내 코드" 화면에서\n6자리 코드를 확인하세요',
-                style: TextStyle(color: Colors.white70, fontSize: 17, height: 1.5),
-              ),
-              const SizedBox(height: 48),
-              // 6칸 코드 입력
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: List.generate(6, (i) => _CodeBox(
-                  controller: _controllers[i],
-                  focusNode: _focusNodes[i],
-                  onChanged: (v) => _onCharInput(i, v),
-                  autofocus: i == 0,
-                )),
-              ),
-              if (_errorMessage != null) ...[
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    const Icon(Icons.error_outline_rounded, color: Colors.redAccent, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      _errorMessage!,
-                      style: const TextStyle(color: Colors.redAccent, fontSize: 16),
-                    ),
-                  ],
+                const SizedBox(height: 24),
+                const Text(
+                  '부모님 코드를\n입력해주세요',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    height: 1.3,
+                  ),
                 ),
-              ],
-              const Spacer(),
-              SizedBox(
-                width: double.infinity,
-                height: 64,
-                child: ElevatedButton(
-                  onPressed: _isFull && !_isLoading ? _connect : null,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    disabledBackgroundColor: Colors.white38,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                const SizedBox(height: 12),
+                const Text(
+                  '부모님 앱의 "내 코드" 화면에서\n6자리 코드를 확인하세요',
+                  style: TextStyle(
+                      color: Colors.white70, fontSize: 17, height: 1.5),
+                ),
+                const SizedBox(height: 48),
+
+                // 숨겨진 TextField (실제 입력 처리)
+                Opacity(
+                  opacity: 0,
+                  child: SizedBox(
+                    height: 1,
+                    child: TextField(
+                      controller: _controller,
+                      focusNode: _focusNode,
+                      autofocus: true,
+                      maxLength: 6,
+                      keyboardType: TextInputType.visiblePassword,
+                      textCapitalization: TextCapitalization.characters,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(
+                            RegExp(r'[a-zA-Z0-9]')),
+                        LengthLimitingTextInputFormatter(6),
+                      ],
+                      onChanged: (v) {
+                        setState(() => _errorMessage = null);
+                      },
+                      decoration: const InputDecoration(
+                        counterText: '',
+                        border: InputBorder.none,
+                      ),
                     ),
                   ),
-                  child: _isLoading
-                      ? const CircularProgressIndicator(color: Color(0xFF4A90D9))
-                      : Text(
-                          '연결하기',
-                          style: TextStyle(
-                            fontSize: 22,
-                            fontWeight: FontWeight.bold,
-                            color: _isFull
-                                ? const Color(0xFF4A90D9)
-                                : const Color(0xFF4A90D9).withValues(alpha: 0.4),
-                          ),
+                ),
+
+                // 6개 시각적 박스
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: List.generate(6, (i) {
+                    final char = i < _code.length ? _code[i] : '';
+                    final isCurrent = i == _code.length && _focusNode.hasFocus;
+                    return _CodeBox(char: char, isCurrent: isCurrent);
+                  }),
+                ),
+
+                if (_errorMessage != null) ...[
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      const Icon(Icons.error_outline_rounded,
+                          color: Colors.redAccent, size: 20),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          _errorMessage!,
+                          style: const TextStyle(
+                              color: Colors.redAccent, fontSize: 16),
                         ),
+                      ),
+                    ],
+                  ),
+                ],
+                const Spacer(),
+                SizedBox(
+                  width: double.infinity,
+                  height: 64,
+                  child: ElevatedButton(
+                    onPressed: _isFull && !_isLoading ? _connect : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      disabledBackgroundColor: Colors.white38,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(
+                            color: Color(0xFF4A90D9))
+                        : Text(
+                            '연결하기',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.bold,
+                              color: _isFull
+                                  ? const Color(0xFF4A90D9)
+                                  : const Color(0xFF4A90D9)
+                                      .withValues(alpha: 0.4),
+                            ),
+                          ),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 16),
-              const Center(
-                child: Text(
-                  '코드는 부모님 앱 → 내 코드 에서 확인할 수 있어요',
-                  style: TextStyle(color: Colors.white60, fontSize: 14),
-                  textAlign: TextAlign.center,
+                const SizedBox(height: 16),
+                const Center(
+                  child: Text(
+                    '코드는 부모님 앱 → 내 코드 에서 확인할 수 있어요',
+                    style: TextStyle(color: Colors.white60, fontSize: 14),
+                    textAlign: TextAlign.center,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -200,55 +203,56 @@ class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
 }
 
 class _CodeBox extends StatelessWidget {
-  final TextEditingController controller;
-  final FocusNode focusNode;
-  final ValueChanged<String> onChanged;
-  final bool autofocus;
+  final String char;
+  final bool isCurrent;
 
-  const _CodeBox({
-    required this.controller,
-    required this.focusNode,
-    required this.onChanged,
-    this.autofocus = false,
-  });
+  const _CodeBox({required this.char, required this.isCurrent});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 150),
       width: 48,
       height: 64,
-      child: TextField(
-        controller: controller,
-        focusNode: focusNode,
-        autofocus: autofocus,
-        textAlign: TextAlign.center,
-        textCapitalization: TextCapitalization.characters,
-        maxLength: 1,
-        keyboardType: TextInputType.visiblePassword,
-        inputFormatters: [
-          FilteringTextInputFormatter.allow(RegExp(r'[a-zA-Z0-9]')),
-        ],
-        style: const TextStyle(
-          fontSize: 26,
-          fontWeight: FontWeight.bold,
-          color: Color(0xFF1A1A2E),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: isCurrent
+              ? Colors.white
+              : Colors.white.withValues(alpha: 0.0),
+          width: 2.5,
         ),
-        decoration: InputDecoration(
-          counterText: '',
-          filled: true,
-          fillColor: Colors.white,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: BorderSide.none,
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(14),
-            borderSide: const BorderSide(color: Colors.white, width: 2.5),
-          ),
-          contentPadding: EdgeInsets.zero,
-        ),
-        onChanged: onChanged,
+        boxShadow: isCurrent
+            ? [
+                BoxShadow(
+                  color: Colors.white.withValues(alpha: 0.4),
+                  blurRadius: 8,
+                  spreadRadius: 1,
+                )
+              ]
+            : null,
       ),
+      alignment: Alignment.center,
+      child: char.isEmpty
+          ? Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: isCurrent
+                    ? const Color(0xFF4A90D9)
+                    : const Color(0xFFCCCCCC),
+                shape: BoxShape.circle,
+              ),
+            )
+          : Text(
+              char,
+              style: const TextStyle(
+                fontSize: 26,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF1A1A2E),
+              ),
+            ),
     );
   }
 }

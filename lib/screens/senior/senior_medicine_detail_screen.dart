@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/medicine.dart';
 import '../../services/firestore_service.dart';
+import '../../services/notification_service.dart';
 import 'senior_medicine_edit_screen.dart';
 
 class SeniorMedicineDetailScreen extends StatelessWidget {
@@ -189,6 +190,7 @@ class _DetailView extends StatelessWidget {
     );
     if (ok == true && context.mounted) {
       await FirestoreService.deleteMedicine(medicine.id);
+      await NotificationService.cancelMedicineAlarms(medicine.id);
       if (context.mounted) Navigator.pop(context);
     }
   }

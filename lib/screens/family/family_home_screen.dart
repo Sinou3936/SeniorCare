@@ -15,6 +15,11 @@ class _FamilyHomeScreenState extends State<FamilyHomeScreen> {
   String? _seniorUid;
   bool _loading = true;
 
+  DateTime get _weekStart {
+    final now = _selectedDate;
+    return now.subtract(Duration(days: now.weekday - 1));
+  }
+
   static const _slotOrder = ['아침', '점심', '저녁', '취침'];
   static const _slotIcons = {
     '아침': Icons.wb_sunny_outlined,
@@ -41,8 +46,6 @@ class _FamilyHomeScreenState extends State<FamilyHomeScreen> {
     return '취침';
   }
 
-  DateTime _dateOnly(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
-
   Map<String, List<MedicineLog>> _grouped(List<MedicineLog> logs) {
     final map = <String, List<MedicineLog>>{};
     for (final log in logs) {
@@ -51,16 +54,6 @@ class _FamilyHomeScreenState extends State<FamilyHomeScreen> {
     return {
       for (final slot in _slotOrder)
         if (map.containsKey(slot)) slot: map[slot]!,
-    };
-  }
-
-  Map<DateTime, bool?> get _statusMap {
-    final today = _dateOnly(DateTime.now());
-    return {
-      today: false,
-      today.subtract(const Duration(days: 1)): true,
-      today.subtract(const Duration(days: 2)): true,
-      today.subtract(const Duration(days: 3)): false,
     };
   }
 
@@ -82,90 +75,103 @@ class _FamilyHomeScreenState extends State<FamilyHomeScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FA),
-      body: StreamBuilder<List<MedicineLog>>(
-        stream: FirestoreService.watchSeniorLogsForDate(_seniorUid!, _selectedDate),
-        builder: (context, snap) {
-          final logs = snap.data ?? [];
-          final takenCount = logs.where((l) => l.taken).length;
-          final grouped = _grouped(logs);
+      body: StreamBuilder<Map<DateTime, bool?>>(
+        stream: FirestoreService.watchSeniorWeekStatus(_seniorUid!, _weekStart),
+        builder: (context, weekSnap) {
+          final statusMap = weekSnap.data ?? {};
+          return StreamBuilder<List<MedicineLog>>(
+            stream: FirestoreService.watchSeniorLogsForDate(
+                _seniorUid!, _selectedDate),
+            builder: (context, snap) {
+              final logs = snap.data ?? [];
+              final takenCount = logs.where((l) => l.taken).length;
+              final grouped = _grouped(logs);
 
-          return Column(
-            children: [
-              Container(
-                color: const Color(0xFF4A90D9),
-                child: SafeArea(
-                  bottom: false,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        const Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+              return Column(
+                children: [
+                  Container(
+                    color: const Color(0xFF4A90D9),
+                    child: SafeArea(
+                      bottom: false,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text('부모님 복용 현황',
-                                style: TextStyle(color: Colors.white70, fontSize: 15)),
-                            Text('부모님',
-                                style: TextStyle(
+                            const Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('부모님 복용 현황',
+                                    style: TextStyle(
+                                        color: Colors.white70, fontSize: 15)),
+                                Text('부모님',
+                                    style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 26,
+                                        fontWeight: FontWeight.bold)),
+                              ],
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 14, vertical: 8),
+                              decoration: BoxDecoration(
+                                color: Colors.white24,
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Text(
+                                '$takenCount/${logs.length} 복용',
+                                style: const TextStyle(
                                     color: Colors.white,
-                                    fontSize: 26,
-                                    fontWeight: FontWeight.bold)),
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ),
                           ],
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                          decoration: BoxDecoration(
-                            color: Colors.white24,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Text(
-                            '$takenCount/${logs.length} 복용',
-                            style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-              ),
-              WeeklyCalendar(
-                selectedDate: _selectedDate,
-                onDateSelected: (d) => setState(() => _selectedDate = d),
-                statusMap: _statusMap,
-              ),
-              Expanded(
-                child: logs.isEmpty && snap.connectionState == ConnectionState.waiting
-                    ? const Center(
-                        child: CircularProgressIndicator(color: Color(0xFF4A90D9)))
-                    : logs.isEmpty
+                  WeeklyCalendar(
+                    selectedDate: _selectedDate,
+                    onDateSelected: (d) => setState(() => _selectedDate = d),
+                    statusMap: statusMap,
+                  ),
+                  Expanded(
+                    child: logs.isEmpty &&
+                            snap.connectionState == ConnectionState.waiting
                         ? const Center(
-                            child: Text('복용 기록이 없어요',
-                                style: TextStyle(
-                                    fontSize: 18, color: Color(0xFF999999))),
-                          )
-                        : ListView(
-                            padding: const EdgeInsets.all(16),
-                            children: [
-                              const Text(
-                                '오늘 복용 현황',
-                                style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF1A1A2E)),
+                            child: CircularProgressIndicator(
+                                color: Color(0xFF4A90D9)))
+                        : logs.isEmpty
+                            ? const Center(
+                                child: Text('복용 기록이 없어요',
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        color: Color(0xFF999999))),
+                              )
+                            : ListView(
+                                padding: const EdgeInsets.all(16),
+                                children: [
+                                  const Text(
+                                    '오늘 복용 현황',
+                                    style: TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color(0xFF1A1A2E)),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  ...grouped.entries.map(
+                                      (entry) => _FamilySlotGroup(
+                                            slot: entry.key,
+                                            icon: _slotIcons[entry.key]!,
+                                            logs: entry.value,
+                                          )),
+                                ],
                               ),
-                              const SizedBox(height: 12),
-                              ...grouped.entries.map((entry) => _FamilySlotGroup(
-                                    slot: entry.key,
-                                    icon: _slotIcons[entry.key]!,
-                                    logs: entry.value,
-                                  )),
-                            ],
-                          ),
-              ),
-            ],
+                  ),
+                ],
+              );
+            },
           );
         },
       ),

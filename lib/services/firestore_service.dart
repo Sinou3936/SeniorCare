@@ -225,6 +225,37 @@ class FirestoreService {
         .map((s) => s.docs.map((d) => MedicineLog.fromFirestore(d)).toList());
   }
 
+  /// 가족: 시니어의 주간 복용 상태 스트림
+  static Stream<Map<DateTime, bool?>> watchSeniorWeekStatus(
+      String seniorUid, DateTime weekStart) {
+    final start = DateTime(weekStart.year, weekStart.month, weekStart.day);
+    final end = start.add(const Duration(days: 7));
+    return _users
+        .doc(seniorUid)
+        .collection('medicine_logs')
+        .where('scheduledTime', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
+        .where('scheduledTime', isLessThan: Timestamp.fromDate(end))
+        .orderBy('scheduledTime')
+        .snapshots()
+        .map((s) {
+      final logs = s.docs.map((d) => MedicineLog.fromFirestore(d)).toList();
+      final map = <DateTime, bool?>{};
+      for (final log in logs) {
+        final date = DateTime(
+          log.scheduledTime.year,
+          log.scheduledTime.month,
+          log.scheduledTime.day,
+        );
+        if (!map.containsKey(date)) {
+          map[date] = log.taken;
+        } else if (map[date] == true && !log.taken) {
+          map[date] = false;
+        }
+      }
+      return map;
+    });
+  }
+
   static Stream<List<MedicineLog>> watchSeniorLogsForDate(
       String seniorUid, DateTime date) {
     final start = DateTime(date.year, date.month, date.day);

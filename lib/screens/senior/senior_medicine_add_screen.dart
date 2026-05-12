@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/medicine.dart';
 import '../../models/medicine_log.dart';
 import '../../services/firestore_service.dart';
+import '../../services/notification_service.dart';
 
 class SeniorMedicineAddScreen extends StatefulWidget {
   const SeniorMedicineAddScreen({super.key});
@@ -66,6 +67,11 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
       startDate: DateTime.now(),
     );
     await FirestoreService.addMedicine(medicine);
+    await NotificationService.scheduleMedicineAlarms(
+      medicineId: medicine.id,
+      medicineName: medicine.name,
+      times: enabledSlots,
+    );
 
     // 오늘 복용 로그 생성
     final today = DateTime.now();
