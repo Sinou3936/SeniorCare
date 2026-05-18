@@ -8,77 +8,80 @@ initializeApp();
 const db = getFirestore();
 
 /**
- * medicine_log가 업데이트될 때 실행
- * taken이 false이고 scheduledTime 기준 30분이 지났으면 보호자에게 FCM 푸시
+ * 5분마다 실행 — scheduledTime 기준 20분 초과 미복용 로그를 보호자에게 FCM 푸시
+ * onUpdate 트리거 대신 pubsub.schedule 사용 (시니어가 앱을 켜지 않아도 동작)
  */
-exports.notifyMissedDose = functions
+exports.checkMissedDoses = functions
   .region('asia-northeast3')
-  .firestore.document('users/{uid}/medicine_logs/{logId}')
-  .onUpdate(async (change, context) => {
-    const after = change.after.data();
-    const uid = context.params.uid;
-
-    // 이미 복용했으면 스킵
-    if (after.taken) return null;
-
-    // scheduledTime 기준 30분이 지나지 않았으면 스킵
-    const scheduledTime = after.scheduledTime?.toDate();
-    if (!scheduledTime) return null;
-
+  .pubsub.schedule('every 5 minutes')
+  .onRun(async () => {
     const now = new Date();
-    const diffMinutes = (now - scheduledTime) / 1000 / 60;
-    if (diffMinutes < 30) return null;
+    const threshold = new Date(now.getTime() - 20 * 60 * 1000);
 
-    // 이미 알림 발송했으면 스킵 (중복 방지)
-    if (after.notified) return null;
+    const snapshot = await db.collectionGroup('medicine_logs')
+      .where('taken', '==', false)
+      .where('notified', '==', false)
+      .where('scheduledTime', '<', Timestamp.fromDate(threshold))
+      .get();
 
-    // 시니어 doc에서 보호자 uid 목록 조회
-    const seniorDoc = await db.collection('users').doc(uid).get();
-    if (!seniorDoc.exists) return null;
+    if (snapshot.empty) return null;
 
-    const linkedFamilyUids = seniorDoc.data().linkedFamilyUids || [];
-    if (linkedFamilyUids.length === 0) return null;
+    for (const doc of snapshot.docs) {
+      const log = doc.data();
+      // doc.ref.path = users/{uid}/medicine_logs/{logId}
+      const uid = doc.ref.parent.parent.id;
 
-    const medicineName = after.medicineName || '약';
-    const messages = [];
+      const seniorDoc = await db.collection('users').doc(uid).get();
+      if (!seniorDoc.exists) {
+        await doc.ref.update({ notified: true });
+        continue;
+      }
 
-    for (const familyUid of linkedFamilyUids) {
-      const familyDoc = await db.collection('users').doc(familyUid).get();
-      if (!familyDoc.exists) continue;
+      const linkedFamilyUids = seniorDoc.data().linkedFamilyUids || [];
+      if (linkedFamilyUids.length === 0) {
+        await doc.ref.update({ notified: true });
+        continue;
+      }
 
-      const fcmToken = familyDoc.data().fcmToken;
-      if (!fcmToken) continue;
+      const medicineName = log.medicineName || '약';
+      const messages = [];
 
-      messages.push({
-        token: fcmToken,
-        notification: {
-          title: '미복용 알림',
-          body: `부모님이 ${medicineName}을(를) 아직 드시지 않으셨어요`,
-        },
-        data: {
+      for (const familyUid of linkedFamilyUids) {
+        const familyDoc = await db.collection('users').doc(familyUid).get();
+        if (!familyDoc.exists) continue;
+
+        const fcmToken = familyDoc.data().fcmToken;
+        if (!fcmToken) continue;
+
+        messages.push({
+          token: fcmToken,
+          notification: {
+            title: '미복용 알림',
+            body: `부모님이 ${medicineName}을(를) 아직 드시지 않으셨어요`,
+          },
+          data: {
+            type: 'missed_dose',
+            medicineLogId: doc.id,
+            seniorUid: uid,
+          },
+        });
+
+        await db.collection('users').doc(familyUid).collection('notifications').add({
           type: 'missed_dose',
-          medicineLogId: context.params.logId,
+          medicineName,
           seniorUid: uid,
-        },
-      });
+          medicineLogId: doc.id,
+          isRead: false,
+          createdAt: Timestamp.now(),
+        });
+      }
 
-      // Firestore notifications 컬렉션에 알림 기록
-      await db.collection('users').doc(familyUid).collection('notifications').add({
-        type: 'missed_dose',
-        medicineName,
-        seniorUid: uid,
-        medicineLogId: context.params.logId,
-        isRead: false,
-        createdAt: Timestamp.now(),
-      });
+      if (messages.length > 0) {
+        await getMessaging().sendEach(messages);
+      }
+
+      await doc.ref.update({ notified: true });
     }
-
-    if (messages.length > 0) {
-      await getMessaging().sendEach(messages);
-    }
-
-    // 중복 알림 방지 플래그
-    await change.after.ref.update({ notified: true });
 
     return null;
   });

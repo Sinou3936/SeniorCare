@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/medicine_log.dart';
 import '../../services/firestore_service.dart';
+import '../../services/notification_service.dart';
 import '../../utils/time_utils.dart';
 import '../../widgets/weekly_calendar.dart';
 import 'senior_my_code_screen.dart';
@@ -53,12 +54,27 @@ class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
   }
 
   Future<void> _toggleTaken(MedicineLog log) async {
-    await FirestoreService.setLogTaken(log.id, !log.taken);
+    final newTaken = !log.taken;
+    await FirestoreService.setLogTaken(log.id, newTaken);
+    if (newTaken) {
+      await NotificationService.cancelReminderForLog(
+        log.medicineId,
+        log.scheduledTime.hour,
+        log.scheduledTime.minute,
+      );
+    }
   }
 
   Future<void> _takeAll(List<MedicineLog> group) async {
     for (final log in group) {
-      if (!log.taken) await FirestoreService.setLogTaken(log.id, true);
+      if (!log.taken) {
+        await FirestoreService.setLogTaken(log.id, true);
+        await NotificationService.cancelReminderForLog(
+          log.medicineId,
+          log.scheduledTime.hour,
+          log.scheduledTime.minute,
+        );
+      }
     }
   }
 

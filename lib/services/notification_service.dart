@@ -74,7 +74,7 @@ class NotificationService {
     required String medicineName,
     required List<String> times,
   }) async {
-    await cancelMedicineAlarms(medicineId);
+    await cancelMedicineAlarms(medicineId, times: times);
 
     for (int i = 0; i < times.length; i++) {
       final parts = times[i].split(':');
@@ -95,6 +95,17 @@ class NotificationService {
         androidScheduleMode: AndroidScheduleMode.alarmClock,
         matchDateTimeComponents: DateTimeComponents.time,
       );
+
+      // +10분 미복용 리마인더 (one-shot, 복용 체크 시 취소됨)
+      final reminderId = _reminderNotificationId(medicineId, hour, minute);
+      await _local.zonedSchedule(
+        id: reminderId,
+        title: '복약 알림',
+        body: '$medicineName 아직 드시지 않으셨나요?',
+        scheduledDate: scheduledTime.add(const Duration(minutes: 10)),
+        notificationDetails: _notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.alarmClock,
+      );
     }
   }
 
@@ -110,14 +121,33 @@ class NotificationService {
   }
 
   /// 약 삭제 시 해당 약의 모든 알림 취소
-  static Future<void> cancelMedicineAlarms(String medicineId) async {
+  static Future<void> cancelMedicineAlarms(String medicineId, {List<String>? times}) async {
     for (int i = 0; i < 10; i++) {
       await _local.cancel(id: _notificationId(medicineId, i));
     }
+    if (times != null) {
+      for (final t in times) {
+        final parts = t.split(':');
+        if (parts.length != 2) continue;
+        final h = int.tryParse(parts[0]);
+        final m = int.tryParse(parts[1]);
+        if (h == null || m == null) continue;
+        await _local.cancel(id: _reminderNotificationId(medicineId, h, m));
+      }
+    }
+  }
+
+  /// 복용 체크 시 해당 시간대 리마인더 취소
+  static Future<void> cancelReminderForLog(String medicineId, int hour, int minute) async {
+    await _local.cancel(id: _reminderNotificationId(medicineId, hour, minute));
   }
 
   static int _notificationId(String medicineId, int timeIndex) {
     return (medicineId.hashCode.abs() % 100000) * 10 + timeIndex;
+  }
+
+  static int _reminderNotificationId(String medicineId, int hour, int minute) {
+    return 10000000 + (medicineId.hashCode.abs() % 10000) * 1440 + hour * 60 + minute;
   }
 
   // ignore: invalid_use_of_visible_for_testing_member

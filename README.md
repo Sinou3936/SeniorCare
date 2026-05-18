@@ -21,6 +21,22 @@
 
 ## 작업 이력
 
+### 2026-05-18 — 미복용 알림 개편 / 안정성 개선
+
+- **미복용 리마인더 추가 (시니어)** — 복용 알림 +10분 후 "아직 드시지 않으셨나요?" 로컬 알림 추가, 복용 체크 시 자동 취소
+- **Cloud Functions 개편 (보호자)** — `onUpdate` 트리거 → `pubsub.schedule('every 5 minutes')` 교체, 20분 미복용 기준으로 변경, collectionGroup 쿼리로 전체 사용자 스캔
+- **Samsung 알람 재등록 버그 수정** — `alarmClock` 모드 one-shot 특성 반영, 앱 시작 시 전체 활성 약 알람 재등록 (`rescheduleAllAlarms`)
+- **버튼 연속 클릭 방지** — 약 추가/병원 추가 저장 버튼 `_isSaving` 가드로 중복 호출 차단
+- **가족 앱 세션 유지** — `linkedSeniorUid` SharedPreferences 캐싱, 재실행 시 코드 재입력 없이 자동 복원
+- **Firestore 오프라인 캐시** — `persistenceEnabled: true` 설정으로 오프라인 / 느린 네트워크 대응
+- **홈 화면 반응 속도 개선** — `StreamBuilder`를 state 변수로 분리해 날짜 탭 전환 시 깜빡임 제거
+- **약 시간 범위 제한** — 아침 07:00~09:00, 점심 11:30~15:00, 저녁 17:30~20:00 경계 벗어나지 않도록 clamp 처리
+- **복용 종료일 기본값 변경** — 30일 → 7일
+- **날짜 picker 한국어** — 약/병원 추가·수정 화면 `showDatePicker` locale 명시 (`ko_KR`)
+- **스플래시 이미지 변경** — `splash_screen.png` → `app_icon.png` 단일화, 배경색 유지 fix
+
+---
+
 ### 2026-05-12 — 스플래시 / 아이콘 / UX 개선
 
 - **앱 이름 변경** — `seniorcare` → `약봄` (AndroidManifest, main.dart 반영)
@@ -103,13 +119,18 @@
 | 달력 점 스타일 개선 (미완료 흰색 / 완료 초록) | ✅ 완료 |
 | FCM 클라이언트 (토큰 저장, 로컬 알림 수신) | ✅ 완료 |
 | 복약 알림 스케줄링 (시간대별 매일 반복) | ✅ 완료 |
-| Cloud Functions (미복용 30분 후 보호자 푸시) | ✅ 완료 |
+| Samsung alarmClock one-shot 재등록 버그 수정 | ✅ 완료 |
+| 미복용 리마인더 +10분 로컬 알림 (시니어) | ✅ 완료 |
+| Cloud Functions 미복용 알림 (pubsub 5분 주기, 20분 기준) | ✅ 완료 |
 | 가족 알림 화면 실데이터 연동 | ✅ 완료 |
 | KST 타임존 통일 (디바이스 timezone 무관) | ✅ 완료 |
 | 약 복용 종료일 (등록·수정·자동 목록 제외) | ✅ 완료 |
 | 앱 브랜딩 (이름·색상·아이콘·스플래시) | ✅ 완료 |
 | Google 계정 연동 (익명 → 영구 계정, linkWithCredential) | ✅ 완료 |
-| 가족 앱 재실행 시 세션 유지 (코드 재입력 스킵) | 🔲 예정 |
+| 가족 앱 재실행 시 세션 유지 (코드 재입력 스킵) | ✅ 완료 |
+| Firestore 오프라인 캐시 | ✅ 완료 |
+| 홈 화면 날짜 탭 반응 속도 개선 | ✅ 완료 |
+| 약 시간 슬롯 범위 clamp (아침/점심/저녁 경계 고정) | ✅ 완료 |
 
 ---
 
@@ -138,7 +159,8 @@ users/{uid}/medicine_logs/{logId}
   ├── medicineName: "혈압약"
   ├── scheduledTime: Timestamp   # KST 기준
   ├── taken: false
-  └── takenAt: Timestamp | null
+  ├── takenAt: Timestamp | null
+  └── notified: false            # 보호자 FCM 발송 여부 (중복 방지)
 
 users/{uid}/appointments/{appointmentId}
   ├── hospitalName: "서울내과"
