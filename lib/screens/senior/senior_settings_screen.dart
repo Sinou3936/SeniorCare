@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
+import '../../services/notification_service.dart';
 import '../../services/prefs_service.dart';
 import '../mode_select_screen.dart';
 import 'senior_my_code_screen.dart';
@@ -86,6 +87,27 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
                       onChanged: (v) async {
                         setState(() => _notificationEnabled = v);
                         await PrefsService.saveNotificationEnabled(v);
+                      },
+                    ),
+                    const Divider(height: 1, indent: 16, endIndent: 16),
+                    ListTile(
+                      leading: const Icon(Icons.notification_add_outlined,
+                          color: Color(0xFFE8896A), size: 28),
+                      title: const Text('알림 테스트',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                      subtitle: const Text('5초 후 예약 알림 발송',
+                          style: TextStyle(fontSize: 14, color: Color(0xFF999999))),
+                      onTap: () async {
+                        await NotificationService.sendTestNotification();
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('5초 후 알림이 옵니다'),
+                              duration: Duration(seconds: 2),
+                              behavior: SnackBarBehavior.floating,
+                            ),
+                          );
+                        }
                       },
                     ),
                   ]),

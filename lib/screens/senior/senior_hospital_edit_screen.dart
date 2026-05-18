@@ -47,6 +47,7 @@ class _SeniorHospitalEditScreenState extends State<SeniorHospitalEditScreen> {
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
+      locale: const Locale('ko', 'KR'),
       initialDate: _selectedDate,
       firstDate: DateTime(2000),
       lastDate: DateTime.now().add(const Duration(days: 365)),
@@ -146,26 +147,28 @@ class _SeniorHospitalEditScreenState extends State<SeniorHospitalEditScreen> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _AdjBtn(label: '- 1h', onTap: () => _adjustTime(-60)),
-                  const SizedBox(width: 6),
-                  _AdjBtn(label: '- 30m', onTap: () => _adjustTime(-30)),
-                  const SizedBox(width: 16),
-                  Text(
-                    _formattedTime,
-                    style: const TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFFE8896A),
+              child: FittedBox(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _AdjBtn(label: '- 1h', onTap: () => _adjustTime(-60)),
+                    const SizedBox(width: 6),
+                    _AdjBtn(label: '- 30m', onTap: () => _adjustTime(-30)),
+                    const SizedBox(width: 16),
+                    Text(
+                      _formattedTime,
+                      style: const TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFE8896A),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  _AdjBtn(label: '+ 30m', onTap: () => _adjustTime(30)),
-                  const SizedBox(width: 6),
-                  _AdjBtn(label: '+ 1h', onTap: () => _adjustTime(60)),
-                ],
+                    const SizedBox(width: 16),
+                    _AdjBtn(label: '+ 30m', onTap: () => _adjustTime(30)),
+                    const SizedBox(width: 6),
+                    _AdjBtn(label: '+ 1h', onTap: () => _adjustTime(60)),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 24),

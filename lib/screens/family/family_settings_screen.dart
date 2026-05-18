@@ -154,6 +154,7 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
     );
     if (ok == true && mounted) {
       await FirestoreService.unlinkFromSenior();
+      await PrefsService.clearLinkedSeniorUid();
       await PrefsService.clearMode();
       if (mounted) {
         Navigator.pushAndRemoveUntil(
@@ -344,7 +345,7 @@ class _UpgradeBanner extends StatelessWidget {
                   color: Color(0xFF1565C0), size: 22),
               const SizedBox(width: 8),
               const Text(
-                '재실행마다 코드를 다시 입력해야 해요',
+                '재설치 후 코드를 다시 입력해야 해요',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -355,7 +356,7 @@ class _UpgradeBanner extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           const Text(
-            'Google 계정을 연결하면 앱을 껐다 켜도\n부모님과 자동으로 연결돼요.',
+            'Google 계정을 연결하면 앱을 재설치해도\n부모님과 자동으로 연결돼요.',
             style: TextStyle(
               fontSize: 15,
               color: Color(0xFF1976D2),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/medicine_log.dart';
 import '../../services/firestore_service.dart';
+import '../../services/prefs_service.dart';
 import '../../utils/time_utils.dart';
 import '../../widgets/weekly_calendar.dart';
 
@@ -36,7 +37,13 @@ class _FamilyHomeScreenState extends State<FamilyHomeScreen> {
   }
 
   Future<void> _loadSeniorUid() async {
+    final cached = await PrefsService.loadLinkedSeniorUid();
+    if (cached != null) {
+      if (mounted) setState(() { _seniorUid = cached; _loading = false; });
+      return;
+    }
     final uid = await FirestoreService.getLinkedSeniorUid();
+    if (uid != null) await PrefsService.saveLinkedSeniorUid(uid);
     if (mounted) setState(() { _seniorUid = uid; _loading = false; });
   }
 

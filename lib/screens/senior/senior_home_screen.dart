@@ -14,6 +14,8 @@ class SeniorHomeScreen extends StatefulWidget {
 
 class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
   DateTime _selectedDate = kstNow();
+  late Stream<List<MedicineLog>> _logsStream;
+  List<MedicineLog> _cachedLogs = [];
 
   DateTime get _weekStart {
     final wd = _selectedDate.weekday;
@@ -63,17 +65,22 @@ class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
   @override
   void initState() {
     super.initState();
+    _logsStream = FirestoreService.watchLogsForDate(_selectedDate);
     _generateLogsForWeek();
   }
 
   Future<void> _generateLogsForWeek() async {
-    for (int i = 0; i < 7; i++) {
-      await FirestoreService.generateLogsForDate(_weekStart.add(Duration(days: i)));
-    }
+    await Future.wait(
+      List.generate(7, (i) =>
+          FirestoreService.generateLogsForDate(_weekStart.add(Duration(days: i)))),
+    );
   }
 
   void _onDateSelected(DateTime date) {
-    setState(() => _selectedDate = date);
+    setState(() {
+      _selectedDate = date;
+      _logsStream = FirestoreService.watchLogsForDate(date);
+    });
     FirestoreService.generateLogsForDate(date);
   }
 
@@ -86,9 +93,10 @@ class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
         builder: (context, weekSnap) {
           final statusMap = weekSnap.data ?? {};
           return StreamBuilder<List<MedicineLog>>(
-            stream: FirestoreService.watchLogsForDate(_selectedDate),
+            stream: _logsStream,
             builder: (context, snap) {
-              final logs = snap.data ?? [];
+              if (snap.hasData) _cachedLogs = snap.data!;
+              final logs = _cachedLogs;
               final takenCount = logs.where((l) => l.taken).length;
               final grouped = _grouped(logs);
 
@@ -246,9 +254,6 @@ class _SlotGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     final takenCount = logs.where((l) => l.taken).length;
     final allTaken = takenCount == logs.length;
-    final dt = logs.first.scheduledTime;
-    final timeStr =
-        '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -286,9 +291,6 @@ class _SlotGroup extends StatelessWidget {
                     color: allTaken ? const Color(0xFF4CAF50) : const Color(0xFF1A1A2E),
                   ),
                 ),
-                const SizedBox(width: 8),
-                Text(timeStr,
-                    style: const TextStyle(fontSize: 16, color: Color(0xFF999999))),
                 const Spacer(),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -368,12 +370,22 @@ class _MedicineRow extends StatelessWidget {
           ),
           const SizedBox(width: 14),
           Expanded(
-            child: Text(
-              log.medicineName,
-              style: const TextStyle(
-                  fontSize: 19,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF1A1A2E)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  log.medicineName,
+                  style: const TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1A1A2E)),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  '${log.scheduledTime.hour.toString().padLeft(2, '0')}:${log.scheduledTime.minute.toString().padLeft(2, '0')}',
+                  style: const TextStyle(fontSize: 15, color: Color(0xFF999999)),
+                ),
+              ],
             ),
           ),
           GestureDetector(

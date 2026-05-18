@@ -176,12 +176,46 @@ class FirestoreService {
     });
   }
 
+  static Future<List<Medicine>> getActiveMedicines() async {
+    final snap = await _medicines.get();
+    final today = kstNow();
+    final todayDate = DateTime(today.year, today.month, today.day);
+    return snap.docs
+        .map((d) => Medicine.fromFirestore(d))
+        .where((m) => m.endDate == null || !m.endDate!.isBefore(todayDate))
+        .toList();
+  }
+
   static Future<void> addMedicine(Medicine m) async {
     await _medicines.doc(m.id).set(m.toMap());
   }
 
   static Future<void> updateMedicine(Medicine m) async {
     await _medicines.doc(m.id).update(m.toMap());
+
+    final allLogs = await _logs.where('medicineId', isEqualTo: m.id).get();
+    if (allLogs.docs.isNotEmpty) {
+      final today = kstNow();
+      final todayStart = DateTime(today.year, today.month, today.day);
+      final todayEnd = todayStart.add(const Duration(days: 1));
+
+      final batch = _db.batch();
+      for (final doc in allLogs.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final taken = data['taken'] as bool? ?? false;
+        final scheduled = (data['scheduledTime'] as Timestamp).toDate();
+        final isToday = !scheduled.isBefore(todayStart) && scheduled.isBefore(todayEnd);
+
+        if (isToday && !taken) {
+          batch.delete(doc.reference);
+        } else {
+          batch.update(doc.reference, {'medicineName': m.name});
+        }
+      }
+      await batch.commit();
+    }
+
+    await generateLogsForDate(kstNow());
   }
 
   static Future<void> deleteMedicine(String id) async {

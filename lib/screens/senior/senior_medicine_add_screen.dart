@@ -16,6 +16,7 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
   final _nameController = TextEditingController();
 
   DateTime? _endDate;
+  bool _isSaving = false;
 
   final Map<String, int> _times = {
     '아침': 8 * 60,
@@ -42,15 +43,21 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
     return '$h:$m';
   }
 
+  static const _slotMin = {'아침': 7 * 60, '점심': 11 * 60 + 30, '저녁': 17 * 60 + 30, '취침': 20 * 60};
+  static const _slotMax = {'아침': 9 * 60, '점심': 15 * 60, '저녁': 20 * 60, '취침': 23 * 60 + 59};
+
   void _adjustTime(String slot, int delta) {
     setState(() {
-      _times[slot] = (_times[slot]! + delta).clamp(0, 23 * 60 + 59);
+      final min = _slotMin[slot] ?? 0;
+      final max = _slotMax[slot] ?? 23 * 60 + 59;
+      _times[slot] = (_times[slot]! + delta).clamp(min, max);
     });
   }
 
   Future<void> _save(BuildContext context) async {
     final name = _nameController.text.trim();
-    if (name.isEmpty) return;
+    if (name.isEmpty || _isSaving) return;
+    setState(() => _isSaving = true);
 
     final enabledSlots = _timeEnabled.entries
         .where((e) => e.value)
@@ -151,7 +158,8 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
               onTap: () async {
                 final picked = await showDatePicker(
                   context: context,
-                  initialDate: _endDate ?? DateTime.now().add(const Duration(days: 30)),
+                  locale: const Locale('ko', 'KR'),
+                  initialDate: _endDate ?? DateTime.now().add(const Duration(days: 7)),
                   firstDate: DateTime.now(),
                   lastDate: DateTime.now().add(const Duration(days: 365 * 3)),
                 );
@@ -201,19 +209,21 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
               width: double.infinity,
               height: 64,
               child: ElevatedButton(
-                onPressed: () => _save(context),
+                onPressed: _isSaving ? null : () => _save(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFE8896A),
                   shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14)),
                 ),
-                child: const Text(
-                  '저장',
-                  style: TextStyle(
-                      fontSize: 24,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold),
-                ),
+                child: _isSaving
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                        '저장',
+                        style: TextStyle(
+                            fontSize: 24,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold),
+                      ),
               ),
             ),
           ],
@@ -277,26 +287,28 @@ class _TimeRow extends StatelessWidget {
           if (enabled)
             Padding(
               padding: const EdgeInsets.only(top: 8, bottom: 4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _AdjBtn(label: '- 1h', onTap: () => onAdjust(-60)),
-                  const SizedBox(width: 6),
-                  _AdjBtn(label: '- 30m', onTap: () => onAdjust(-30)),
-                  const SizedBox(width: 14),
-                  Text(
-                    formattedTime,
-                    style: const TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFFE8896A),
+              child: FittedBox(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _AdjBtn(label: '- 1h', onTap: () => onAdjust(-60)),
+                    const SizedBox(width: 6),
+                    _AdjBtn(label: '- 30m', onTap: () => onAdjust(-30)),
+                    const SizedBox(width: 14),
+                    Text(
+                      formattedTime,
+                      style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFE8896A),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 14),
-                  _AdjBtn(label: '+ 30m', onTap: () => onAdjust(30)),
-                  const SizedBox(width: 6),
-                  _AdjBtn(label: '+ 1h', onTap: () => onAdjust(60)),
-                ],
+                    const SizedBox(width: 14),
+                    _AdjBtn(label: '+ 30m', onTap: () => onAdjust(30)),
+                    const SizedBox(width: 6),
+                    _AdjBtn(label: '+ 1h', onTap: () => onAdjust(60)),
+                  ],
+                ),
               ),
             ),
         ],

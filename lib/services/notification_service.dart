@@ -1,7 +1,10 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz_data;
+import 'package:flutter/services.dart';
+import '../models/medicine.dart';
 import 'firestore_service.dart';
 
 @pragma('vm:entry-point')
@@ -25,7 +28,6 @@ class NotificationService {
 
   static Future<void> init() async {
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
-
     await _messaging.requestPermission(alert: true, badge: true, sound: true);
 
     // timezone 초기화
@@ -50,11 +52,14 @@ class NotificationService {
             AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(channel);
 
-    // 정확한 알람 권한 요청 (Android 12+)
-    await _local
-        .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.requestExactAlarmsPermission();
+    // 알림 권한 요청 (Android 13+)
+    await Permission.notification.request();
+
+    // Exact Alarm 권한 요청 (Android 12+)
+    await Permission.scheduleExactAlarm.request();
+
+    // 배터리 최적화 면제 요청
+    await _requestBatteryOptimizationExemption();
 
     FirebaseMessaging.onMessage.listen(_showLocal);
 
@@ -64,11 +69,10 @@ class NotificationService {
   }
 
   /// 약 복용 알림 스케줄링 — 약 추가/수정 시 호출
-  /// [medicineId] 기준으로 기존 알림 취소 후 재등록
   static Future<void> scheduleMedicineAlarms({
     required String medicineId,
     required String medicineName,
-    required List<String> times, // "HH:mm" 형식
+    required List<String> times,
   }) async {
     await cancelMedicineAlarms(medicineId);
 
@@ -82,40 +86,36 @@ class NotificationService {
       final id = _notificationId(medicineId, i);
       final scheduledTime = _nextOccurrence(hour, minute);
 
-      try {
-        await _local.zonedSchedule(
-          id: id,
-          title: '복약 알림',
-          body: '$medicineName 드실 시간이에요!',
-          scheduledDate: scheduledTime,
-          notificationDetails: _notificationDetails,
-          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
-          matchDateTimeComponents: DateTimeComponents.time,
-        );
-      } catch (_) {
-        // 정확한 알람 권한 없을 때 inexact로 폴백
-        await _local.zonedSchedule(
-          id: id,
-          title: '복약 알림',
-          body: '$medicineName 드실 시간이에요!',
-          scheduledDate: scheduledTime,
-          notificationDetails: _notificationDetails,
-          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-          matchDateTimeComponents: DateTimeComponents.time,
-        );
-      }
+      await _local.zonedSchedule(
+        id: id,
+        title: '복약 알림',
+        body: '$medicineName 드실 시간이에요!',
+        scheduledDate: scheduledTime,
+        notificationDetails: _notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.alarmClock,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+    }
+  }
+
+  /// 앱 시작 시 전체 활성 약 알람 재등록
+  static Future<void> rescheduleAllAlarms(List<Medicine> medicines) async {
+    for (final m in medicines) {
+      await scheduleMedicineAlarms(
+        medicineId: m.id,
+        medicineName: m.name,
+        times: m.times,
+      );
     }
   }
 
   /// 약 삭제 시 해당 약의 모든 알림 취소
   static Future<void> cancelMedicineAlarms(String medicineId) async {
-    // 최대 시간대 수만큼 취소 시도 (아침/점심/저녁/취침 = 최대 4개)
     for (int i = 0; i < 10; i++) {
       await _local.cancel(id: _notificationId(medicineId, i));
     }
   }
 
-  /// medicineId + 시간대 인덱스로 고유 알림 ID 생성
   static int _notificationId(String medicineId, int timeIndex) {
     return (medicineId.hashCode.abs() % 100000) * 10 + timeIndex;
   }
@@ -124,7 +124,6 @@ class NotificationService {
   static int notificationIdForTest(String medicineId, int timeIndex) =>
       _notificationId(medicineId, timeIndex);
 
-  /// 오늘 해당 시각이 지났으면 내일로 설정
   static tz.TZDateTime _nextOccurrence(int hour, int minute) {
     final now = tz.TZDateTime.now(tz.local);
     var scheduled = tz.TZDateTime(
@@ -139,6 +138,36 @@ class NotificationService {
       scheduled = scheduled.add(const Duration(days: 1));
     }
     return scheduled;
+  }
+
+  /// Exact Alarm 권한 허용 여부 반환
+  static Future<bool> canScheduleExact() async {
+    return await Permission.scheduleExactAlarm.isGranted;
+  }
+
+  /// Exact Alarm 설정 페이지 열기
+  static Future<void> openExactAlarmSettings() async {
+    await Permission.scheduleExactAlarm.request();
+  }
+
+  /// 5초 후 예약 알림 테스트
+  static Future<void> sendTestNotification() async {
+    final scheduledTime = tz.TZDateTime.now(tz.local).add(const Duration(seconds: 5));
+    await _local.zonedSchedule(
+      id: 99999,
+      title: '알림 테스트',
+      body: '예약 알림이 정상 동작합니다!',
+      scheduledDate: scheduledTime,
+      notificationDetails: _notificationDetails,
+      androidScheduleMode: AndroidScheduleMode.alarmClock,
+    );
+  }
+
+  static Future<void> _requestBatteryOptimizationExemption() async {
+    try {
+      const channel = MethodChannel('yakbom/battery');
+      await channel.invokeMethod('requestIgnoreBatteryOptimizations');
+    } catch (_) {}
   }
 
   static Future<void> _showLocal(RemoteMessage message) async {

@@ -15,6 +15,7 @@ class _SeniorHospitalAddScreenState extends State<SeniorHospitalAddScreen> {
   final _memoController = TextEditingController();
   DateTime _selectedDate = DateTime.now().add(const Duration(days: 1));
   int _timeMinutes = 10 * 60;
+  bool _isSaving = false;
 
   @override
   void dispose() {
@@ -35,7 +36,8 @@ class _SeniorHospitalAddScreenState extends State<SeniorHospitalAddScreen> {
 
   Future<void> _save(BuildContext context) async {
     final name = _hospitalController.text.trim();
-    if (name.isEmpty) return;
+    if (name.isEmpty || _isSaving) return;
+    setState(() => _isSaving = true);
     final date = DateTime(
       _selectedDate.year, _selectedDate.month, _selectedDate.day,
       _timeMinutes ~/ 60, _timeMinutes % 60,
@@ -53,6 +55,7 @@ class _SeniorHospitalAddScreenState extends State<SeniorHospitalAddScreen> {
   Future<void> _pickDate() async {
     final picked = await showDatePicker(
       context: context,
+      locale: const Locale('ko', 'KR'),
       initialDate: _selectedDate,
       firstDate: DateTime.now(),
       lastDate: DateTime.now().add(const Duration(days: 365)),
@@ -137,26 +140,28 @@ class _SeniorHospitalAddScreenState extends State<SeniorHospitalAddScreen> {
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _AdjBtn(label: '- 1h', onTap: () => _adjustTime(-60)),
-                  const SizedBox(width: 6),
-                  _AdjBtn(label: '- 30m', onTap: () => _adjustTime(-30)),
-                  const SizedBox(width: 16),
-                  Text(
-                    _formattedTime,
-                    style: const TextStyle(
-                      fontSize: 30,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFFE8896A),
+              child: FittedBox(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _AdjBtn(label: '- 1h', onTap: () => _adjustTime(-60)),
+                    const SizedBox(width: 6),
+                    _AdjBtn(label: '- 30m', onTap: () => _adjustTime(-30)),
+                    const SizedBox(width: 16),
+                    Text(
+                      _formattedTime,
+                      style: const TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFFE8896A),
+                      ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                  _AdjBtn(label: '+ 30m', onTap: () => _adjustTime(30)),
-                  const SizedBox(width: 6),
-                  _AdjBtn(label: '+ 1h', onTap: () => _adjustTime(60)),
-                ],
+                    const SizedBox(width: 16),
+                    _AdjBtn(label: '+ 30m', onTap: () => _adjustTime(30)),
+                    const SizedBox(width: 6),
+                    _AdjBtn(label: '+ 1h', onTap: () => _adjustTime(60)),
+                  ],
+                ),
               ),
             ),
             const SizedBox(height: 24),
@@ -183,15 +188,17 @@ class _SeniorHospitalAddScreenState extends State<SeniorHospitalAddScreen> {
               width: double.infinity,
               height: 64,
               child: ElevatedButton(
-                onPressed: () => _save(context),
+                onPressed: _isSaving ? null : () => _save(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFE8896A),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                 ),
-                child: const Text(
-                  '저장',
-                  style: TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),
-                ),
+                child: _isSaving
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                        '저장',
+                        style: TextStyle(fontSize: 24, color: Colors.white, fontWeight: FontWeight.bold),
+                      ),
               ),
             ),
           ],

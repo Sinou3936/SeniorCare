@@ -67,9 +67,14 @@ class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
     return '$h:$m';
   }
 
+  static const _slotMin = {'아침': 7 * 60, '점심': 11 * 60 + 30, '저녁': 17 * 60 + 30, '취침': 20 * 60};
+  static const _slotMax = {'아침': 9 * 60, '점심': 15 * 60, '저녁': 20 * 60, '취침': 23 * 60 + 59};
+
   void _adjustTime(String slot, int delta) {
     setState(() {
-      _times[slot] = (_times[slot]! + delta).clamp(0, 23 * 60 + 59);
+      final min = _slotMin[slot] ?? 0;
+      final max = _slotMax[slot] ?? 23 * 60 + 59;
+      _times[slot] = (_times[slot]! + delta).clamp(min, max);
     });
   }
 
@@ -159,7 +164,8 @@ class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
               onTap: () async {
                 final picked = await showDatePicker(
                   context: context,
-                  initialDate: _endDate ?? DateTime.now().add(const Duration(days: 30)),
+                  locale: const Locale('ko', 'KR'),
+                  initialDate: _endDate ?? DateTime.now().add(const Duration(days: 7)),
                   firstDate: DateTime.now(),
                   lastDate: DateTime.now().add(const Duration(days: 365 * 3)),
                 );
@@ -280,23 +286,25 @@ class _TimeRow extends StatelessWidget {
           if (enabled)
             Padding(
               padding: const EdgeInsets.only(top: 8, bottom: 4),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _AdjBtn(label: '- 1h', onTap: () => onAdjust(-60)),
-                  const SizedBox(width: 6),
-                  _AdjBtn(label: '- 30m', onTap: () => onAdjust(-30)),
-                  const SizedBox(width: 14),
-                  Text(
-                    formattedTime,
-                    style: const TextStyle(
-                        fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFFE8896A)),
-                  ),
-                  const SizedBox(width: 14),
-                  _AdjBtn(label: '+ 30m', onTap: () => onAdjust(30)),
-                  const SizedBox(width: 6),
-                  _AdjBtn(label: '+ 1h', onTap: () => onAdjust(60)),
-                ],
+              child: FittedBox(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _AdjBtn(label: '- 1h', onTap: () => onAdjust(-60)),
+                    const SizedBox(width: 6),
+                    _AdjBtn(label: '- 30m', onTap: () => onAdjust(-30)),
+                    const SizedBox(width: 14),
+                    Text(
+                      formattedTime,
+                      style: const TextStyle(
+                          fontSize: 28, fontWeight: FontWeight.bold, color: Color(0xFFE8896A)),
+                    ),
+                    const SizedBox(width: 14),
+                    _AdjBtn(label: '+ 30m', onTap: () => onAdjust(30)),
+                    const SizedBox(width: 6),
+                    _AdjBtn(label: '+ 1h', onTap: () => onAdjust(60)),
+                  ],
+                ),
               ),
             ),
         ],

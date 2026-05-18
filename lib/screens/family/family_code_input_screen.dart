@@ -48,6 +48,7 @@ class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
       _focusNode.requestFocus();
     } else if (seniorUid != null) {
       await FirestoreService.linkToSenior(seniorUid);
+      await PrefsService.saveLinkedSeniorUid(seniorUid);
       await PrefsService.saveMode('family');
       if (!mounted) return;
       Navigator.pushReplacement(
