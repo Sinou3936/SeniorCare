@@ -57,7 +57,7 @@ class ModeSelectScreen extends StatelessWidget {
                 color: Colors.white24,
                 textColor: Colors.white,
                 border: Border.all(color: Colors.white, width: 2),
-                onTap: () => Navigator.push(
+                onTap: () => Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (_) => const FamilyCodeInputScreen()),
                 ),
