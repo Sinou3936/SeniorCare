@@ -12,7 +12,8 @@ class FamilyHomeScreen extends StatefulWidget {
   State<FamilyHomeScreen> createState() => _FamilyHomeScreenState();
 }
 
-class _FamilyHomeScreenState extends State<FamilyHomeScreen> {
+class _FamilyHomeScreenState extends State<FamilyHomeScreen>
+    with WidgetsBindingObserver {
   DateTime _selectedDate = kstNow();
   String? _seniorUid;
   bool _loading = true;
@@ -33,8 +34,28 @@ class _FamilyHomeScreenState extends State<FamilyHomeScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _loadSeniorUid();
   }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      final today = kstNow();
+      if (!_isSameDay(_selectedDate, today)) {
+        setState(() => _selectedDate = today);
+      }
+    }
+  }
+
+  bool _isSameDay(DateTime a, DateTime b) =>
+      a.year == b.year && a.month == b.month && a.day == b.day;
 
   Future<void> _loadSeniorUid() async {
     final cached = await PrefsService.loadLinkedSeniorUid();
