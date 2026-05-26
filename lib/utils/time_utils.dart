@@ -3,11 +3,13 @@ import 'package:timezone/timezone.dart' as tz;
 /// 현재 시각을 KST 기준으로 반환 (기기 timezone 설정 무관)
 DateTime kstNow() => tz.TZDateTime.now(tz.getLocation('Asia/Seoul'));
 
-/// 슬롯 라벨 (아침/점심/저녁/취침)
+/// 슬롯 라벨 (새벽/아침/점심/저녁/취침)
 String slotLabel(DateTime dt) {
-  if (dt.hour < 10) return '아침';
-  if (dt.hour < 14) return '점심';
-  if (dt.hour < 20) return '저녁';
+  final m = dt.hour * 60 + dt.minute;
+  if (m < 7 * 60) return '새벽';
+  if (m < 10 * 60) return '아침';
+  if (m < 17 * 60) return '점심';
+  if (m < 20 * 60 + 30) return '저녁';
   return '취침';
 }
 

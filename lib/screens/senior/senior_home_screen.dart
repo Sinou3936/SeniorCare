@@ -4,7 +4,6 @@ import '../../services/firestore_service.dart';
 import '../../services/notification_service.dart';
 import '../../utils/time_utils.dart';
 import '../../widgets/weekly_calendar.dart';
-import 'senior_my_code_screen.dart';
 
 class SeniorHomeScreen extends StatefulWidget {
   const SeniorHomeScreen({super.key});
@@ -24,8 +23,9 @@ class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
     return DateTime(ws.year, ws.month, ws.day);
   }
 
-  static const _slotOrder = ['아침', '점심', '저녁', '취침'];
+  static const _slotOrder = ['새벽', '아침', '점심', '저녁', '취침'];
   static const _slotIcons = {
+    '새벽': Icons.dark_mode_outlined,
     '아침': Icons.wb_sunny_outlined,
     '점심': Icons.light_mode_outlined,
     '저녁': Icons.nights_stay_outlined,
@@ -33,9 +33,11 @@ class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
   };
 
   String _slotLabel(DateTime dt) {
-    if (dt.hour < 10) return '아침';
-    if (dt.hour < 14) return '점심';
-    if (dt.hour < 20) return '저녁';
+    final m = dt.hour * 60 + dt.minute;
+    if (m < 7 * 60) return '새벽';
+    if (m < 10 * 60) return '아침';
+    if (m < 17 * 60) return '점심';
+    if (m < 20 * 60 + 30) return '저녁';
     return '취침';
   }
 
@@ -141,70 +143,26 @@ class _SeniorHomeScreenState extends State<SeniorHomeScreen> {
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${now.month}월 ${now.day}일 ${_weekdayStr(now.weekday)}요일',
-                              style: const TextStyle(color: Colors.white70, fontSize: 15),
-                            ),
-                            const Text(
-                              '안녕하세요!',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 26,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
+                        Text(
+                          '${now.month}월 ${now.day}일 ${_weekdayStr(now.weekday)}요일',
+                          style: const TextStyle(color: Colors.white70, fontSize: 15),
                         ),
-                        Row(
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: Colors.white24,
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                '$takenCount/${logs.length} 복용',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.white24,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '$takenCount/${logs.length} 복용',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
                             ),
-                            const SizedBox(width: 8),
-                            GestureDetector(
-                              onTap: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(builder: (_) => const SeniorMyCodeScreen()),
-                              ),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                decoration: BoxDecoration(
-                                  color: Colors.white24,
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: const Row(
-                                  children: [
-                                    Icon(Icons.qr_code_rounded, color: Colors.white, size: 20),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      '내 코드',
-                                      style: TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ],
                     ),

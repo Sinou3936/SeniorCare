@@ -23,8 +23,9 @@ class _FamilyHomeScreenState extends State<FamilyHomeScreen>
     return now.subtract(Duration(days: now.weekday - 1));
   }
 
-  static const _slotOrder = ['아침', '점심', '저녁', '취침'];
+  static const _slotOrder = ['새벽', '아침', '점심', '저녁', '취침'];
   static const _slotIcons = {
+    '새벽': Icons.dark_mode_outlined,
     '아침': Icons.wb_sunny_outlined,
     '점심': Icons.light_mode_outlined,
     '저녁': Icons.nights_stay_outlined,
@@ -69,9 +70,11 @@ class _FamilyHomeScreenState extends State<FamilyHomeScreen>
   }
 
   String _slotLabel(DateTime dt) {
-    if (dt.hour < 10) return '아침';
-    if (dt.hour < 14) return '점심';
-    if (dt.hour < 20) return '저녁';
+    final m = dt.hour * 60 + dt.minute;
+    if (m < 7 * 60) return '새벽';
+    if (m < 10 * 60) return '아침';
+    if (m < 17 * 60) return '점심';
+    if (m < 20 * 60 + 30) return '저녁';
     return '취침';
   }
 
@@ -127,18 +130,21 @@ class _FamilyHomeScreenState extends State<FamilyHomeScreen>
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('부모님 복용 현황',
-                                    style: TextStyle(
-                                        color: Colors.white70, fontSize: 15)),
-                                Text('부모님',
-                                    style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 26,
-                                        fontWeight: FontWeight.bold)),
-                              ],
+                            const Flexible(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('부모님 복용 현황',
+                                      style: TextStyle(
+                                          color: Colors.white70, fontSize: 15),
+                                      overflow: TextOverflow.ellipsis),
+                                  Text('부모님',
+                                      style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 26,
+                                          fontWeight: FontWeight.bold)),
+                                ],
+                              ),
                             ),
                             Container(
                               padding: const EdgeInsets.symmetric(
@@ -325,7 +331,9 @@ class _FamilyMedicineRow extends StatelessWidget {
                 style: const TextStyle(
                     fontSize: 19,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF1A1A2E))),
+                    color: Color(0xFF1A1A2E)),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),

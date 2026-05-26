@@ -5,6 +5,7 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:flutter/services.dart';
 import '../models/medicine.dart';
+import '../models/appointment.dart';
 import 'firestore_service.dart';
 
 @pragma('vm:entry-point')
@@ -73,8 +74,12 @@ class NotificationService {
     required String medicineId,
     required String medicineName,
     required List<String> times,
+    String medicineType = 'oral', // 'oral' | 'topical'
   }) async {
     await cancelMedicineAlarms(medicineId, times: times);
+
+    final verb = medicineType == 'topical' ? '바르실' : '드실';
+    final reminderVerb = medicineType == 'topical' ? '바르지' : '드시지';
 
     for (int i = 0; i < times.length; i++) {
       final parts = times[i].split(':');
@@ -89,7 +94,7 @@ class NotificationService {
       await _local.zonedSchedule(
         id: id,
         title: '복약 알림',
-        body: '$medicineName 드실 시간이에요!',
+        body: '$medicineName $verb 시간이에요!',
         scheduledDate: scheduledTime,
         notificationDetails: _notificationDetails,
         androidScheduleMode: AndroidScheduleMode.alarmClock,
@@ -101,7 +106,7 @@ class NotificationService {
       await _local.zonedSchedule(
         id: reminderId,
         title: '복약 알림',
-        body: '$medicineName 아직 드시지 않으셨나요?',
+        body: '$medicineName 아직 $reminderVerb 않으셨나요?',
         scheduledDate: scheduledTime.add(const Duration(minutes: 10)),
         notificationDetails: _notificationDetails,
         androidScheduleMode: AndroidScheduleMode.alarmClock,
@@ -116,6 +121,7 @@ class NotificationService {
         medicineId: m.id,
         medicineName: m.name,
         times: m.times,
+        medicineType: m.type.name,
       );
     }
   }
@@ -178,6 +184,45 @@ class NotificationService {
   /// Exact Alarm 설정 페이지 열기
   static Future<void> openExactAlarmSettings() async {
     await Permission.scheduleExactAlarm.request();
+  }
+
+  /// 병원 예약 알림 — 예약 시간 2시간 전에 알림
+  static Future<void> scheduleAppointmentAlarm(Appointment appointment) async {
+    final notifyTime = appointment.date.subtract(const Duration(hours: 2));
+    final now = tz.TZDateTime.now(tz.local);
+    final tzNotifyTime = tz.TZDateTime(
+      tz.local,
+      notifyTime.year, notifyTime.month, notifyTime.day,
+      notifyTime.hour, notifyTime.minute,
+    );
+    // 이미 지난 시간이면 스케줄 스킵
+    if (tzNotifyTime.isBefore(now)) return;
+
+    final id = _appointmentNotificationId(appointment.id);
+    await _local.zonedSchedule(
+      id: id,
+      title: '병원 예약 알림',
+      body: '${appointment.hospitalName} 예약이 2시간 후에 있어요!',
+      scheduledDate: tzNotifyTime,
+      notificationDetails: _notificationDetails,
+      androidScheduleMode: AndroidScheduleMode.alarmClock,
+    );
+  }
+
+  /// 앱 재시작 시 전체 미래 예약 알람 재등록
+  static Future<void> rescheduleAppointmentAlarms(List<Appointment> appointments) async {
+    for (final a in appointments) {
+      await scheduleAppointmentAlarm(a);
+    }
+  }
+
+  /// 병원 예약 알림 취소
+  static Future<void> cancelAppointmentAlarm(String appointmentId) async {
+    await _local.cancel(id: _appointmentNotificationId(appointmentId));
+  }
+
+  static int _appointmentNotificationId(String appointmentId) {
+    return 20000000 + (appointmentId.hashCode.abs() % 1000000);
   }
 
   /// 5초 후 예약 알림 테스트

@@ -20,7 +20,11 @@ void main() async {
   final savedMode = await PrefsService.loadMode();
   if (savedMode == 'senior') {
     final medicines = await FirestoreService.getActiveMedicines();
-    await NotificationService.rescheduleAllAlarms(medicines);
+    final appointments = await FirestoreService.getUpcomingAppointments();
+    await Future.wait([
+      NotificationService.rescheduleAllAlarms(medicines),
+      NotificationService.rescheduleAppointmentAlarms(appointments),
+    ]);
   }
   runApp(SeniorCareApp(initialMode: savedMode));
 }
@@ -43,6 +47,11 @@ class SeniorCareApp extends StatelessWidget {
     return MaterialApp(
       title: '약봄',
       debugShowCheckedModeBanner: false,
+      // 시스템 글자 크기 설정 무시 — 앱 자체 폰트 크기로 고정
+      builder: (context, child) => MediaQuery(
+        data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
+        child: child!,
+      ),
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: const Color(0xFFE8896A),

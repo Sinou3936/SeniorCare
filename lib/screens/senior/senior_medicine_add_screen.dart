@@ -17,14 +17,17 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
 
   DateTime? _endDate;
   bool _isSaving = false;
+  MedicineType _medicineType = MedicineType.oral;
 
   final Map<String, int> _times = {
+    '새벽': 4 * 60,
     '아침': 8 * 60,
     '점심': 12 * 60,
     '저녁': 18 * 60,
     '취침': 21 * 60,
   };
   final Map<String, bool> _timeEnabled = {
+    '새벽': false,
     '아침': true,
     '점심': true,
     '저녁': true,
@@ -43,8 +46,8 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
     return '$h:$m';
   }
 
-  static const _slotMin = {'아침': 7 * 60, '점심': 11 * 60 + 30, '저녁': 17 * 60 + 30, '취침': 20 * 60};
-  static const _slotMax = {'아침': 9 * 60, '점심': 15 * 60, '저녁': 20 * 60, '취침': 23 * 60 + 59};
+  static const _slotMin = {'새벽': 0, '아침': 7 * 60, '점심': 11 * 60 + 30, '저녁': 17 * 60 + 30, '취침': 20 * 60 + 30};
+  static const _slotMax = {'새벽': 6 * 60 + 30, '아침': 9 * 60, '점심': 15 * 60, '저녁': 20 * 60, '취침': 23 * 60 + 30};
 
   void _adjustTime(String slot, int delta) {
     setState(() {
@@ -74,6 +77,7 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
       times: enabledSlots,
       startDate: kstNow(),
       endDate: _endDate,
+      type: _medicineType,
     );
     await FirestoreService.addMedicine(medicine);
     await Future.wait([
@@ -81,6 +85,7 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
         medicineId: medicine.id,
         medicineName: medicine.name,
         times: enabledSlots,
+        medicineType: _medicineType.name,
       ),
       FirestoreService.generateLogsForDate(kstNow()),
     ]);
@@ -131,6 +136,33 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
                 ),
                 contentPadding: const EdgeInsets.all(16),
               ),
+            ),
+            const SizedBox(height: 24),
+            const Text('약 종류',
+                style: TextStyle(fontSize: 18, color: Color(0xFF666666))),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: MedicineTypeButton(
+                    icon: Icons.medication_rounded,
+                    label: '먹는약',
+                    sublabel: '알약·가루약·시럽',
+                    selected: _medicineType == MedicineType.oral,
+                    onTap: () => setState(() => _medicineType = MedicineType.oral),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: MedicineTypeButton(
+                    icon: Icons.opacity_rounded,
+                    label: '바르는약',
+                    sublabel: '안약·연고·흡입기',
+                    selected: _medicineType == MedicineType.topical,
+                    onTap: () => setState(() => _medicineType = MedicineType.topical),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 24),
             const Text(
@@ -312,6 +344,77 @@ class _TimeRow extends StatelessWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class MedicineTypeButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String sublabel;
+  final bool selected;
+  final VoidCallback onTap;
+
+  const MedicineTypeButton({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.sublabel,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
+        decoration: BoxDecoration(
+          color: selected
+              ? const Color(0xFFE8896A).withValues(alpha: 0.1)
+              : Colors.white,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: selected
+                ? const Color(0xFFE8896A)
+                : const Color(0xFFE0E0E0),
+            width: 2,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(icon,
+                size: 28,
+                color: selected
+                    ? const Color(0xFFE8896A)
+                    : const Color(0xFFCCCCCC)),
+            const SizedBox(height: 6),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: selected
+                    ? const Color(0xFFE8896A)
+                    : const Color(0xFF999999),
+              ),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              sublabel,
+              style: TextStyle(
+                fontSize: 12,
+                color: selected
+                    ? const Color(0xFFE8896A).withValues(alpha: 0.8)
+                    : const Color(0xFFCCCCCC),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/medicine.dart';
 import '../../services/firestore_service.dart';
 import '../../services/notification_service.dart';
+import 'senior_medicine_add_screen.dart' show MedicineTypeButton;
 
 class SeniorMedicineEditScreen extends StatefulWidget {
   final Medicine medicine;
@@ -15,11 +16,12 @@ class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
   late final TextEditingController _nameController;
 
   // 슬롯 이름 → 기본 분 단위
-  static const _defaultMinutes = {'아침': 8 * 60, '점심': 12 * 60, '저녁': 18 * 60, '취침': 21 * 60};
+  static const _defaultMinutes = {'새벽': 4 * 60, '아침': 8 * 60, '점심': 12 * 60, '저녁': 18 * 60, '취침': 21 * 60};
 
   late final Map<String, int> _times;
   late final Map<String, bool> _timeEnabled;
   late DateTime? _endDate;
+  late MedicineType _medicineType;
 
   bool _isSaving = false;
 
@@ -46,6 +48,7 @@ class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
         slot: existingTimes.containsKey(slot),
     };
     _endDate = widget.medicine.endDate;
+    _medicineType = widget.medicine.type;
   }
 
   @override
@@ -55,9 +58,10 @@ class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
   }
 
   String _slotFromMinutes(int mins) {
+    if (mins < 7 * 60) return '새벽';
     if (mins < 10 * 60) return '아침';
-    if (mins < 14 * 60) return '점심';
-    if (mins < 20 * 60) return '저녁';
+    if (mins < 17 * 60) return '점심';
+    if (mins < 20 * 60 + 30) return '저녁';
     return '취침';
   }
 
@@ -67,8 +71,8 @@ class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
     return '$h:$m';
   }
 
-  static const _slotMin = {'아침': 7 * 60, '점심': 11 * 60 + 30, '저녁': 17 * 60 + 30, '취침': 20 * 60};
-  static const _slotMax = {'아침': 9 * 60, '점심': 15 * 60, '저녁': 20 * 60, '취침': 23 * 60 + 59};
+  static const _slotMin = {'새벽': 0, '아침': 7 * 60, '점심': 11 * 60 + 30, '저녁': 17 * 60 + 30, '취침': 20 * 60 + 30};
+  static const _slotMax = {'새벽': 6 * 60 + 30, '아침': 9 * 60, '점심': 15 * 60, '저녁': 20 * 60, '취침': 23 * 60 + 30};
 
   void _adjustTime(String slot, int delta) {
     setState(() {
@@ -95,6 +99,7 @@ class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
       times: enabledTimes,
       startDate: widget.medicine.startDate,
       endDate: _endDate,
+      type: _medicineType,
     );
 
     await FirestoreService.updateMedicine(updated);
@@ -102,6 +107,7 @@ class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
       medicineId: updated.id,
       medicineName: updated.name,
       times: enabledTimes,
+      medicineType: _medicineType.name,
     );
     if (mounted) Navigator.pop(context);
   }
@@ -140,6 +146,33 @@ class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
                 ),
                 contentPadding: const EdgeInsets.all(16),
               ),
+            ),
+            const SizedBox(height: 24),
+            const Text('약 종류',
+                style: TextStyle(fontSize: 18, color: Color(0xFF666666))),
+            const SizedBox(height: 8),
+            Row(
+              children: [
+                Expanded(
+                  child: MedicineTypeButton(
+                    icon: Icons.medication_rounded,
+                    label: '먹는약',
+                    sublabel: '알약·가루약·시럽',
+                    selected: _medicineType == MedicineType.oral,
+                    onTap: () => setState(() => _medicineType = MedicineType.oral),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: MedicineTypeButton(
+                    icon: Icons.opacity_rounded,
+                    label: '바르는약',
+                    sublabel: '안약·연고·흡입기',
+                    selected: _medicineType == MedicineType.topical,
+                    onTap: () => setState(() => _medicineType = MedicineType.topical),
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 24),
             const Text(

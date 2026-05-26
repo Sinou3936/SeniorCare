@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/appointment.dart';
 import '../../services/firestore_service.dart';
+import '../../services/notification_service.dart';
 import 'senior_hospital_edit_screen.dart';
 
 class SeniorHospitalDetailScreen extends StatelessWidget {
@@ -146,6 +147,7 @@ class SeniorHospitalDetailScreen extends StatelessWidget {
       ),
     );
     if (ok == true && context.mounted) {
+      await NotificationService.cancelAppointmentAlarm(appointment.id);
       await FirestoreService.deleteAppointment(appointment.id);
       if (context.mounted) Navigator.pop(context);
     }

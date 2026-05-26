@@ -403,16 +403,6 @@ class _Header extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.settings_rounded,
-                        color: Colors.white, size: 28),
-                  ),
                 ],
               ),
               const SizedBox(height: 24),
@@ -509,12 +499,14 @@ class _UpgradeBanner extends StatelessWidget {
               const Icon(Icons.warning_amber_rounded,
                   color: Color(0xFFFF9800), size: 22),
               const SizedBox(width: 8),
-              const Text(
-                '기기를 바꾸면 데이터가 사라져요',
-                style: TextStyle(
-                  fontSize: 17,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFFE65100),
+              const Expanded(
+                child: Text(
+                  '기기를 바꾸면 데이터가 사라져요',
+                  style: TextStyle(
+                    fontSize: 17,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFFE65100),
+                  ),
                 ),
               ),
             ],
@@ -531,12 +523,12 @@ class _UpgradeBanner extends StatelessWidget {
           const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
-            height: 48,
             child: ElevatedButton.icon(
               onPressed: onTap,
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF4285F4),
                 foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(vertical: 14),
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12)),
                 elevation: 0,
@@ -808,12 +800,15 @@ class _ActionButton extends StatelessWidget {
           children: [
             Icon(icon, color: color, size: 20),
             const SizedBox(width: 6),
-            Text(
-              label,
-              style: TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: color,
+            Flexible(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],

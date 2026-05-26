@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../models/appointment.dart';
 import '../../services/firestore_service.dart';
+import '../../services/notification_service.dart';
 
 class SeniorHospitalEditScreen extends StatefulWidget {
   final Appointment appointment;
@@ -71,7 +72,9 @@ class _SeniorHospitalEditScreenState extends State<SeniorHospitalEditScreen> {
       memo: _memoController.text.trim().isEmpty ? null : _memoController.text.trim(),
     );
 
+    await NotificationService.cancelAppointmentAlarm(updated.id);
     await FirestoreService.updateAppointment(updated);
+    await NotificationService.scheduleAppointmentAlarm(updated);
     if (mounted) Navigator.pop(context);
   }
 

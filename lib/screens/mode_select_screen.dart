@@ -11,11 +11,17 @@ class ModeSelectScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: const Color(0xFFE8896A),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 32),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).size.height -
+                  MediaQuery.of(context).padding.top -
+                  MediaQuery.of(context).padding.bottom,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
               const Icon(Icons.favorite_rounded, color: Colors.white, size: 72),
               const SizedBox(height: 16),
               const Text(
@@ -62,7 +68,8 @@ class ModeSelectScreen extends StatelessWidget {
                   MaterialPageRoute(builder: (_) => const FamilyCodeInputScreen()),
                 ),
               ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

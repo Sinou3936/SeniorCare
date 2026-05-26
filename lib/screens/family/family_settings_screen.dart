@@ -240,16 +240,6 @@ class _Header extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.settings_rounded,
-                        color: Colors.white, size: 28),
-                  ),
                 ],
               ),
               const SizedBox(height: 24),
@@ -344,12 +334,15 @@ class _UpgradeBanner extends StatelessWidget {
               const Icon(Icons.info_outline_rounded,
                   color: Color(0xFF1565C0), size: 22),
               const SizedBox(width: 8),
-              const Text(
-                '재설치 후 코드를 다시 입력해야 해요',
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Color(0xFF1565C0),
+              const Flexible(
+                child: Text(
+                  '재설치 후 코드를 다시 입력해야 해요',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF1565C0),
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
             ],

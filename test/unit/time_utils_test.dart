@@ -1,28 +1,49 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:seniorcare/utils/time_utils.dart';
+import 'package:timezone/data/latest_all.dart' as tz_data;
+import 'package:timezone/timezone.dart' as tz;
 
 void main() {
+  setUpAll(() {
+    tz_data.initializeTimeZones();
+    tz.setLocalLocation(tz.getLocation('Asia/Seoul'));
+  });
+
   group('slotLabel', () {
-    test('06시 → 아침', () {
-      expect(slotLabel(DateTime(2024, 1, 1, 6, 0)), '아침');
+    // 새벽: 0:00 ~ 6:59
+    test('00시 → 새벽', () {
+      expect(slotLabel(DateTime(2024, 1, 1, 0, 0)), '새벽');
+    });
+    test('06시 → 새벽', () {
+      expect(slotLabel(DateTime(2024, 1, 1, 6, 59)), '새벽');
+    });
+    // 아침: 7:00 ~ 9:59
+    test('07시 → 아침', () {
+      expect(slotLabel(DateTime(2024, 1, 1, 7, 0)), '아침');
     });
     test('09시 → 아침', () {
       expect(slotLabel(DateTime(2024, 1, 1, 9, 59)), '아침');
     });
+    // 점심: 10:00 ~ 16:59
     test('10시 → 점심', () {
       expect(slotLabel(DateTime(2024, 1, 1, 10, 0)), '점심');
     });
-    test('13시 → 점심', () {
-      expect(slotLabel(DateTime(2024, 1, 1, 13, 59)), '점심');
+    test('16시 → 점심', () {
+      expect(slotLabel(DateTime(2024, 1, 1, 16, 59)), '점심');
     });
-    test('14시 → 저녁', () {
-      expect(slotLabel(DateTime(2024, 1, 1, 14, 0)), '저녁');
+    // 저녁: 17:00 ~ 20:29
+    test('17시 → 저녁', () {
+      expect(slotLabel(DateTime(2024, 1, 1, 17, 0)), '저녁');
     });
-    test('19시 → 저녁', () {
-      expect(slotLabel(DateTime(2024, 1, 1, 19, 59)), '저녁');
+    test('20:00 → 저녁', () {
+      expect(slotLabel(DateTime(2024, 1, 1, 20, 0)), '저녁');
     });
-    test('20시 → 취침', () {
-      expect(slotLabel(DateTime(2024, 1, 1, 20, 0)), '취침');
+    test('20:29 → 저녁', () {
+      expect(slotLabel(DateTime(2024, 1, 1, 20, 29)), '저녁');
+    });
+    // 취침: 20:30 ~ 23:59
+    test('20:30 → 취침', () {
+      expect(slotLabel(DateTime(2024, 1, 1, 20, 30)), '취침');
     });
     test('23시 → 취침', () {
       expect(slotLabel(DateTime(2024, 1, 1, 23, 0)), '취침');

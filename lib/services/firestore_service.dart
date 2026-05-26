@@ -197,25 +197,31 @@ class FirestoreService {
     if (allLogs.docs.isNotEmpty) {
       final today = kstNow();
       final todayStart = DateTime(today.year, today.month, today.day);
-      final todayEnd = todayStart.add(const Duration(days: 1));
 
       final batch = _db.batch();
       for (final doc in allLogs.docs) {
         final data = doc.data() as Map<String, dynamic>;
         final taken = data['taken'] as bool? ?? false;
         final scheduled = (data['scheduledTime'] as Timestamp).toDate();
-        final isToday = !scheduled.isBefore(todayStart) && scheduled.isBefore(todayEnd);
+        final isPast = scheduled.isBefore(todayStart); // 오늘 이전 = 과거
 
-        if (isToday && !taken) {
-          batch.delete(doc.reference);
-        } else {
+        if (isPast) {
+          // 과거 로그: 이름만 업데이트 (복용 기록 유지)
           batch.update(doc.reference, {'medicineName': m.name});
+        } else {
+          // 오늘 및 미래: 미복용이면 삭제(시간 변경 반영), 복용 완료면 이름만 업데이트
+          if (!taken) {
+            batch.delete(doc.reference);
+          } else {
+            batch.update(doc.reference, {'medicineName': m.name});
+          }
         }
       }
       await batch.commit();
     }
 
     await generateLogsForDate(kstNow());
+    // 미래 날짜 로그는 해당 날짜 접근 시 generateLogsForDate()로 자동 재생성됨
   }
 
   static Future<void> deleteMedicine(String id) async {
@@ -395,6 +401,14 @@ class FirestoreService {
     return _appointments.orderBy('date').snapshots().map(
           (s) => s.docs.map((d) => Appointment.fromFirestore(d)).toList(),
         );
+  }
+
+  /// 앱 재시작 시 알람 재등록용 — 현재 이후 예약만 반환
+  static Future<List<Appointment>> getUpcomingAppointments() async {
+    final snap = await _appointments
+        .where('date', isGreaterThan: Timestamp.fromDate(DateTime.now()))
+        .get();
+    return snap.docs.map((d) => Appointment.fromFirestore(d)).toList();
   }
 
   static Future<void> addAppointment(Appointment a) async {

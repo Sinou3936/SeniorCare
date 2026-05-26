@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../models/appointment.dart';
 import '../../services/firestore_service.dart';
+import '../../services/notification_service.dart';
 
 class SeniorHospitalAddScreen extends StatefulWidget {
   const SeniorHospitalAddScreen({super.key});
@@ -49,6 +50,7 @@ class _SeniorHospitalAddScreenState extends State<SeniorHospitalAddScreen> {
       memo: _memoController.text.trim().isEmpty ? null : _memoController.text.trim(),
     );
     await FirestoreService.addAppointment(appointment);
+    await NotificationService.scheduleAppointmentAlarm(appointment);
     if (context.mounted) Navigator.pop(context);
   }
 

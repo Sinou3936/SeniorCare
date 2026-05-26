@@ -189,35 +189,6 @@ class _CodeBody extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 16),
-          if (!isExpired)
-            SizedBox(
-              width: double.infinity,
-              height: 64,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('카카오톡 공유 기능은 준비 중이에요',
-                          style: TextStyle(fontSize: 16)),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFEE500),
-                  shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16)),
-                ),
-                icon: const Icon(Icons.chat_bubble_rounded,
-                    color: Color(0xFF3A1D1D), size: 28),
-                label: const Text(
-                  '카카오톡으로 공유',
-                  style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF3A1D1D)),
-                ),
-              ),
-            ),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
