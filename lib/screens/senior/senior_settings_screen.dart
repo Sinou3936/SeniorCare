@@ -15,6 +15,7 @@ class SeniorSettingsScreen extends StatefulWidget {
 
 class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
   bool _notificationEnabled = true;
+  bool _hospitalNotificationEnabled = true;
   int _linkedFamilyCount = 0;
 
   @override
@@ -22,6 +23,8 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
     super.initState();
     PrefsService.loadNotificationEnabled()
         .then((v) => setState(() => _notificationEnabled = v));
+    PrefsService.loadHospitalNotificationEnabled()
+        .then((v) => setState(() => _hospitalNotificationEnabled = v));
     FirestoreService.getLinkedFamilyUids()
         .then((list) => setState(() => _linkedFamilyCount = list.length));
   }
@@ -87,6 +90,34 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
                       onChanged: (v) async {
                         setState(() => _notificationEnabled = v);
                         await PrefsService.saveNotificationEnabled(v);
+                        final medicines = await FirestoreService.getActiveMedicines();
+                        if (v) {
+                          await NotificationService.rescheduleAllAlarms(medicines);
+                        } else {
+                          for (final m in medicines) {
+                            await NotificationService.cancelMedicineAlarms(m.id, times: m.times);
+                          }
+                        }
+                      },
+                    ),
+                    const Divider(height: 1, indent: 16, endIndent: 16),
+                    _SwitchTile(
+                      icon: Icons.local_hospital_outlined,
+                      iconColor: const Color(0xFFE8896A),
+                      title: '병원 예약 알림',
+                      subtitle: '예약 2시간 전에 알림을 보내드려요',
+                      value: _hospitalNotificationEnabled,
+                      onChanged: (v) async {
+                        setState(() => _hospitalNotificationEnabled = v);
+                        await PrefsService.saveHospitalNotificationEnabled(v);
+                        final appointments = await FirestoreService.getUpcomingAppointments();
+                        if (v) {
+                          await NotificationService.rescheduleAppointmentAlarms(appointments);
+                        } else {
+                          for (final a in appointments) {
+                            await NotificationService.cancelAppointmentAlarm(a.id);
+                          }
+                        }
                       },
                     ),
                     const Divider(height: 1, indent: 16, endIndent: 16),

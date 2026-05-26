@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/medicine.dart';
 import '../../services/firestore_service.dart';
 import '../../services/notification_service.dart';
+import '../../services/prefs_service.dart';
 import 'senior_medicine_add_screen.dart' show MedicineTypeButton;
 
 class SeniorMedicineEditScreen extends StatefulWidget {
@@ -103,12 +104,15 @@ class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
     );
 
     await FirestoreService.updateMedicine(updated);
-    await NotificationService.scheduleMedicineAlarms(
-      medicineId: updated.id,
-      medicineName: updated.name,
-      times: enabledTimes,
-      medicineType: _medicineType.name,
-    );
+    final notifEnabled = await PrefsService.loadNotificationEnabled();
+    if (notifEnabled) {
+      await NotificationService.scheduleMedicineAlarms(
+        medicineId: updated.id,
+        medicineName: updated.name,
+        times: enabledTimes,
+        medicineType: _medicineType.name,
+      );
+    }
     if (mounted) Navigator.pop(context);
   }
 

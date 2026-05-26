@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/medicine.dart';
 import '../../services/firestore_service.dart';
 import '../../services/notification_service.dart';
+import '../../services/prefs_service.dart';
 import '../../utils/time_utils.dart';
 
 class SeniorMedicineAddScreen extends StatefulWidget {
@@ -80,13 +81,15 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
       type: _medicineType,
     );
     await FirestoreService.addMedicine(medicine);
+    final notifEnabled = await PrefsService.loadNotificationEnabled();
     await Future.wait([
-      NotificationService.scheduleMedicineAlarms(
-        medicineId: medicine.id,
-        medicineName: medicine.name,
-        times: enabledSlots,
-        medicineType: _medicineType.name,
-      ),
+      if (notifEnabled)
+        NotificationService.scheduleMedicineAlarms(
+          medicineId: medicine.id,
+          medicineName: medicine.name,
+          times: enabledSlots,
+          medicineType: _medicineType.name,
+        ),
       FirestoreService.generateLogsForDate(kstNow()),
     ]);
 

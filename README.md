@@ -21,6 +21,17 @@
 
 ## 작업 이력
 
+### 2026-05-26 (2차) — 알림 토글 실제 동작 / 병원 알림 토글 추가
+
+- **복약 알림 토글 실제 동작** — OFF 시 전체 약 알람 즉시 취소, ON 시 재등록. 약 추가·수정 시에도 토글 상태 확인 후 조건부 스케줄링
+- **병원 예약 알림 토글 추가** — 앱 기능 섹션에 토글 UI 추가, OFF 시 미래 예약 알람 즉시 취소 / ON 시 재등록
+- **FCM 토글 연동** — `_showLocal` (포그라운드 FCM 수신)도 토글 OFF 시 표시 차단
+- **앱 재시작 시 토글 확인** — `main.dart`에서 복약·병원 알림 토글 값 확인 후 조건부 재등록
+- **`PrefsService` 병원 알림 키 추가** — `hospital_notification_enabled` 저장·로드
+- **코드 검증 버그 수정** — `TextScaler` 위치 오류(`MaterialApp.builder`로 이동), `mode_select_screen` Column overflow, `time_utils_test` 슬롯 경계·timezone 갱신
+
+---
+
 ### 2026-05-26 — 슬롯 개편 / 약 종류 / 병원 알림 / UI 정리
 
 - **새벽 슬롯 추가** — 0:00~6:59 (기본값 04:00, 기본 비활성), 아이콘 `dark_mode_outlined`
@@ -155,6 +166,8 @@
 | 병원 알림 앱 재시작 시 재등록 | ✅ 완료 |
 | 시스템 글자 크기 무시 (TextScaler.noScaling) | ✅ 완료 |
 | Cloud Functions Cloud Tasks 방식 전환 | ✅ 완료 |
+| 복약 알림 토글 실제 동작 (취소·재등록·FCM 차단) | ✅ 완료 |
+| 병원 예약 알림 토글 (ON/OFF 실제 동작) | ✅ 완료 |
 | OCR / AI 약 파싱 | ⏳ 미구현 |
 | Google 계정 복원 (재설치 시 기존 데이터 접근) | ⏳ 미구현 |
 | iOS 대응 | ⏳ 미구현 |

@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class PrefsService {
   static const _keyMode = 'app_mode';
   static const _keyNotification = 'notification_enabled';
+  static const _keyHospitalNotification = 'hospital_notification_enabled';
   static const _keyLinkedSeniorUid = 'linked_senior_uid';
 
   static Future<void> saveMode(String mode) async {
@@ -28,6 +29,16 @@ class PrefsService {
   static Future<bool> loadNotificationEnabled() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_keyNotification) ?? true;
+  }
+
+  static Future<void> saveHospitalNotificationEnabled(bool enabled) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyHospitalNotification, enabled);
+  }
+
+  static Future<bool> loadHospitalNotificationEnabled() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyHospitalNotification) ?? true;
   }
 
   static Future<void> saveLinkedSeniorUid(String uid) async {

@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import '../models/medicine.dart';
 import '../models/appointment.dart';
 import 'firestore_service.dart';
+import 'prefs_service.dart';
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {}
@@ -188,6 +189,8 @@ class NotificationService {
 
   /// 병원 예약 알림 — 예약 시간 2시간 전에 알림
   static Future<void> scheduleAppointmentAlarm(Appointment appointment) async {
+    final enabled = await PrefsService.loadHospitalNotificationEnabled();
+    if (!enabled) return;
     final notifyTime = appointment.date.subtract(const Duration(hours: 2));
     final now = tz.TZDateTime.now(tz.local);
     final tzNotifyTime = tz.TZDateTime(
@@ -248,6 +251,10 @@ class NotificationService {
   static Future<void> _showLocal(RemoteMessage message) async {
     final n = message.notification;
     if (n == null) return;
+
+    // 복약 알림 토글 OFF면 FCM도 표시 안 함
+    final enabled = await PrefsService.loadNotificationEnabled();
+    if (!enabled) return;
 
     await _local.show(
       id: n.hashCode,

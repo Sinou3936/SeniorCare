@@ -21,9 +21,11 @@ void main() async {
   if (savedMode == 'senior') {
     final medicines = await FirestoreService.getActiveMedicines();
     final appointments = await FirestoreService.getUpcomingAppointments();
+    final notifEnabled = await PrefsService.loadNotificationEnabled();
+    final hospitalNotifEnabled = await PrefsService.loadHospitalNotificationEnabled();
     await Future.wait([
-      NotificationService.rescheduleAllAlarms(medicines),
-      NotificationService.rescheduleAppointmentAlarms(appointments),
+      if (notifEnabled) NotificationService.rescheduleAllAlarms(medicines),
+      if (hospitalNotifEnabled) NotificationService.rescheduleAppointmentAlarms(appointments),
     ]);
   }
   runApp(SeniorCareApp(initialMode: savedMode));
