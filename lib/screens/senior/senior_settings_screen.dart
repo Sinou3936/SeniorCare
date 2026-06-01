@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../../services/auth_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/notification_service.dart';
@@ -116,6 +117,21 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
                             await NotificationService.cancelAppointmentAlarm(a.id);
                           }
                         }
+                      },
+                    ),
+                    const Divider(height: 1, indent: 16, endIndent: 16),
+                    ListTile(
+                      leading: const Icon(Icons.music_note_outlined,
+                          color: Color(0xFFE8896A), size: 28),
+                      title: const Text('알림음 변경',
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+                      subtitle: const Text('복약 알람 소리를 변경해요',
+                          style: TextStyle(fontSize: 14, color: Color(0xFF999999))),
+                      trailing: const Icon(Icons.arrow_forward_ios_rounded,
+                          size: 16, color: Color(0xFFCCCCCC)),
+                      onTap: () async {
+                        final info = await PackageInfo.fromPlatform();
+                        await NotificationService.openAlarmSoundSettings(info.packageName);
                       },
                     ),
                     const Divider(height: 1, indent: 16, endIndent: 16),

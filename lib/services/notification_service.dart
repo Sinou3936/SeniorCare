@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'package:android_intent_plus/android_intent.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -237,6 +238,18 @@ class NotificationService {
       notificationDetails: _notificationDetails,
       androidScheduleMode: AndroidScheduleMode.alarmClock,
     );
+  }
+
+  /// 복약 알람 채널 소리 설정 페이지 열기
+  static Future<void> openAlarmSoundSettings(String packageName) async {
+    final intent = AndroidIntent(
+      action: 'android.settings.CHANNEL_NOTIFICATION_SETTINGS',
+      arguments: {
+        'android.provider.extra.APP_PACKAGE': packageName,
+        'android.provider.extra.CHANNEL_ID': _alarmChannelId,
+      },
+    );
+    await intent.launch();
   }
 
   static Future<bool> canScheduleExact() async {
