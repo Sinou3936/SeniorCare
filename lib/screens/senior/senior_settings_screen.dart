@@ -94,9 +94,7 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
                         if (v) {
                           await NotificationService.rescheduleAllAlarms(medicines);
                         } else {
-                          for (final m in medicines) {
-                            await NotificationService.cancelMedicineAlarms(m.id, times: m.times);
-                          }
+                          await NotificationService.cancelAllSlotAlarms();
                         }
                       },
                     ),

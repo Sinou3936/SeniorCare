@@ -81,15 +81,10 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
       type: _medicineType,
     );
     await FirestoreService.addMedicine(medicine);
+    final medicines = await FirestoreService.getActiveMedicines();
     final notifEnabled = await PrefsService.loadNotificationEnabled();
     await Future.wait([
-      if (notifEnabled)
-        NotificationService.scheduleMedicineAlarms(
-          medicineId: medicine.id,
-          medicineName: medicine.name,
-          times: enabledSlots,
-          medicineType: _medicineType.name,
-        ),
+      if (notifEnabled) NotificationService.rescheduleAllAlarms(medicines),
       FirestoreService.generateLogsForDate(kstNow()),
     ]);
 

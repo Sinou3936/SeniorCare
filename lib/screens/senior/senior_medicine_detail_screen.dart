@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../models/medicine.dart';
 import '../../services/firestore_service.dart';
 import '../../services/notification_service.dart';
+import '../../services/prefs_service.dart';
 import 'senior_medicine_edit_screen.dart';
 
 class SeniorMedicineDetailScreen extends StatelessWidget {
@@ -182,7 +183,13 @@ class _DetailView extends StatelessWidget {
     );
     if (ok == true && context.mounted) {
       await FirestoreService.deleteMedicine(medicine.id);
-      await NotificationService.cancelMedicineAlarms(medicine.id);
+      final medicines = await FirestoreService.getActiveMedicines();
+      final notifEnabled = await PrefsService.loadNotificationEnabled();
+      if (notifEnabled) {
+        await NotificationService.rescheduleAllAlarms(medicines);
+      } else {
+        await NotificationService.rebuildScheduleCache(medicines);
+      }
       if (context.mounted) Navigator.pop(context);
     }
   }

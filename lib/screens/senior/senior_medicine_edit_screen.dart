@@ -104,14 +104,10 @@ class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
     );
 
     await FirestoreService.updateMedicine(updated);
+    final medicines = await FirestoreService.getActiveMedicines();
     final notifEnabled = await PrefsService.loadNotificationEnabled();
     if (notifEnabled) {
-      await NotificationService.scheduleMedicineAlarms(
-        medicineId: updated.id,
-        medicineName: updated.name,
-        times: enabledTimes,
-        medicineType: _medicineType.name,
-      );
+      await NotificationService.rescheduleAllAlarms(medicines);
     }
     if (mounted) Navigator.pop(context);
   }

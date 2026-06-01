@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PrefsService {
@@ -5,6 +6,7 @@ class PrefsService {
   static const _keyNotification = 'notification_enabled';
   static const _keyHospitalNotification = 'hospital_notification_enabled';
   static const _keyLinkedSeniorUid = 'linked_senior_uid';
+  static const _keyMedicineSchedule = 'medicine_schedule_cache';
 
   static Future<void> saveMode(String mode) async {
     final prefs = await SharedPreferences.getInstance();
@@ -54,5 +56,22 @@ class PrefsService {
   static Future<void> clearLinkedSeniorUid() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_keyLinkedSeniorUid);
+  }
+
+  // 슬롯 알람용 캐시: {"08:00": [{"id": "...", "name": "혈압약"}, ...], ...}
+  static Future<void> saveMedicineSchedule(Map<String, List<Map<String, String>>> schedule) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyMedicineSchedule, jsonEncode(schedule));
+  }
+
+  static Future<Map<String, List<Map<String, String>>>> loadMedicineSchedule() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_keyMedicineSchedule);
+    if (raw == null) return {};
+    final decoded = jsonDecode(raw) as Map<String, dynamic>;
+    return decoded.map((time, meds) => MapEntry(
+      time,
+      (meds as List).map((m) => Map<String, String>.from(m as Map)).toList(),
+    ));
   }
 }
