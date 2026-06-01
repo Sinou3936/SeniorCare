@@ -33,13 +33,14 @@ class NotificationService {
     ),
   );
 
-  // 복약 슬롯 알람 전용 — FLAG_INSISTENT(탭 전 소리 루프)
+  // 복약 슬롯 알람 전용 — fullScreenIntent(잠금화면 자동 표시) + FLAG_INSISTENT(소리 루프)
   static final _alarmNotificationDetails = NotificationDetails(
     android: AndroidNotificationDetails(
       _alarmChannelId,
       _alarmChannelName,
       importance: Importance.max,
       priority: Priority.max,
+      fullScreenIntent: true,
       additionalFlags: Int32List.fromList([4]), // FLAG_INSISTENT
     ),
   );
@@ -87,6 +88,15 @@ class NotificationService {
     final token = await _messaging.getToken();
     if (token != null) await FirestoreService.saveFcmToken(token);
     _messaging.onTokenRefresh.listen(FirestoreService.saveFcmToken);
+  }
+
+  /// 화면 OFF 상태에서 알람으로 앱이 실행됐는지 확인 — payload = "08:00"
+  static Future<String?> getLaunchAlarmTime() async {
+    final details = await _local.getNotificationAppLaunchDetails();
+    if (details?.didNotificationLaunchApp == true) {
+      return details?.notificationResponse?.payload;
+    }
+    return null;
   }
 
   // ── 슬롯 단위 알람 ────────────────────────────────────────

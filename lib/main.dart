@@ -5,6 +5,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'firebase_options.dart';
 import 'screens/mode_select_screen.dart';
 import 'screens/senior/senior_main_screen.dart';
+import 'screens/senior/medicine_alarm_screen.dart';
 import 'screens/family/family_main_screen.dart';
 import 'services/auth_service.dart';
 import 'services/firestore_service.dart';
@@ -18,6 +19,9 @@ void main() async {
   await AuthService.signInAnonymously();
   await NotificationService.init();
 
+  // 화면 OFF 상태에서 알람으로 앱이 실행됐는지 확인
+  final alarmTime = await NotificationService.getLaunchAlarmTime();
+
   final savedMode = await PrefsService.loadMode();
   if (savedMode == 'senior') {
     final medicines = await FirestoreService.getActiveMedicines();
@@ -28,17 +32,21 @@ void main() async {
     if (notifEnabled) await NotificationService.rescheduleAllAlarms(medicines);
     if (hospitalNotifEnabled) await NotificationService.rescheduleAppointmentAlarms(appointments);
   }
-  runApp(SeniorCareApp(initialMode: savedMode));
+  runApp(SeniorCareApp(initialMode: savedMode, alarmTime: alarmTime));
 }
 
 class SeniorCareApp extends StatelessWidget {
   final String? initialMode;
-  const SeniorCareApp({super.key, this.initialMode});
+  final String? alarmTime;
+  const SeniorCareApp({super.key, this.initialMode, this.alarmTime});
 
   @override
   Widget build(BuildContext context) {
     Widget home;
-    if (initialMode == 'senior') {
+    if (alarmTime != null) {
+      // 화면 OFF 상태에서 알람으로 실행 → MedicineAlarmScreen 바로 표시
+      home = MedicineAlarmScreen(time: alarmTime!);
+    } else if (initialMode == 'senior') {
       home = const SeniorMainScreen();
     } else if (initialMode == 'family') {
       home = const FamilyMainScreen();
