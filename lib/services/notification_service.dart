@@ -43,9 +43,6 @@ class NotificationService {
     ),
   );
 
-  // 알림 탭 시 알람 화면으로 이동하는 콜백 (main.dart에서 등록)
-  static void Function(String time)? onAlarmTapped;
-
   static Future<void> init() async {
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     await _messaging.requestPermission(alert: true, badge: true, sound: true);
@@ -56,12 +53,7 @@ class NotificationService {
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     await _local.initialize(
       settings: const InitializationSettings(android: androidSettings),
-      onDidReceiveNotificationResponse: (response) {
-        final payload = response.payload;
-        if (payload != null) {
-          onAlarmTapped?.call(payload);
-        }
-      },
+      onDidReceiveNotificationResponse: (_) {},
     );
 
     // 일반 알림 채널
@@ -94,15 +86,6 @@ class NotificationService {
     final token = await _messaging.getToken();
     if (token != null) await FirestoreService.saveFcmToken(token);
     _messaging.onTokenRefresh.listen(FirestoreService.saveFcmToken);
-  }
-
-  /// 앱이 알람 알림으로 실행됐는지 확인 — payload = "08:00" 형태
-  static Future<String?> getLaunchAlarmTime() async {
-    final details = await _local.getNotificationAppLaunchDetails();
-    if (details?.didNotificationLaunchApp == true) {
-      return details?.notificationResponse?.payload;
-    }
-    return null;
   }
 
   // ── 슬롯 단위 알람 ────────────────────────────────────────

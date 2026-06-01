@@ -5,14 +5,11 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'firebase_options.dart';
 import 'screens/mode_select_screen.dart';
 import 'screens/senior/senior_main_screen.dart';
-import 'screens/senior/medicine_alarm_screen.dart';
 import 'screens/family/family_main_screen.dart';
 import 'services/auth_service.dart';
 import 'services/firestore_service.dart';
 import 'services/notification_service.dart';
 import 'services/prefs_service.dart';
-
-final _navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,16 +17,6 @@ void main() async {
   FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
   await AuthService.signInAnonymously();
   await NotificationService.init();
-
-  // 알람 탭 시 알람 화면으로 이동
-  NotificationService.onAlarmTapped = (time) {
-    _navigatorKey.currentState?.push(MaterialPageRoute(
-      builder: (_) => MedicineAlarmScreen(time: time),
-    ));
-  };
-
-  // 앱이 알람으로 실행됐는지 확인
-  final alarmTime = await NotificationService.getLaunchAlarmTime();
 
   final savedMode = await PrefsService.loadMode();
   if (savedMode == 'senior') {
@@ -41,20 +28,17 @@ void main() async {
     if (notifEnabled) await NotificationService.rescheduleAllAlarms(medicines);
     if (hospitalNotifEnabled) await NotificationService.rescheduleAppointmentAlarms(appointments);
   }
-  runApp(SeniorCareApp(initialMode: savedMode, alarmTime: alarmTime));
+  runApp(SeniorCareApp(initialMode: savedMode));
 }
 
 class SeniorCareApp extends StatelessWidget {
   final String? initialMode;
-  final String? alarmTime;
-  const SeniorCareApp({super.key, this.initialMode, this.alarmTime});
+  const SeniorCareApp({super.key, this.initialMode});
 
   @override
   Widget build(BuildContext context) {
     Widget home;
-    if (alarmTime != null) {
-      home = MedicineAlarmScreen(time: alarmTime!);
-    } else if (initialMode == 'senior') {
+    if (initialMode == 'senior') {
       home = const SeniorMainScreen();
     } else if (initialMode == 'family') {
       home = const FamilyMainScreen();
@@ -63,7 +47,6 @@ class SeniorCareApp extends StatelessWidget {
     }
 
     return MaterialApp(
-      navigatorKey: _navigatorKey,
       title: '약봄',
       debugShowCheckedModeBanner: false,
       // 시스템 글자 크기 설정 무시 — 앱 자체 폰트 크기로 고정
