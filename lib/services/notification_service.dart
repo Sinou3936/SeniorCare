@@ -166,7 +166,7 @@ class NotificationService {
     await PrefsService.saveMedicineSchedule(schedule);
   }
 
-  /// 10분 후 다시 알림 (스누즈) — one-shot
+  /// 10분 후 다시 알림 (스누즈) — 일반 배너, 풀스크린 없음
   static Future<void> scheduleSnoozeAlarm({
     required String time,
     required List<String> medicineNames,
@@ -179,10 +179,10 @@ class NotificationService {
     );
     await _local.zonedSchedule(
       id: 60000 + _slotNotificationId(time),
-      title: '복약 시간이에요 💊',
+      title: '아직 복약하지 않으셨나요? 💊',
       body: medicineNames.join(', '),
       scheduledDate: tzTime,
-      notificationDetails: _alarmNotificationDetails,
+      notificationDetails: _notificationDetails,
       androidScheduleMode: AndroidScheduleMode.alarmClock,
       payload: time,
     );
