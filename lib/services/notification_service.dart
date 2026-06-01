@@ -45,6 +45,10 @@ class NotificationService {
     ),
   );
 
+  // 잠금 상태에서 알람 알림이 떴을 때 호출되는 콜백 (main.dart에서 등록)
+  // payload = "08:00" 또는 "08:00|1"
+  static void Function(String payload)? onAlarmTapped;
+
   static Future<void> init() async {
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     await _messaging.requestPermission(alert: true, badge: true, sound: true);
@@ -55,7 +59,7 @@ class NotificationService {
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
     await _local.initialize(
       settings: const InitializationSettings(android: androidSettings),
-      onDidReceiveNotificationResponse: (_) {},
+      onDidReceiveNotificationResponse: _onNotificationResponse,
     );
 
     // 일반 알림 채널
@@ -90,13 +94,36 @@ class NotificationService {
     _messaging.onTokenRefresh.listen(FirestoreService.saveFcmToken);
   }
 
-  /// 화면 OFF 상태에서 알람으로 앱이 실행됐는지 확인 — payload = "08:00"
+  /// 알림 응답 콜백 — 백그라운드 앱이 알람 인텐트로 깨어났을 때(onNewIntent 경로)
+  /// 잠금/화면꺼짐 상태였을 때만 풀스크린 알람 화면으로 이동
+  static Future<void> _onNotificationResponse(NotificationResponse response) async {
+    final payload = response.payload;
+    if (payload == null || payload.isEmpty) return;
+    final locked = await isDeviceLocked();
+    if (locked) {
+      onAlarmTapped?.call(payload);
+    }
+    // 화면 ON 상태(배너 탭)면 그냥 앱이 포그라운드로 올라오며 홈 화면 유지
+  }
+
+  /// 화면 OFF/콜드스타트 상태에서 알람으로 앱이 실행됐는지 확인 — payload = "08:00"
   static Future<String?> getLaunchAlarmTime() async {
     final details = await _local.getNotificationAppLaunchDetails();
     if (details?.didNotificationLaunchApp == true) {
       return details?.notificationResponse?.payload;
     }
     return null;
+  }
+
+  /// 알람 실행 시점에 기기가 잠금/화면꺼짐 상태였는지 (네이티브)
+  static Future<bool> isDeviceLocked() async {
+    try {
+      const channel = MethodChannel('yakbom/battery');
+      final result = await channel.invokeMethod<bool>('isDeviceLocked');
+      return result ?? false;
+    } catch (_) {
+      return false;
+    }
   }
 
   // ── 슬롯 단위 알람 ────────────────────────────────────────

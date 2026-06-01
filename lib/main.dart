@@ -12,6 +12,18 @@ import 'services/firestore_service.dart';
 import 'services/notification_service.dart';
 import 'services/prefs_service.dart';
 
+final navigatorKey = GlobalKey<NavigatorState>();
+
+/// payload("08:00" 또는 "08:00|1") → MedicineAlarmScreen으로 이동
+void _openAlarmScreen(String payload) {
+  final parts = payload.split('|');
+  final time = parts[0];
+  final snoozeCount = parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0;
+  navigatorKey.currentState?.push(MaterialPageRoute(
+    builder: (_) => MedicineAlarmScreen(time: time, snoozeCount: snoozeCount),
+  ));
+}
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -19,8 +31,16 @@ void main() async {
   await AuthService.signInAnonymously();
   await NotificationService.init();
 
-  // 화면 OFF 상태에서 알람으로 앱이 실행됐는지 확인
-  final alarmTime = await NotificationService.getLaunchAlarmTime();
+  // 백그라운드 앱이 알람으로 깨어났을 때(onNewIntent) → 잠금상태면 알람 화면 이동
+  NotificationService.onAlarmTapped = _openAlarmScreen;
+
+  // 콜드스타트: 알람 인텐트로 실행됐고 + 잠금/화면꺼짐 상태였을 때만 알람 화면으로 시작
+  final launchPayload = await NotificationService.getLaunchAlarmTime();
+  String? alarmTime;
+  if (launchPayload != null) {
+    final locked = await NotificationService.isDeviceLocked();
+    if (locked) alarmTime = launchPayload;
+  }
 
   final savedMode = await PrefsService.loadMode();
   if (savedMode == 'senior') {
@@ -59,6 +79,7 @@ class SeniorCareApp extends StatelessWidget {
     }
 
     return MaterialApp(
+      navigatorKey: navigatorKey,
       title: '약봄',
       debugShowCheckedModeBanner: false,
       // 시스템 글자 크기 설정 무시 — 앱 자체 폰트 크기로 고정
