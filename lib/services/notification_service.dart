@@ -134,17 +134,42 @@ class NotificationService {
       final minute = int.tryParse(parts[1]);
       if (hour == null || minute == null) continue;
 
+      final scheduledTime = _nextOccurrence(hour, minute);
+
       await _local.zonedSchedule(
         id: _slotNotificationId(time),
         title: '복약 시간이에요 💊',
         body: names.join(', '),
-        scheduledDate: _nextOccurrence(hour, minute),
+        scheduledDate: scheduledTime,
         notificationDetails: _alarmNotificationDetails,
         androidScheduleMode: AndroidScheduleMode.alarmClock,
         matchDateTimeComponents: DateTimeComponents.time,
         payload: time,
       );
+
+      // 자동 +10분 리마인더 (one-shot, 복용 완료 시 취소)
+      await _local.zonedSchedule(
+        id: _slotReminderNotificationId(time),
+        title: '아직 복약하지 않으셨나요? 💊',
+        body: names.join(', '),
+        scheduledDate: scheduledTime.add(const Duration(minutes: 10)),
+        notificationDetails: _notificationDetails,
+        androidScheduleMode: AndroidScheduleMode.alarmClock,
+      );
     }
+  }
+
+  /// 슬롯 리마인더 ID: "08:00" → 70480
+  static int _slotReminderNotificationId(String time) {
+    final parts = time.split(':');
+    final hour = int.parse(parts[0]);
+    final minute = int.parse(parts[1]);
+    return 70000 + hour * 60 + minute;
+  }
+
+  /// 슬롯 리마인더 취소 (복용 완료 또는 10분 후 다시 버튼 시)
+  static Future<void> cancelSlotReminder(String time) async {
+    await _local.cancel(id: _slotReminderNotificationId(time));
   }
 
   /// 캐시 기반으로 등록된 슬롯 알람 전체 취소

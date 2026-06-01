@@ -59,6 +59,8 @@ class _MedicineAlarmScreenState extends State<MedicineAlarmScreen> {
   }
 
   Future<void> _onDone() async {
+    // 자동 리마인더 취소 후 화면 닫기
+    await NotificationService.cancelSlotReminder(widget.time);
     _dismiss();
   }
 
@@ -67,6 +69,8 @@ class _MedicineAlarmScreenState extends State<MedicineAlarmScreen> {
     WakelockPlus.disable();
     _autoCloseTimer?.cancel();
 
+    // 자동 리마인더 취소 후 수동 스누즈 등록 (중복 방지)
+    await NotificationService.cancelSlotReminder(widget.time);
     final snoozeTime = DateTime.now().add(const Duration(minutes: 10));
     await NotificationService.scheduleSnoozeAlarm(
       time: widget.time,
