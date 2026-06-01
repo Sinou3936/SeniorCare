@@ -217,7 +217,7 @@ class NotificationService {
   }
 
   /// 10분 후 다시 알림 (스누즈) — 일반 배너, 풀스크린 없음
-  /// payload 형식: "08:00|1" (time|snoozeCount)
+  /// payload 없음 → 탭해도 알람 화면 안 뜨고 그냥 앱 홈으로 진입
   static Future<void> scheduleSnoozeAlarm({
     required String time,
     required List<String> medicineNames,
@@ -236,7 +236,6 @@ class NotificationService {
       scheduledDate: tzTime,
       notificationDetails: _notificationDetails,
       androidScheduleMode: AndroidScheduleMode.alarmClock,
-      payload: '$time|$snoozeCount',
     );
   }
 
