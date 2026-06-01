@@ -16,6 +16,7 @@ class MedicineAlarmScreen extends StatefulWidget {
 class _MedicineAlarmScreenState extends State<MedicineAlarmScreen> {
   List<Map<String, String>> _medicines = [];
   Timer? _autoCloseTimer;
+  final _ringtonePlayer = FlutterRingtonePlayer();
 
   @override
   void initState() {
@@ -34,14 +35,14 @@ class _MedicineAlarmScreenState extends State<MedicineAlarmScreen> {
     });
 
     // 알람음 루프 시작
-    FlutterRingtonePlayer().playAlarm(looping: true);
+    _ringtonePlayer.playAlarm(looping: true);
 
     // 1분 후 자동 종료
     _autoCloseTimer = Timer(const Duration(minutes: 1), _dismiss);
   }
 
   void _dismiss() {
-    FlutterRingtonePlayer().stop();
+    _ringtonePlayer.stop();
     WakelockPlus.disable();
     _autoCloseTimer?.cancel();
     if (mounted) Navigator.of(context).pop();
@@ -52,7 +53,7 @@ class _MedicineAlarmScreenState extends State<MedicineAlarmScreen> {
   }
 
   Future<void> _onSnooze() async {
-    FlutterRingtonePlayer().stop();
+    _ringtonePlayer.stop();
     WakelockPlus.disable();
     _autoCloseTimer?.cancel();
 
@@ -92,7 +93,7 @@ class _MedicineAlarmScreenState extends State<MedicineAlarmScreen> {
   @override
   void dispose() {
     _autoCloseTimer?.cancel();
-    FlutterRingtonePlayer().stop();
+    _ringtonePlayer.stop();
     WakelockPlus.disable();
     super.dispose();
   }
