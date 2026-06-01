@@ -4,6 +4,7 @@ import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../../services/notification_service.dart';
 import '../../services/prefs_service.dart';
+import '../senior/senior_main_screen.dart';
 
 class MedicineAlarmScreen extends StatefulWidget {
   final String time; // "08:00"
@@ -45,7 +46,15 @@ class _MedicineAlarmScreenState extends State<MedicineAlarmScreen> {
     _ringtonePlayer.stop();
     WakelockPlus.disable();
     _autoCloseTimer?.cancel();
-    if (mounted) Navigator.of(context).pop();
+    if (!mounted) return;
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    } else {
+      // root로 실행된 경우 (화면 OFF 알람) → 홈 화면으로 이동
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const SeniorMainScreen()),
+      );
+    }
   }
 
   Future<void> _onDone() async {
