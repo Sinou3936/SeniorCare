@@ -8,7 +8,8 @@ import '../senior/senior_main_screen.dart';
 
 class MedicineAlarmScreen extends StatefulWidget {
   final String time; // "08:00"
-  const MedicineAlarmScreen({super.key, required this.time});
+  final int snoozeCount; // 0 = 첫 알람, 1 = 스누즈 1회 사용
+  const MedicineAlarmScreen({super.key, required this.time, this.snoozeCount = 0});
 
   @override
   State<MedicineAlarmScreen> createState() => _MedicineAlarmScreenState();
@@ -66,16 +67,15 @@ class _MedicineAlarmScreenState extends State<MedicineAlarmScreen> {
     WakelockPlus.disable();
     _autoCloseTimer?.cancel();
 
-    // 10분 후 one-shot 알람 재등록
     final snoozeTime = DateTime.now().add(const Duration(minutes: 10));
-
     await NotificationService.scheduleSnoozeAlarm(
       time: widget.time,
       medicineNames: _medicines.map((m) => m['name'] ?? '').toList(),
       scheduledAt: snoozeTime,
+      snoozeCount: widget.snoozeCount + 1,
     );
 
-    if (mounted) Navigator.of(context).pop();
+    if (mounted) _dismiss();
   }
 
   String _slotLabel() {
@@ -210,6 +210,7 @@ class _MedicineAlarmScreenState extends State<MedicineAlarmScreen> {
                         ),
                       ),
                     ),
+                    if (widget.snoozeCount < 1) ...[
                     const SizedBox(height: 12),
                     SizedBox(
                       width: double.infinity,
@@ -231,6 +232,7 @@ class _MedicineAlarmScreenState extends State<MedicineAlarmScreen> {
                         ),
                       ),
                     ),
+                    ], // snoozeCount < 1
                   ],
                 ),
               ),

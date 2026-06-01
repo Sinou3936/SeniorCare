@@ -45,7 +45,11 @@ class SeniorCareApp extends StatelessWidget {
     Widget home;
     if (alarmTime != null) {
       // 화면 OFF 상태에서 알람으로 실행 → MedicineAlarmScreen 바로 표시
-      home = MedicineAlarmScreen(time: alarmTime!);
+      // payload 형식: "08:00" 또는 "08:00|1" (스누즈 카운트 포함)
+      final parts = alarmTime!.split('|');
+      final time = parts[0];
+      final snoozeCount = parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0;
+      home = MedicineAlarmScreen(time: time, snoozeCount: snoozeCount);
     } else if (initialMode == 'senior') {
       home = const SeniorMainScreen();
     } else if (initialMode == 'family') {

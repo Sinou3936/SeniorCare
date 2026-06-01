@@ -167,10 +167,12 @@ class NotificationService {
   }
 
   /// 10분 후 다시 알림 (스누즈) — 일반 배너, 풀스크린 없음
+  /// payload 형식: "08:00|1" (time|snoozeCount)
   static Future<void> scheduleSnoozeAlarm({
     required String time,
     required List<String> medicineNames,
     required DateTime scheduledAt,
+    required int snoozeCount,
   }) async {
     final tzTime = tz.TZDateTime(
       tz.local,
@@ -184,7 +186,7 @@ class NotificationService {
       scheduledDate: tzTime,
       notificationDetails: _notificationDetails,
       androidScheduleMode: AndroidScheduleMode.alarmClock,
-      payload: time,
+      payload: '$time|$snoozeCount',
     );
   }
 
