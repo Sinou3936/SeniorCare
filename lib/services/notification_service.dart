@@ -116,7 +116,8 @@ class NotificationService {
 
   /// 전체 활성 약을 슬롯 단위로 재등록 + 캐시 갱신 (메인 진입점)
   static Future<void> rescheduleAllAlarms(List<Medicine> medicines) async {
-    await cancelAllSlotAlarms();
+    // cancelAll로 구 방식 알람(per-medicine ID)까지 전부 제거
+    await _local.cancelAll();
     await _scheduleSlotAlarms(medicines);
     await rebuildScheduleCache(medicines);
   }

@@ -37,10 +37,9 @@ void main() async {
     final appointments = await FirestoreService.getUpcomingAppointments();
     final notifEnabled = await PrefsService.loadNotificationEnabled();
     final hospitalNotifEnabled = await PrefsService.loadHospitalNotificationEnabled();
-    await Future.wait([
-      if (notifEnabled) NotificationService.rescheduleAllAlarms(medicines),
-      if (hospitalNotifEnabled) NotificationService.rescheduleAppointmentAlarms(appointments),
-    ]);
+    // cancelAll() 포함된 rescheduleAllAlarms 먼저 실행 후 병원 알람 재등록
+    if (notifEnabled) await NotificationService.rescheduleAllAlarms(medicines);
+    if (hospitalNotifEnabled) await NotificationService.rescheduleAppointmentAlarms(appointments);
   }
   runApp(SeniorCareApp(initialMode: savedMode, alarmTime: alarmTime));
 }
