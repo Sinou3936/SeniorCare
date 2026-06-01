@@ -94,16 +94,14 @@ class NotificationService {
     _messaging.onTokenRefresh.listen(FirestoreService.saveFcmToken);
   }
 
-  /// 알림 응답 콜백 — 백그라운드 앱이 알람 인텐트로 깨어났을 때(onNewIntent 경로)
-  /// 잠금/화면꺼짐 상태였을 때만 풀스크린 알람 화면으로 이동
+  /// 알림 응답 콜백 — 알람 인텐트로 앱이 깨어났을 때(풀스크린 자동실행 또는 배너 탭)
+  /// 알람 시계 방식: 알람 알림이 뜨면 항상 알람 화면으로 이동
+  /// - 화면 OFF/잠금: 풀스크린이 자동 실행되며 이 콜백이 불림 → 알람 화면
+  /// - 화면 ON: 배너를 사용자가 탭했을 때만 불림 → 알람 화면
   static Future<void> _onNotificationResponse(NotificationResponse response) async {
     final payload = response.payload;
     if (payload == null || payload.isEmpty) return;
-    final locked = await isDeviceLocked();
-    if (locked) {
-      onAlarmTapped?.call(payload);
-    }
-    // 화면 ON 상태(배너 탭)면 그냥 앱이 포그라운드로 올라오며 홈 화면 유지
+    onAlarmTapped?.call(payload);
   }
 
   /// 화면 OFF/콜드스타트 상태에서 알람으로 앱이 실행됐는지 확인 — payload = "08:00"

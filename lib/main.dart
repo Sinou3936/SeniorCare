@@ -31,16 +31,11 @@ void main() async {
   await AuthService.signInAnonymously();
   await NotificationService.init();
 
-  // 백그라운드 앱이 알람으로 깨어났을 때(onNewIntent) → 잠금상태면 알람 화면 이동
+  // 백그라운드 앱이 알람으로 깨어났을 때(onNewIntent) → 알람 화면으로 이동
   NotificationService.onAlarmTapped = _openAlarmScreen;
 
-  // 콜드스타트: 알람 인텐트로 실행됐고 + 잠금/화면꺼짐 상태였을 때만 알람 화면으로 시작
-  final launchPayload = await NotificationService.getLaunchAlarmTime();
-  String? alarmTime;
-  if (launchPayload != null) {
-    final locked = await NotificationService.isDeviceLocked();
-    if (locked) alarmTime = launchPayload;
-  }
+  // 콜드스타트: 알람 인텐트로 실행됐으면 알람 화면으로 시작
+  final alarmTime = await NotificationService.getLaunchAlarmTime();
 
   final savedMode = await PrefsService.loadMode();
   if (savedMode == 'senior') {
