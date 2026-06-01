@@ -32,14 +32,13 @@ class NotificationService {
     ),
   );
 
-  // 복약 슬롯 알람 전용 — fullScreenIntent + FLAG_INSISTENT(탭 전 소리 루프)
+  // 복약 슬롯 알람 전용 — FLAG_INSISTENT(탭 전 소리 루프)
   static final _alarmNotificationDetails = NotificationDetails(
     android: AndroidNotificationDetails(
       _alarmChannelId,
       _alarmChannelName,
       importance: Importance.max,
       priority: Priority.max,
-      fullScreenIntent: true,
       additionalFlags: Int32List.fromList([4]), // FLAG_INSISTENT
     ),
   );
