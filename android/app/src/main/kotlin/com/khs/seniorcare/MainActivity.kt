@@ -1,5 +1,7 @@
 package com.khs.seniorcare
 
+import android.app.NotificationManager
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
@@ -51,6 +53,14 @@ class MainActivity : FlutterActivity() {
                 "wasScreenOnAtLaunch" -> {
                     // 알람으로 앱이 깨어난 순간 화면이 켜져 있었는지 (true=사용자 탭, false=화면OFF 자동실행)
                     result.success(screenOnAtLaunch)
+                }
+                "isDndActive" -> {
+                    // 방해금지 모드가 켜져 있는지 (전체 허용이 아니면 켜진 것으로 간주)
+                    val nm = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    val filter = nm.currentInterruptionFilter
+                    val dndOn = filter != NotificationManager.INTERRUPTION_FILTER_ALL &&
+                        filter != NotificationManager.INTERRUPTION_FILTER_UNKNOWN
+                    result.success(dndOn)
                 }
                 else -> result.notImplemented()
             }

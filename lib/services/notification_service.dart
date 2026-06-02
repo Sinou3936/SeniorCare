@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:android_intent_plus/android_intent.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -33,15 +32,17 @@ class NotificationService {
     ),
   );
 
-  // 복약 슬롯 알람 전용 — fullScreenIntent(잠금화면 자동 표시) + FLAG_INSISTENT(소리 루프)
-  static final _alarmNotificationDetails = NotificationDetails(
+  // 복약 슬롯 알람 전용 — fullScreenIntent(화면 OFF 시 풀스크린 자동 표시)
+  // 채널 알림음은 무음(playSound:false). 소리는 풀스크린에서 playAlarm(알람 소리)만 사용
+  // → 화면 ON: 진동 + 배너만, 화면 OFF: 풀스크린 + 알람 소리
+  static const _alarmNotificationDetails = NotificationDetails(
     android: AndroidNotificationDetails(
       _alarmChannelId,
       _alarmChannelName,
       importance: Importance.max,
       priority: Priority.max,
       fullScreenIntent: true,
-      additionalFlags: Int32List.fromList([4]), // FLAG_INSISTENT
+      playSound: false,
     ),
   );
 
@@ -72,7 +73,8 @@ class NotificationService {
           enableVibration: true,
         ));
 
-    // 복약 알람 채널 (최대 중요도, fullScreenIntent용)
+    // 복약 알람 채널 (최대 중요도, fullScreenIntent용) — 채널 무음, 진동만
+    // 소리는 풀스크린에서 playAlarm으로만 재생 (화면 ON 시 소리 없이 진동+배너)
     await _local
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(const AndroidNotificationChannel(
@@ -80,7 +82,7 @@ class NotificationService {
           _alarmChannelName,
           importance: Importance.max,
           enableVibration: true,
-          playSound: true,
+          playSound: false,
         ));
 
     await Permission.notification.request();
@@ -125,6 +127,17 @@ class NotificationService {
       return result ?? true;
     } catch (_) {
       return true;
+    }
+  }
+
+  /// 방해금지(DND) 모드가 켜져 있는지 (네이티브) — 켜져 있으면 알람 소리 스킵
+  static Future<bool> isDndActive() async {
+    try {
+      const channel = MethodChannel('yakbom/battery');
+      final result = await channel.invokeMethod<bool>('isDndActive');
+      return result ?? false;
+    } catch (_) {
+      return false;
     }
   }
 
@@ -305,15 +318,9 @@ class NotificationService {
     );
   }
 
-  /// 복약 알람 채널 소리 설정 페이지 열기
-  static Future<void> openAlarmSoundSettings(String packageName) async {
-    final intent = AndroidIntent(
-      action: 'android.settings.CHANNEL_NOTIFICATION_SETTINGS',
-      arguments: {
-        'android.provider.extra.APP_PACKAGE': packageName,
-        'android.provider.extra.CHANNEL_ID': _alarmChannelId,
-      },
-    );
+  /// 시스템 사운드 설정 열기 — 사용자가 "알람 소리"를 변경하면 풀스크린 playAlarm이 따라감
+  static Future<void> openAlarmSoundSettings() async {
+    const intent = AndroidIntent(action: 'android.settings.SOUND_SETTINGS');
     await intent.launch();
   }
 

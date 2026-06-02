@@ -36,8 +36,11 @@ class _MedicineAlarmScreenState extends State<MedicineAlarmScreen> {
       _medicines = schedule[widget.time] ?? [];
     });
 
-    // 알람음 루프 시작
-    _ringtonePlayer.playAlarm(looping: true);
+    // 알람음 루프 시작 — 방해금지 모드면 소리 스킵 (진동·화면은 그대로)
+    final dnd = await NotificationService.isDndActive();
+    if (!dnd) {
+      _ringtonePlayer.playAlarm(looping: true);
+    }
 
     // 1분 후 자동 종료
     _autoCloseTimer = Timer(const Duration(minutes: 1), _dismiss);
