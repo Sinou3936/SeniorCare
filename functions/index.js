@@ -124,6 +124,9 @@ exports.sendMissedDoseNotification = functions
       const familyDoc = await db.collection('users').doc(familyUid).get();
       if (!familyDoc.exists) continue;
 
+      // 가족이 미복용 알림을 꺼둔 경우 발송 스킵 (기본값 true)
+      if (familyDoc.data().missedDoseNotificationEnabled === false) continue;
+
       const fcmToken = familyDoc.data().fcmToken;
       if (!fcmToken) continue;
 

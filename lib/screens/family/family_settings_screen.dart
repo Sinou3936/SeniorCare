@@ -24,7 +24,7 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
 
   Future<void> _load() async {
     final results = await Future.wait([
-      PrefsService.loadNotificationEnabled(),
+      FirestoreService.getMissedDoseNotificationEnabled(),
       FirestoreService.getLinkedSeniorUid(),
     ]);
     if (mounted) {
@@ -84,7 +84,7 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
                             value: _notificationEnabled,
                             onChanged: (v) async {
                               setState(() => _notificationEnabled = v);
-                              await PrefsService.saveNotificationEnabled(v);
+                              await FirestoreService.setMissedDoseNotificationEnabled(v);
                             },
                           ),
                         ]),

@@ -117,6 +117,21 @@ class FirestoreService {
     );
   }
 
+  /// 가족: 미복용 알림 수신 설정 저장 (Cloud Functions가 발송 전 확인)
+  static Future<void> setMissedDoseNotificationEnabled(bool enabled) async {
+    await _users.doc(AuthService.uid).set(
+      {'missedDoseNotificationEnabled': enabled},
+      SetOptions(merge: true),
+    );
+  }
+
+  /// 가족: 미복용 알림 수신 설정 조회 (기본 true)
+  static Future<bool> getMissedDoseNotificationEnabled() async {
+    final doc = await _users.doc(AuthService.uid).get();
+    if (!doc.exists) return true;
+    return (doc.data() as Map?)?['missedDoseNotificationEnabled'] as bool? ?? true;
+  }
+
   /// 가족: 연결된 시니어 uid 조회
   static Future<String?> getLinkedSeniorUid() async {
     final doc = await _users.doc(AuthService.uid).get();
