@@ -16,7 +16,8 @@ const FUNCTION_URL = `https://asia-northeast3-${PROJECT_ID}.cloudfunctions.net/s
 
 /**
  * medicine_log 생성 시 scheduledTime + 20분에 Cloud Task 예약
- * 같은 logId로 중복 생성 시 Cloud Tasks가 자동으로 무시
+ * Task 이름을 (uid + 복용시각)으로 묶어 같은 시간대 약은 Task 1개만 생성
+ * (두 번째 이후 로그는 ALREADY_EXISTS로 무시 → 보호자에게 슬롯당 알림 1개)
  */
 exports.scheduleMissedDoseCheck = functions
   .region('asia-northeast3')
@@ -32,17 +33,17 @@ exports.scheduleMissedDoseCheck = functions
     if (notifyAt <= now) return null;
 
     const uid = context.params.uid;
-    const logId = context.params.logId;
+    const slotMillis = scheduledTime.getTime(); // 같은 시간대 로그는 동일 값
 
     const parent = tasksClient.queuePath(PROJECT_ID, QUEUE_LOCATION, QUEUE_NAME);
 
     const task = {
-      name: `${parent}/tasks/${logId}`,
+      name: `${parent}/tasks/${uid}_${slotMillis}`, // 슬롯 단위 중복 제거 키
       httpRequest: {
         httpMethod: 'POST',
         url: FUNCTION_URL,
         headers: { 'Content-Type': 'application/json' },
-        body: Buffer.from(JSON.stringify({ uid, logId })).toString('base64'),
+        body: Buffer.from(JSON.stringify({ uid, slotMillis })).toString('base64'),
         oidcToken: {
           serviceAccountEmail: `${PROJECT_ID}@appspot.gserviceaccount.com`,
         },
@@ -62,7 +63,7 @@ exports.scheduleMissedDoseCheck = functions
   });
 
 /**
- * Cloud Task 핸들러 — taken: false이면 보호자에게 FCM 발송
+ * Cloud Task 핸들러 — 해당 시간대(slotMillis) 미복용 로그 전부 모아 보호자에게 FCM 1개 발송
  */
 exports.sendMissedDoseNotification = functions
   .region('asia-northeast3')
@@ -72,21 +73,38 @@ exports.sendMissedDoseNotification = functions
       return;
     }
 
-    const { uid, logId } = req.body;
-    if (!uid || !logId) {
+    const { uid, slotMillis } = req.body;
+    if (!uid || slotMillis == null) {
       res.sendStatus(400);
       return;
     }
 
-    const logRef = db.collection('users').doc(uid).collection('medicine_logs').doc(logId);
-    const logDoc = await logRef.get();
+    // 해당 시간대 로그 전부 조회
+    const slotTime = Timestamp.fromMillis(slotMillis);
+    const logsSnap = await db
+      .collection('users').doc(uid).collection('medicine_logs')
+      .where('scheduledTime', '==', slotTime)
+      .get();
 
-    if (!logDoc.exists || logDoc.data().taken || logDoc.data().notified) {
+    // 미복용 + 미알림 로그만 추림
+    const pending = logsSnap.docs.filter(
+      (d) => !d.data().taken && !d.data().notified
+    );
+    if (pending.length === 0) {
       res.sendStatus(200);
       return;
     }
 
-    const log = logDoc.data();
+    const names = pending.map((d) => d.data().medicineName || '약');
+    const namesText = names.join(', ');
+
+    // 알림 발송 여부와 무관하게 처리한 로그는 notified 표시 (중복 방지)
+    const markNotified = async () => {
+      const batch = db.batch();
+      pending.forEach((d) => batch.update(d.ref, { notified: true }));
+      await batch.commit();
+    };
+
     const seniorDoc = await db.collection('users').doc(uid).get();
     if (!seniorDoc.exists) {
       res.sendStatus(200);
@@ -95,12 +113,11 @@ exports.sendMissedDoseNotification = functions
 
     const linkedFamilyUids = seniorDoc.data().linkedFamilyUids || [];
     if (linkedFamilyUids.length === 0) {
-      await logRef.update({ notified: true });
+      await markNotified();
       res.sendStatus(200);
       return;
     }
 
-    const medicineName = log.medicineName || '약';
     const messages = [];
 
     for (const familyUid of linkedFamilyUids) {
@@ -114,20 +131,18 @@ exports.sendMissedDoseNotification = functions
         token: fcmToken,
         notification: {
           title: '미복용 알림',
-          body: `부모님이 ${medicineName}을(를) 아직 드시지 않으셨어요`,
+          body: `부모님이 ${namesText}을(를) 아직 드시지 않으셨어요`,
         },
         data: {
           type: 'missed_dose',
-          medicineLogId: logId,
           seniorUid: uid,
         },
       });
 
       await db.collection('users').doc(familyUid).collection('notifications').add({
         type: 'missed_dose',
-        medicineName,
+        medicineName: namesText,
         seniorUid: uid,
-        medicineLogId: logId,
         isRead: false,
         createdAt: Timestamp.now(),
       });
@@ -137,6 +152,6 @@ exports.sendMissedDoseNotification = functions
       await getMessaging().sendEach(messages);
     }
 
-    await logRef.update({ notified: true });
+    await markNotified();
     res.sendStatus(200);
   });
