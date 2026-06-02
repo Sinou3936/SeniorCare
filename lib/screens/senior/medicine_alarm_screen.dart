@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
+import '../../services/firestore_service.dart';
 import '../../services/notification_service.dart';
 import '../../services/prefs_service.dart';
 import '../senior/senior_main_screen.dart';
@@ -44,7 +45,8 @@ class _MedicineAlarmScreenState extends State<MedicineAlarmScreen> {
   }
 
   void _dismiss() {
-    _ringtonePlayer.stop();
+    _ringtonePlayer.stop();                              // Flutter 벨소리 정지
+    NotificationService.cancelSlotAlarm(widget.time);    // 알림 INSISTENT 진동/소리 정지
     WakelockPlus.disable();
     _autoCloseTimer?.cancel();
     if (!mounted) return;
@@ -59,7 +61,8 @@ class _MedicineAlarmScreenState extends State<MedicineAlarmScreen> {
   }
 
   Future<void> _onDone() async {
-    // 자동 리마인더 취소 후 화면 닫기
+    // 실제 복용 처리 (오늘 이 시간대 로그 taken:true) + 자동 리마인더 취소 후 화면 닫기
+    await FirestoreService.markDoseTakenAt(widget.time);
     await NotificationService.cancelSlotReminder(widget.time);
     _dismiss();
   }

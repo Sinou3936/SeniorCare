@@ -1,10 +1,9 @@
 package com.khs.seniorcare
 
-import android.app.KeyguardManager
-import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
 import io.flutter.embedding.android.FlutterActivity
@@ -13,6 +12,25 @@ import io.flutter.plugin.common.MethodChannel
 
 class MainActivity : FlutterActivity() {
     private val channel = "yakbom/battery"
+
+    // 앱이 깨어나는 순간(앱 시작/백그라운드 복귀) 화면이 켜져 있었는지.
+    // turnScreenOn으로 화면이 켜지기 전에 캡처해야 정확하므로 onCreate/onNewIntent에서 즉시 저장.
+    private var screenOnAtLaunch = true
+
+    private fun captureScreenState() {
+        val pm = getSystemService(POWER_SERVICE) as PowerManager
+        screenOnAtLaunch = pm.isInteractive
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        captureScreenState() // 앱 종료 상태에서 알람으로 시작된 경우
+        super.onCreate(savedInstanceState)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        captureScreenState() // 백그라운드 앱이 알람으로 복귀된 경우 (super가 플러그인에 전달하기 전에 캡처)
+        super.onNewIntent(intent)
+    }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
@@ -30,12 +48,9 @@ class MainActivity : FlutterActivity() {
                     }
                     result.success(null)
                 }
-                "isDeviceLocked" -> {
-                    // 알람 실행 시점에 기기가 잠금/화면 꺼짐 상태였는지 판별
-                    val km = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
-                    val pm = getSystemService(POWER_SERVICE) as PowerManager
-                    val locked = km.isKeyguardLocked || !pm.isInteractive
-                    result.success(locked)
+                "wasScreenOnAtLaunch" -> {
+                    // 알람으로 앱이 깨어난 순간 화면이 켜져 있었는지 (true=사용자 탭, false=화면OFF 자동실행)
+                    result.success(screenOnAtLaunch)
                 }
                 else -> result.notImplemented()
             }

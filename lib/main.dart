@@ -34,8 +34,14 @@ void main() async {
   // 백그라운드 앱이 알람으로 깨어났을 때(onNewIntent) → 알람 화면으로 이동
   NotificationService.onAlarmTapped = _openAlarmScreen;
 
-  // 콜드스타트: 알람 인텐트로 실행됐으면 알람 화면으로 시작
-  final alarmTime = await NotificationService.getLaunchAlarmTime();
+  // 콜드스타트: 알람 인텐트로 실행됐고 + 화면이 꺼져 있었을 때만 풀스크린 알람 화면으로 시작
+  // (화면 ON에서 배너 탭으로 실행된 경우는 일반 홈으로)
+  final launchPayload = await NotificationService.getLaunchAlarmTime();
+  String? alarmTime;
+  if (launchPayload != null) {
+    final screenOn = await NotificationService.wasScreenOnAtLaunch();
+    if (!screenOn) alarmTime = launchPayload;
+  }
 
   final savedMode = await PrefsService.loadMode();
   if (savedMode == 'senior') {

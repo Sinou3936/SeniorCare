@@ -95,16 +95,19 @@ class NotificationService {
   }
 
   /// 알림 응답 콜백 — 알람 인텐트로 앱이 깨어났을 때(풀스크린 자동실행 또는 배너 탭)
-  /// 알람 시계 방식: 알람 알림이 뜨면 항상 알람 화면으로 이동
-  /// - 화면 OFF/잠금: 풀스크린이 자동 실행되며 이 콜백이 불림 → 알람 화면
-  /// - 화면 ON: 배너를 사용자가 탭했을 때만 불림 → 알람 화면
+  /// - 화면 OFF였음(자동실행): 풀스크린 알람 화면으로 이동
+  /// - 화면 ON이었음(사용자 배너 탭): 풀스크린 안 띄우고 앱만 정상적으로 열림
   static Future<void> _onNotificationResponse(NotificationResponse response) async {
     final payload = response.payload;
     if (payload == null || payload.isEmpty) return;
-    onAlarmTapped?.call(payload);
+    final screenOn = await wasScreenOnAtLaunch();
+    if (!screenOn) {
+      onAlarmTapped?.call(payload);
+    }
+    // 화면 ON 탭이면 아무것도 안 함 → 앱이 그냥 포그라운드로 올라옴
   }
 
-  /// 화면 OFF/콜드스타트 상태에서 알람으로 앱이 실행됐는지 확인 — payload = "08:00"
+  /// 콜드스타트 상태에서 알람으로 앱이 실행됐는지 확인 — payload = "08:00"
   static Future<String?> getLaunchAlarmTime() async {
     final details = await _local.getNotificationAppLaunchDetails();
     if (details?.didNotificationLaunchApp == true) {
@@ -113,14 +116,15 @@ class NotificationService {
     return null;
   }
 
-  /// 알람 실행 시점에 기기가 잠금/화면꺼짐 상태였는지 (네이티브)
-  static Future<bool> isDeviceLocked() async {
+  /// 알람으로 앱이 깨어난 순간 화면이 켜져 있었는지 (네이티브)
+  /// true = 사용자가 배너 탭(화면 ON), false = 화면 OFF에서 풀스크린 자동실행
+  static Future<bool> wasScreenOnAtLaunch() async {
     try {
       const channel = MethodChannel('yakbom/battery');
-      final result = await channel.invokeMethod<bool>('isDeviceLocked');
-      return result ?? false;
+      final result = await channel.invokeMethod<bool>('wasScreenOnAtLaunch');
+      return result ?? true;
     } catch (_) {
-      return false;
+      return true;
     }
   }
 
@@ -195,6 +199,11 @@ class NotificationService {
   /// 슬롯 리마인더 취소 (복용 완료 또는 10분 후 다시 버튼 시)
   static Future<void> cancelSlotReminder(String time) async {
     await _local.cancel(id: _slotReminderNotificationId(time));
+  }
+
+  /// 슬롯 메인 알람 알림 취소 — FLAG_INSISTENT 진동/소리 정지용
+  static Future<void> cancelSlotAlarm(String time) async {
+    await _local.cancel(id: _slotNotificationId(time));
   }
 
   /// 캐시 기반으로 등록된 슬롯 알람 전체 취소

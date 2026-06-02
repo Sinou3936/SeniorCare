@@ -262,10 +262,16 @@ class FirestoreService {
     });
   }
 
-  /// 해당 날짜에 약별 로그가 없으면 자동 생성 (기존 로그가 있어도 누락된 약만 추가)
+  /// 해당 날짜에 약별 로그가 없으면 자동 생성 (오늘·미래만, 누락된 슬롯만 추가)
+  /// 과거 날짜는 "실제 기록"이라 현재 스케줄로 재생성하지 않음 (중복 누적 방지)
   static Future<void> generateLogsForDate(DateTime date) async {
     final start = DateTime(date.year, date.month, date.day);
     final end = start.add(const Duration(days: 1));
+
+    // 과거 날짜는 로그 생성 스킵 — 지난 기록은 그대로 보존
+    final now = kstNow();
+    final todayStart = DateTime(now.year, now.month, now.day);
+    if (start.isBefore(todayStart)) return;
 
     final results = await Future.wait([
       _logs
@@ -278,17 +284,21 @@ class FirestoreService {
     final existingSnap = results[0];
     final medicinesSnap = results[1];
 
-    // 이미 로그가 있는 약 ID 집합
-    final existingMedicineIds = existingSnap.docs
-        .map((d) => (d.data() as Map<String, dynamic>)['medicineId'] as String)
-        .toSet();
+    // 이미 로그가 있는 (약 ID + 시각) 조합 집합 — 슬롯 단위로 누락 판별
+    final existingKeys = existingSnap.docs.map((d) {
+      final data = d.data() as Map<String, dynamic>;
+      final mid = data['medicineId'] as String;
+      final st = (data['scheduledTime'] as Timestamp).toDate();
+      final hh = st.hour.toString().padLeft(2, '0');
+      final mm = st.minute.toString().padLeft(2, '0');
+      return '$mid|$hh:$mm';
+    }).toSet();
 
     final batch = _db.batch();
     bool hasNew = false;
 
     for (final doc in medicinesSnap.docs) {
       final medicine = Medicine.fromFirestore(doc);
-      if (existingMedicineIds.contains(medicine.id)) continue;
 
       final startDay = DateTime(medicine.startDate.year, medicine.startDate.month, medicine.startDate.day);
       if (start.isBefore(startDay)) continue;
@@ -303,6 +313,11 @@ class FirestoreService {
         final h = int.tryParse(parts[0]);
         final m = int.tryParse(parts[1]);
         if (h == null || m == null) continue;
+
+        // 이 약의 이 시간 슬롯 로그가 이미 있으면 건너뜀 (약 단위가 아닌 슬롯 단위)
+        final key = '${medicine.id}|${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}';
+        if (existingKeys.contains(key)) continue;
+
         final scheduled = DateTime(start.year, start.month, start.day, h, m);
         final logRef = _logs.doc();
         batch.set(logRef, MedicineLog(
@@ -381,6 +396,37 @@ class FirestoreService {
       'taken': taken,
       'takenAt': taken ? Timestamp.now() : null,
     });
+  }
+
+  /// 풀스크린 알람 "복용 완료" 처리 — 오늘 해당 시간대("HH:mm") 미복용 로그 전부 taken:true
+  static Future<void> markDoseTakenAt(String time) async {
+    final parts = time.split(':');
+    if (parts.length != 2) return;
+    final h = int.tryParse(parts[0]);
+    final m = int.tryParse(parts[1]);
+    if (h == null || m == null) return;
+
+    final now = kstNow();
+    final start = DateTime(now.year, now.month, now.day);
+    final end = start.add(const Duration(days: 1));
+
+    final snap = await _logs
+        .where('scheduledTime', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
+        .where('scheduledTime', isLessThan: Timestamp.fromDate(end))
+        .get();
+
+    final batch = _db.batch();
+    bool hasUpdate = false;
+    for (final doc in snap.docs) {
+      final log = MedicineLog.fromFirestore(doc);
+      if (log.scheduledTime.hour == h &&
+          log.scheduledTime.minute == m &&
+          !log.taken) {
+        batch.update(doc.reference, {'taken': true, 'takenAt': Timestamp.now()});
+        hasUpdate = true;
+      }
+    }
+    if (hasUpdate) await batch.commit();
   }
 
   static Future<void> addLog(MedicineLog log) async {
