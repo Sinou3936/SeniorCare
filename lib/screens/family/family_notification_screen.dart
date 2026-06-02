@@ -127,7 +127,7 @@ class _NotificationCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    '${item.medicineName} 복용을 하지 않으셨어요',
+                    '${item.medicineName} 아직 복용하지 않으셨어요',
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight:

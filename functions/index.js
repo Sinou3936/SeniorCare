@@ -134,7 +134,7 @@ exports.sendMissedDoseNotification = functions
         token: fcmToken,
         notification: {
           title: '미복용 알림',
-          body: `부모님이 ${namesText}을(를) 아직 드시지 않으셨어요`,
+          body: `부모님이 ${namesText} 아직 복용하지 않으셨어요`,
         },
         data: {
           type: 'missed_dose',
