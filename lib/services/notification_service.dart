@@ -140,8 +140,8 @@ class NotificationService {
 
   /// 전체 활성 약을 슬롯 단위로 재등록 + 캐시 갱신 (메인 진입점)
   static Future<void> rescheduleAllAlarms(List<Medicine> medicines) async {
-    // cancelAll로 구 방식 알람(per-medicine ID)까지 전부 제거
-    await _local.cancelAll();
+    // 이전 캐시 기반으로 복약 알림만 취소 (병원 예약 알람은 보존)
+    await cancelAllSlotAlarms();
     await _scheduleSlotAlarms(medicines);
     await rebuildScheduleCache(medicines);
   }
@@ -206,11 +206,14 @@ class NotificationService {
     await _local.cancel(id: _slotNotificationId(time));
   }
 
-  /// 캐시 기반으로 등록된 슬롯 알람 전체 취소
+  /// 캐시 기반으로 등록된 복약 알림 전체 취소 (메인 알람 + 리마인더 + 스누즈)
+  /// 병원 예약 알람(20000000+)은 건드리지 않음
   static Future<void> cancelAllSlotAlarms() async {
     final schedule = await PrefsService.loadMedicineSchedule();
     for (final time in schedule.keys) {
-      await _local.cancel(id: _slotNotificationId(time));
+      await _local.cancel(id: _slotNotificationId(time));          // 메인 알람
+      await _local.cancel(id: _slotReminderNotificationId(time));  // +10분 리마인더
+      await _local.cancel(id: 60000 + _slotNotificationId(time));  // 스누즈
     }
   }
 
