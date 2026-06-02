@@ -9,8 +9,7 @@ import '../senior/senior_main_screen.dart';
 
 class MedicineAlarmScreen extends StatefulWidget {
   final String time; // "08:00"
-  final int snoozeCount; // 0 = 첫 알람, 1 = 스누즈 1회 사용
-  const MedicineAlarmScreen({super.key, required this.time, this.snoozeCount = 0});
+  const MedicineAlarmScreen({super.key, required this.time});
 
   @override
   State<MedicineAlarmScreen> createState() => _MedicineAlarmScreenState();
@@ -79,7 +78,6 @@ class _MedicineAlarmScreenState extends State<MedicineAlarmScreen> {
       time: widget.time,
       medicineNames: _medicines.map((m) => m['name'] ?? '').toList(),
       scheduledAt: snoozeTime,
-      snoozeCount: widget.snoozeCount + 1,
     );
 
     if (mounted) _dismiss();
@@ -217,7 +215,6 @@ class _MedicineAlarmScreenState extends State<MedicineAlarmScreen> {
                         ),
                       ),
                     ),
-                    if (widget.snoozeCount < 1) ...[
                     const SizedBox(height: 12),
                     SizedBox(
                       width: double.infinity,
@@ -239,7 +236,6 @@ class _MedicineAlarmScreenState extends State<MedicineAlarmScreen> {
                         ),
                       ),
                     ),
-                    ], // snoozeCount < 1
                   ],
                 ),
               ),

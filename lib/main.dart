@@ -14,13 +14,10 @@ import 'services/prefs_service.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
-/// payload("08:00" 또는 "08:00|1") → MedicineAlarmScreen으로 이동
-void _openAlarmScreen(String payload) {
-  final parts = payload.split('|');
-  final time = parts[0];
-  final snoozeCount = parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0;
+/// payload("08:00") → MedicineAlarmScreen으로 이동
+void _openAlarmScreen(String time) {
   navigatorKey.currentState?.push(MaterialPageRoute(
-    builder: (_) => MedicineAlarmScreen(time: time, snoozeCount: snoozeCount),
+    builder: (_) => MedicineAlarmScreen(time: time),
   ));
 }
 
@@ -66,11 +63,7 @@ class SeniorCareApp extends StatelessWidget {
     Widget home;
     if (alarmTime != null) {
       // 화면 OFF 상태에서 알람으로 실행 → MedicineAlarmScreen 바로 표시
-      // payload 형식: "08:00" 또는 "08:00|1" (스누즈 카운트 포함)
-      final parts = alarmTime!.split('|');
-      final time = parts[0];
-      final snoozeCount = parts.length > 1 ? int.tryParse(parts[1]) ?? 0 : 0;
-      home = MedicineAlarmScreen(time: time, snoozeCount: snoozeCount);
+      home = MedicineAlarmScreen(time: alarmTime!);
     } else if (initialMode == 'senior') {
       home = const SeniorMainScreen();
     } else if (initialMode == 'family') {

@@ -45,9 +45,9 @@ class NotificationService {
     ),
   );
 
-  // 잠금 상태에서 알람 알림이 떴을 때 호출되는 콜백 (main.dart에서 등록)
-  // payload = "08:00" 또는 "08:00|1"
-  static void Function(String payload)? onAlarmTapped;
+  // 화면 OFF에서 알람이 자동 실행됐을 때 알람 화면으로 이동하는 콜백 (main.dart에서 등록)
+  // payload = "08:00" (시각)
+  static void Function(String time)? onAlarmTapped;
 
   static Future<void> init() async {
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
@@ -231,7 +231,6 @@ class NotificationService {
     required String time,
     required List<String> medicineNames,
     required DateTime scheduledAt,
-    required int snoozeCount,
   }) async {
     final tzTime = tz.TZDateTime(
       tz.local,
@@ -247,9 +246,6 @@ class NotificationService {
       androidScheduleMode: AndroidScheduleMode.alarmClock,
     );
   }
-
-  /// 약 삭제/토글 OFF용 — 하위 호환 유지, 슬롯 재등록으로 대체 권장
-  static Future<void> cancelMedicineAlarms(String medicineId, {List<String>? times}) async {}
 
   // ── 병원 예약 알람 ────────────────────────────────────────
 
@@ -290,10 +286,6 @@ class NotificationService {
   }
 
   // ── 기타 ─────────────────────────────────────────────────
-
-  // ignore: invalid_use_of_visible_for_testing_member
-  static int notificationIdForTest(String medicineId, int timeIndex) =>
-      _slotNotificationId('08:00');
 
   // ignore: invalid_use_of_visible_for_testing_member
   static int slotNotificationIdForTest(String time) => _slotNotificationId(time);
