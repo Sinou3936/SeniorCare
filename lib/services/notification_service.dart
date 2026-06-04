@@ -153,8 +153,8 @@ class NotificationService {
 
   /// 전체 활성 약을 슬롯 단위로 재등록 + 캐시 갱신 (메인 진입점)
   static Future<void> rescheduleAllAlarms(List<Medicine> medicines) async {
-    // 이전 캐시 기반으로 복약 알림만 취소 (병원 예약 알람은 보존)
-    await cancelAllSlotAlarms();
+    // 이전 캐시 기반으로 복약 알림만 취소 (병원 알람·사용자 스누즈는 보존)
+    await cancelAllSlotAlarms(includeSnooze: false);
     await _scheduleSlotAlarms(medicines);
     await rebuildScheduleCache(medicines);
   }
@@ -219,14 +219,17 @@ class NotificationService {
     await _local.cancel(id: _slotNotificationId(time));
   }
 
-  /// 캐시 기반으로 등록된 복약 알림 전체 취소 (메인 알람 + 리마인더 + 스누즈)
+  /// 캐시 기반으로 등록된 복약 알림 취소 (메인 알람 + 리마인더, 옵션상 스누즈)
   /// 병원 예약 알람(20000000+)은 건드리지 않음
-  static Future<void> cancelAllSlotAlarms() async {
+  /// [includeSnooze] 재스케줄(rescheduleAllAlarms) 시엔 false — 사용자가 누른 스누즈는 보존
+  static Future<void> cancelAllSlotAlarms({bool includeSnooze = true}) async {
     final schedule = await PrefsService.loadMedicineSchedule();
     for (final time in schedule.keys) {
       await _local.cancel(id: _slotNotificationId(time));          // 메인 알람
       await _local.cancel(id: _slotReminderNotificationId(time));  // +10분 리마인더
-      await _local.cancel(id: 60000 + _slotNotificationId(time));  // 스누즈
+      if (includeSnooze) {
+        await _local.cancel(id: 60000 + _slotNotificationId(time)); // 스누즈
+      }
     }
   }
 
