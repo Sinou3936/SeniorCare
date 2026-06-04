@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../../services/firestore_service.dart';
@@ -42,16 +43,24 @@ class _MedicineAlarmScreenState extends State<MedicineAlarmScreen> {
       _ringtonePlayer.playAlarm(looping: true);
     }
 
-    // 1분 후 자동 종료
-    _autoCloseTimer = Timer(const Duration(minutes: 1), _dismiss);
+    // 1분 후 자동 종료 — 사용자 무반응이므로 앱 닫고 잠금화면 복귀
+    _autoCloseTimer = Timer(const Duration(minutes: 1), () => _dismiss(closeApp: true));
   }
 
-  void _dismiss() {
+  /// [closeApp] true = 앱 종료(잠금화면 복귀), false = 홈 화면으로 이동
+  void _dismiss({bool closeApp = false}) {
     _ringtonePlayer.stop();                              // Flutter 벨소리 정지
     NotificationService.cancelSlotAlarm(widget.time);    // 알림 INSISTENT 진동/소리 정지
     WakelockPlus.disable();
     _autoCloseTimer?.cancel();
     if (!mounted) return;
+
+    if (closeApp) {
+      // 스누즈·자동종료 → 앱 들어가지 않고 잠금화면으로 복귀
+      SystemNavigator.pop();
+      return;
+    }
+
     if (Navigator.of(context).canPop()) {
       Navigator.of(context).pop();
     } else {
@@ -63,7 +72,7 @@ class _MedicineAlarmScreenState extends State<MedicineAlarmScreen> {
   }
 
   Future<void> _onDone() async {
-    // 실제 복용 처리 (오늘 이 시간대 로그 taken:true) + 자동 리마인더 취소 후 화면 닫기
+    // 실제 복용 처리 (오늘 이 시간대 로그 taken:true) + 자동 리마인더 취소 후 홈으로
     await FirestoreService.markDoseTakenAt(widget.time);
     await NotificationService.cancelSlotReminder(widget.time);
     _dismiss();
@@ -83,7 +92,7 @@ class _MedicineAlarmScreenState extends State<MedicineAlarmScreen> {
       scheduledAt: snoozeTime,
     );
 
-    if (mounted) _dismiss();
+    if (mounted) _dismiss(closeApp: true);
   }
 
   String _slotLabel() {
