@@ -60,3 +60,6 @@ app.*.map.json
 
 # Cloud Functions
 functions/node_modules/
+
+# 로그캣 테스트 캡처 (커밋 금지)
+alarm_log.txt
