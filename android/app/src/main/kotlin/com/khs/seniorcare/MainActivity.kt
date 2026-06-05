@@ -16,7 +16,8 @@ class MainActivity : FlutterActivity() {
     private val channel = "yakbom/battery"
 
     // 앱이 깨어나는 순간(앱 시작/백그라운드 복귀) 화면이 켜져 있었는지.
-    // turnScreenOn으로 화면이 켜지기 전에 캡처해야 정확하므로 onCreate/onNewIntent에서 즉시 저장.
+    // 매니페스트 turnScreenOn 제거 → 시스템이 화면을 먼저 안 켜므로 여기서 읽으면 진짜 상태.
+    // 읽은 뒤 우리가 직접 화면을 켠다(setTurnScreenOn) → "읽기→켜기" 순서를 앱이 통제.
     private var screenOnAtLaunch = true
 
     private fun captureScreenState() {
@@ -24,14 +25,30 @@ class MainActivity : FlutterActivity() {
         screenOnAtLaunch = pm.isInteractive
     }
 
+    private fun showOverLockAndTurnScreenOn() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+        } else {
+            @Suppress("DEPRECATION")
+            window.addFlags(
+                android.view.WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                    android.view.WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                    android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
+            )
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
-        captureScreenState() // 앱 종료 상태에서 알람으로 시작된 경우
+        captureScreenState()          // ① 화면 상태 먼저 읽기 (아직 안 켜진 상태)
         super.onCreate(savedInstanceState)
+        showOverLockAndTurnScreenOn() // ② 그 다음 우리가 직접 화면 켜기
     }
 
     override fun onNewIntent(intent: Intent) {
-        captureScreenState() // 백그라운드 앱이 알람으로 복귀된 경우 (super가 플러그인에 전달하기 전에 캡처)
+        captureScreenState()          // ① 백그라운드 복귀 시에도 먼저 읽기
         super.onNewIntent(intent)
+        showOverLockAndTurnScreenOn() // ② 직접 화면 켜기
     }
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {

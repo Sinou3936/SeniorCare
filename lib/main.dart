@@ -14,11 +14,20 @@ import 'services/prefs_service.dart';
 
 final navigatorKey = GlobalKey<NavigatorState>();
 
-/// payload("08:00") → MedicineAlarmScreen으로 이동
-void _openAlarmScreen(String time) {
-  navigatorKey.currentState?.push(MaterialPageRoute(
-    builder: (_) => MedicineAlarmScreen(time: time),
-  ));
+/// 알람 인텐트로 깨어났을 때 라우팅
+/// - 화면 OFF(자동실행) → 풀스크린 알람 화면
+/// - 화면 ON(배너 탭) → 홈 화면으로
+void _onAlarmRoute(String time, bool screenOn) {
+  if (screenOn) {
+    navigatorKey.currentState?.pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const SeniorMainScreen()),
+      (route) => false,
+    );
+  } else {
+    navigatorKey.currentState?.push(MaterialPageRoute(
+      builder: (_) => MedicineAlarmScreen(time: time),
+    ));
+  }
 }
 
 void main() async {
@@ -28,8 +37,8 @@ void main() async {
   await AuthService.signInAnonymously();
   await NotificationService.init();
 
-  // 백그라운드 앱이 알람으로 깨어났을 때(onNewIntent) → 알람 화면으로 이동
-  NotificationService.onAlarmTapped = _openAlarmScreen;
+  // 백그라운드 앱이 알람으로 깨어났을 때(onNewIntent) → 화면상태로 분기
+  NotificationService.onAlarmTapped = _onAlarmRoute;
 
   // 콜드스타트: 알람 인텐트로 실행됐고 + 화면이 꺼져 있었을 때만 풀스크린 알람 화면으로 시작
   // (화면 ON에서 배너 탭으로 실행된 경우는 일반 홈으로)

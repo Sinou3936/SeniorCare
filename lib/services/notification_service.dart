@@ -46,9 +46,9 @@ class NotificationService {
     ),
   );
 
-  // 화면 OFF에서 알람이 자동 실행됐을 때 알람 화면으로 이동하는 콜백 (main.dart에서 등록)
-  // payload = "08:00" (시각)
-  static void Function(String time)? onAlarmTapped;
+  // 알람 인텐트로 앱이 깨어났을 때 라우팅 콜백 (main.dart에서 등록)
+  // time = "08:00", screenOn = 깨어난 순간 화면이 켜져 있었는지(true=배너 탭 → 홈, false=OFF 자동 → 풀스크린)
+  static void Function(String time, bool screenOn)? onAlarmTapped;
 
   static Future<void> init() async {
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
@@ -103,10 +103,7 @@ class NotificationService {
     final payload = response.payload;
     if (payload == null || payload.isEmpty) return;
     final screenOn = await wasScreenOnAtLaunch();
-    if (!screenOn) {
-      onAlarmTapped?.call(payload);
-    }
-    // 화면 ON 탭이면 아무것도 안 함 → 앱이 그냥 포그라운드로 올라옴
+    onAlarmTapped?.call(payload, screenOn); // 화면 OFF→풀스크린, ON→홈 (main.dart에서 분기)
   }
 
   /// 콜드스타트 상태에서 알람으로 앱이 실행됐는지 확인 — payload = "08:00"
