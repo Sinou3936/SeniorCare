@@ -32,9 +32,8 @@ class NotificationService {
     ),
   );
 
-  // 복약 슬롯 알람 전용 — fullScreenIntent(화면 OFF 시 풀스크린 자동 표시)
-  // 채널 알림음은 무음(playSound:false). 소리는 풀스크린에서 playAlarm(알람 소리)만 사용
-  // → 화면 ON: 진동 + 배너만, 화면 OFF: 풀스크린 + 알람 소리
+  // 복약 슬롯 알람 전용 — fullScreenIntent(화면 OFF 시 풀스크린 자동 표시) + 채널 소리
+  // → 화면 ON: 배너 + 소리 + 진동, 화면 OFF: 풀스크린 + playAlarm (시작 ~1초 채널음과 겹침)
   static const _alarmNotificationDetails = NotificationDetails(
     android: AndroidNotificationDetails(
       _alarmChannelId,
@@ -42,7 +41,7 @@ class NotificationService {
       importance: Importance.max,
       priority: Priority.max,
       fullScreenIntent: true,
-      playSound: false,
+      playSound: true,
     ),
   );
 
@@ -73,8 +72,8 @@ class NotificationService {
           enableVibration: true,
         ));
 
-    // 복약 알람 채널 (최대 중요도, fullScreenIntent용) — 채널 무음, 진동만
-    // 소리는 풀스크린에서 playAlarm으로만 재생 (화면 ON 시 소리 없이 진동+배너)
+    // 복약 알람 채널 (최대 중요도, fullScreenIntent용) — 소리 + 진동
+    // 화면 ON: 배너 + 소리 + 진동 / 화면 OFF: 풀스크린에서 playAlarm
     await _local
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
         ?.createNotificationChannel(const AndroidNotificationChannel(
@@ -82,7 +81,7 @@ class NotificationService {
           _alarmChannelName,
           importance: Importance.max,
           enableVibration: true,
-          playSound: false,
+          playSound: true,
         ));
 
     await Permission.notification.request();
