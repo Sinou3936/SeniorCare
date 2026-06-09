@@ -1,3 +1,8 @@
+---
+title: 계정 및 데이터 삭제 안내
+permalink: /account-deletion/
+---
+
 # 계정 및 데이터 삭제 안내
 
 **앱: 약봄** (개발자: 약봄)
