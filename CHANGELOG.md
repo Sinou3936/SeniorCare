@@ -4,6 +4,28 @@
 
 ---
 
+### 2026-06-23 — 비공개 테스트 피드백 수정 / 시각 기반 알림 문구
+
+- **가족 코드 입력 키보드 재표시 (B1)** — 시스템 버튼으로 키보드를 내리면 `FocusNode`가 포커스를 유지해 `requestFocus()`가 무시되던 문제, 이미 포커스인 경우 `SystemChannels.textInput.invokeMethod('TextInput.show')`로 강제 재표시
+- **모드 선택 뒤로가기 흐름 개선 (B2)** — 모드선택→코드입력을 `pushReplacement`→`push`로 바꿔 뒤로가기 시 모드선택 복귀, 연결 성공 후엔 `pushAndRemoveUntil`로 가족 메인을 루트로 만들어 뒤로가기 시 앱 종료
+- **풀스크린 알람 상태바 코랄 적용 (B3)** — `SafeArea(top: false)` + 상단 패딩에 `MediaQuery.padding.top` 추가해 코랄 헤더가 상태바 영역까지 덮도록 (기존 상단 회색 노출 제거)
+- **시각 기반 알림 문구 (G)** — 알림 그룹이 정확한 시각 단위로 묶이는 점을 반영해 시각을 문구에 포함
+  - 시니어 알람: "오전 8시 약 드실 시간이에요" (슬롯이 전부 바르는약이면 "바르실")
+  - 시니어 리마인더: "오전 8시 약, 아직 안 드셨어요?"
+  - 보호자 FCM: "부모님이 오전 8시 [약] 아직 복용하지 않으셨어요" (Cloud Functions `koreanTimeLabel(millis)` 헬퍼 추가, KST=UTC+9 보정)
+
+---
+
+### 2026-06-09 — Google Play 비공개 테스트 출시 준비
+
+- **개인정보처리방침 / 계정·데이터 삭제 안내 페이지** — `privacy-policy.md`, `account-deletion.md` 작성, GitHub Pages front matter + permalink로 고정 주소 적용
+- **데이터 보안 설문 작성** — 건강정보·사용자ID·기기ID·FCM·이메일 수집 항목 입력, 전송 암호화 명시
+- **그래픽 이미지 1024×500 생성** — `tools/make_feature_graphic.py`(PIL)로 스플래시 기반 페더 그래픽 자동 생성
+- **AAB 빌드·서명** — 업로드 키스토어 생성, `build.gradle.kts`에 release `signingConfig` 연결, `key.properties` 기반 서명 적용 (키스토어 / 키 비밀번호는 `.gitignore` 처리)
+- **Google Play 내부 테스트 업로드** — AAB 1.0.0+1 업로드 완료, 비공개 테스트 시작
+
+---
+
 ### 2026-06-08 — 풀스크린 알람 안정화 / 알람 시스템 리팩토링
 
 - **슬롯 단위 알람** — 약별 개별 알람 → 시간대(슬롯)별로 묶어 알람 1개로 통합, 약 목록은 SharedPreferences 캐시
