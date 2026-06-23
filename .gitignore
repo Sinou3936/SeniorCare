@@ -18,6 +18,11 @@ migrate_working_dir/
 google-services.json
 GoogleService-Info.plist
 firebase_options.dart
+
+# 릴리스 서명 — 절대 커밋 금지 (분실 시 앱 업데이트 불가)
+android/key.properties
+android/upload-keystore.jks
+**/*.jks
 google-service-account*.json
 *.keystore
 *.jks
