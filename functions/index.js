@@ -14,6 +14,18 @@ const QUEUE_LOCATION = 'asia-northeast1';
 const QUEUE_NAME = 'missed-dose-notifications';
 const FUNCTION_URL = `https://asia-northeast3-${PROJECT_ID}.cloudfunctions.net/sendMissedDoseNotification`;
 
+/** epoch millis → KST 기준 "오전 8시" / "오후 1시 30분" */
+function koreanTimeLabel(millis) {
+  const d = new Date(millis + 9 * 60 * 60 * 1000); // UTC+9 (KST)
+  const hour = d.getUTCHours();
+  const minute = d.getUTCMinutes();
+  const period = hour < 12 ? '오전' : '오후';
+  let h = hour % 12;
+  if (h === 0) h = 12;
+  const base = `${period} ${h}시`;
+  return minute === 0 ? base : `${base} ${minute}분`;
+}
+
 /**
  * medicine_log 생성 시 scheduledTime + 20분에 Cloud Task 예약
  * Task 이름을 (uid + 복용시각)으로 묶어 같은 시간대 약은 Task 1개만 생성
@@ -97,6 +109,7 @@ exports.sendMissedDoseNotification = functions
 
     const names = pending.map((d) => d.data().medicineName || '약');
     const namesText = names.join(', ');
+    const timeLabel = koreanTimeLabel(slotMillis);
 
     // 알림 발송 여부와 무관하게 처리한 로그는 notified 표시 (중복 방지)
     const markNotified = async () => {
@@ -134,7 +147,7 @@ exports.sendMissedDoseNotification = functions
         token: fcmToken,
         notification: {
           title: '미복용 알림',
-          body: `부모님이 ${namesText} 아직 복용하지 않으셨어요`,
+          body: `부모님이 ${timeLabel} ${namesText} 아직 복용하지 않으셨어요`,
         },
         data: {
           type: 'missed_dose',

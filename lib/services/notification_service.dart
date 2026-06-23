@@ -156,27 +156,34 @@ class NotificationService {
   }
 
   static Future<void> _scheduleSlotAlarms(List<Medicine> medicines) async {
-    final Map<String, List<String>> timeToNames = {};
+    final Map<String, List<Medicine>> timeToMeds = {};
     for (final m in medicines) {
       for (final t in m.times) {
-        timeToNames.putIfAbsent(t, () => []).add(m.name);
+        timeToMeds.putIfAbsent(t, () => []).add(m);
       }
     }
 
-    for (final entry in timeToNames.entries) {
+    for (final entry in timeToMeds.entries) {
       final time = entry.key;
-      final names = entry.value;
+      final meds = entry.value;
+      final names = meds.map((m) => m.name).toList();
       final parts = time.split(':');
       if (parts.length != 2) continue;
       final hour = int.tryParse(parts[0]);
       final minute = int.tryParse(parts[1]);
       if (hour == null || minute == null) continue;
 
+      final timeLabel = _koreanTimeLabel(hour, minute);
+      // 슬롯에 먹는약이 하나라도 있으면 "드실", 전부 바르는약이면 "바르실"
+      final allTopical = meds.every((m) => m.type == MedicineType.topical);
+      final verb = allTopical ? '바르실' : '드실';
+      final verbPast = allTopical ? '바르셨어요' : '드셨어요';
+
       final scheduledTime = _nextOccurrence(hour, minute);
 
       await _local.zonedSchedule(
         id: _slotNotificationId(time),
-        title: '복약 시간이에요 💊',
+        title: '$timeLabel 약 $verb 시간이에요',
         body: names.join(', '),
         scheduledDate: scheduledTime,
         notificationDetails: _alarmNotificationDetails,
@@ -188,13 +195,22 @@ class NotificationService {
       // 자동 +10분 리마인더 (one-shot, 복용 완료 시 취소)
       await _local.zonedSchedule(
         id: _slotReminderNotificationId(time),
-        title: '아직 복약하지 않으셨나요? 💊',
+        title: '$timeLabel 약, 아직 안 $verbPast?',
         body: names.join(', '),
         scheduledDate: scheduledTime.add(const Duration(minutes: 10)),
         notificationDetails: _notificationDetails,
         androidScheduleMode: AndroidScheduleMode.alarmClock,
       );
     }
+  }
+
+  /// "08:00" → "오전 8시", "13:30" → "오후 1시 30분"
+  static String _koreanTimeLabel(int hour, int minute) {
+    final period = hour < 12 ? '오전' : '오후';
+    var h = hour % 12;
+    if (h == 0) h = 12;
+    final base = '$period $h시';
+    return minute == 0 ? base : '$base $minute분';
   }
 
   /// 슬롯 리마인더 ID: "08:00" → 70480

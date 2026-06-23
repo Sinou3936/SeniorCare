@@ -51,9 +51,13 @@ class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
       await PrefsService.saveLinkedSeniorUid(seniorUid);
       await PrefsService.saveMode('family');
       if (!mounted) return;
-      Navigator.pushReplacement(
+      // 이전 스택(모드선택·코드입력) 전부 제거 → 가족 메인을 루트로.
+      // (코드입력은 push로 띄워 뒤로가기가 모드선택으로 가지만, 연결 성공 후엔
+      //  가족 메인이 루트여야 뒤로가기가 앱 종료로 동작)
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const FamilyMainScreen()),
+        (route) => false,
       );
     } else {
       setState(() {
@@ -71,7 +75,15 @@ class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
       backgroundColor: const Color(0xFFE8896A),
       body: SafeArea(
         child: GestureDetector(
-          onTap: () => _focusNode.requestFocus(),
+          onTap: () {
+            // 키보드를 시스템 버튼으로 내리면 FocusNode는 포커스를 유지해
+            // requestFocus()가 무시됨 → 이미 포커스면 키보드를 강제로 다시 띄움
+            if (_focusNode.hasFocus) {
+              SystemChannels.textInput.invokeMethod('TextInput.show');
+            } else {
+              _focusNode.requestFocus();
+            }
+          },
           behavior: HitTestBehavior.opaque,
           child: Padding(
             padding: const EdgeInsets.all(28),

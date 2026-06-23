@@ -131,13 +131,17 @@ class _MedicineAlarmScreenState extends State<MedicineAlarmScreen> {
       child: Scaffold(
         backgroundColor: const Color(0xFFF8F9FA),
         body: SafeArea(
+          top: false, // 상단 코랄 헤더가 상태바 영역까지 덮도록 (회색 노출 방지)
           child: Column(
             children: [
               // 상단 슬롯 정보
               Container(
                 width: double.infinity,
                 color: const Color(0xFFE8896A),
-                padding: const EdgeInsets.symmetric(vertical: 32),
+                padding: EdgeInsets.only(
+                  top: MediaQuery.of(context).padding.top + 32, // 상태바 높이 + 여백
+                  bottom: 32,
+                ),
                 child: Column(
                   children: [
                     Icon(_slotIcon(), color: Colors.white, size: 48),
