@@ -68,3 +68,8 @@ functions/node_modules/
 
 # 로그캣 테스트 캡처 (커밋 금지)
 alarm_log.txt
+
+# 스토어/홍보용 이미지·생성 스크립트 (앱 런타임 자산 아님, 추적 제외)
+assets/app_icon_512.png
+assets/feature_graphic.png
+tools/

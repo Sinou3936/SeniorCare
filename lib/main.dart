@@ -85,9 +85,13 @@ class SeniorCareApp extends StatelessWidget {
       navigatorKey: navigatorKey,
       title: '약봄',
       debugShowCheckedModeBanner: false,
-      // 시스템 글자 크기 설정 무시 — 앱 자체 폰트 크기로 고정
+      // 시스템 글자 크기 반영하되 상한 1.5배 (시니어 접근성 + 레이아웃 보호)
       builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context).copyWith(textScaler: TextScaler.noScaling),
+        data: MediaQuery.of(context).copyWith(
+          textScaler: MediaQuery.of(context)
+              .textScaler
+              .clamp(minScaleFactor: 1.0, maxScaleFactor: 1.5),
+        ),
         child: child!,
       ),
       theme: ThemeData(

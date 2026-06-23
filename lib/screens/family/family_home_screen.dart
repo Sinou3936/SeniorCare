@@ -226,9 +226,6 @@ class _FamilySlotGroup extends StatelessWidget {
     final takenCount = logs.where((l) => l.taken).length;
     final allTaken = takenCount == logs.length;
     final noneTaken = takenCount == 0;
-    final dt = logs.first.scheduledTime;
-    final timeStr =
-        '${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}';
 
     final statusColor = allTaken
         ? const Color(0xFF4CAF50)
@@ -267,9 +264,6 @@ class _FamilySlotGroup extends StatelessWidget {
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Color(0xFF1A1A2E))),
-                const SizedBox(width: 8),
-                Text(timeStr,
-                    style: const TextStyle(fontSize: 16, color: Color(0xFF999999))),
                 const Spacer(),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
@@ -298,6 +292,15 @@ class _FamilySlotGroup extends StatelessWidget {
       ),
     );
   }
+}
+
+/// "08:00" → "오전 8시", "13:30" → "오후 1시 30분" (시니어 알림 문구와 동일 형식)
+String _koreanTimeLabel(int hour, int minute) {
+  final period = hour < 12 ? '오전' : '오후';
+  var h = hour % 12;
+  if (h == 0) h = 12;
+  final base = '$period $h시';
+  return minute == 0 ? base : '$base $minute분';
 }
 
 class _FamilyMedicineRow extends StatelessWidget {
@@ -335,6 +338,12 @@ class _FamilyMedicineRow extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis),
           ),
+          const SizedBox(width: 8),
+          Text(
+            _koreanTimeLabel(log.scheduledTime.hour, log.scheduledTime.minute),
+            style: const TextStyle(fontSize: 15, color: Color(0xFF999999)),
+          ),
+          const SizedBox(width: 10),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
             decoration: BoxDecoration(
