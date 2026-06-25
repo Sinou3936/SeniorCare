@@ -4,6 +4,16 @@
 
 ---
 
+### 2026-06-25 — 앱 내 정책 화면 / 문의 폼(이메일 발송)
+
+- **설정 "정보" 섹션** — 앱 기능 아래 카드로 정리. 시니어: 개인정보처리방침·계정·데이터 삭제 안내 / 보호자: +문의하기 (기존 하단 푸터 링크 대체)
+- **앱 내 정책 화면** — `privacy-policy.md`·`account-deletion.md`를 에셋 번들 후 `flutter_markdown`으로 렌더(외부 브라우저 대신, 오프라인 OK, 단일 소스). 정책 내 외부 링크는 탭 시 브라우저로 열림
+- **문의 폼 → 이메일 발송** — 보호자 설정에 문의 폼(카테고리: 오류/버그·기능 제안·사용 문의·기타 + 내용). 보내기 → Cloud Function `sendInquiry`(nodemailer + Gmail SMTP)로 이메일 발송. Firestore 저장 없음, 인증 필요, 시크릿(GMAIL_USER·GMAIL_APP_PASSWORD)으로 발송 계정 보호
+- **보호자 코드 입력 포커스 글로우 수정** — `_focusNode` 리스너 누락으로 현재 칸 하이라이트가 안 뜨던 문제(autofocus 후 미갱신) 수정
+- **설정 버전 표시 동적화** — `package_info_plus`로 pubspec 버전 자동 반영
+
+---
+
 ### 2026-06-24 — 오프라인 대응 / 앱 표시명 약봄
 
 - **앱 오프라인 실행 수정 (B5)** — `NotificationService.init()`의 `FirebaseMessaging.getToken()`이 오프라인에서 멈춰 `runApp()`에 도달하지 못해 앱이 안 뜨던 문제. FCM 토큰 등록을 백그라운드 비차단으로 분리하고, `main.dart`도 `runApp()`을 Firestore 재등록보다 먼저 호출

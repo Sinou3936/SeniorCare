@@ -20,6 +20,15 @@ class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
   String? _errorMessage;
 
   @override
+  void initState() {
+    super.initState();
+    // 포커스 변화 시 현재 칸 하이라이트(glow) 갱신 — 없으면 autofocus 후에도 안 빛남
+    _focusNode.addListener(() {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
   void dispose() {
     _controller.dispose();
     _focusNode.dispose();

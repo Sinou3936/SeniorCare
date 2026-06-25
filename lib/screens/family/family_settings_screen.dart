@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import '../../services/auth_service.dart';
 import '../../services/connectivity_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/prefs_service.dart';
 import '../mode_select_screen.dart';
+import '../policy_viewer_screen.dart';
+import 'family_inquiry_screen.dart';
 
 class FamilySettingsScreen extends StatefulWidget {
   const FamilySettingsScreen({super.key});
@@ -16,11 +19,15 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
   bool _notificationEnabled = true;
   String? _linkedSeniorUid;
   bool _loading = true;
+  String _appVersion = '';
 
   @override
   void initState() {
     super.initState();
     _load();
+    PackageInfo.fromPlatform().then((info) {
+      if (mounted) setState(() => _appVersion = info.version);
+    });
   }
 
   Future<void> _load() async {
@@ -90,6 +97,43 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
                           ),
                         ]),
 
+                        const SizedBox(height: 24),
+
+                        // ── 정보 ──────────────────────────────────────
+                        _SectionTitle('정보'),
+                        const SizedBox(height: 10),
+                        _Card(children: [
+                          _NavTile(
+                            icon: Icons.mail_outline_rounded,
+                            title: '문의하기',
+                            onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) =>
+                                        const FamilyInquiryScreen())),
+                          ),
+                          _NavTile(
+                            icon: Icons.privacy_tip_outlined,
+                            title: '개인정보처리방침',
+                            onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const PolicyViewerScreen(
+                                        title: '개인정보처리방침',
+                                        assetPath: 'privacy-policy.md'))),
+                          ),
+                          _NavTile(
+                            icon: Icons.delete_outline_rounded,
+                            title: '계정·데이터 삭제 안내',
+                            onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (_) => const PolicyViewerScreen(
+                                        title: '계정·데이터 삭제 안내',
+                                        assetPath: 'account-deletion.md'))),
+                          ),
+                        ]),
+
                         const SizedBox(height: 32),
 
                         SizedBox(
@@ -112,10 +156,10 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 16),
                         Center(
                           child: Text(
-                            '약봄 v1.0.0',
+                            _appVersion.isEmpty ? '약봄' : '약봄 v$_appVersion',
                             style:
                                 TextStyle(fontSize: 14, color: Colors.grey[400]),
                           ),
@@ -512,6 +556,48 @@ class _Card extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
       ),
       child: Column(children: children),
+    );
+  }
+}
+
+/// 탭하면 이동하는 설정 행 (아이콘 + 라벨 + chevron)
+class _NavTile extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+  const _NavTile(
+      {required this.icon, required this.title, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        child: Row(
+          children: [
+            Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: const Color(0xFFE8896A).withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: const Color(0xFFE8896A), size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(title,
+                  style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1A1A2E))),
+            ),
+            const Icon(Icons.chevron_right_rounded, color: Color(0xFFBBBBBB)),
+          ],
+        ),
+      ),
     );
   }
 }

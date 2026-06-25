@@ -3,6 +3,7 @@ const { initializeApp } = require('firebase-admin/app');
 const { getFirestore, Timestamp } = require('firebase-admin/firestore');
 const { getMessaging } = require('firebase-admin/messaging');
 const { CloudTasksClient } = require('@google-cloud/tasks');
+const nodemailer = require('nodemailer');
 
 initializeApp();
 
@@ -13,6 +14,54 @@ const PROJECT_ID = 'seniorcare-5e8a0';
 const QUEUE_LOCATION = 'asia-northeast1';
 const QUEUE_NAME = 'missed-dose-notifications';
 const FUNCTION_URL = `https://asia-northeast3-${PROJECT_ID}.cloudfunctions.net/sendMissedDoseNotification`;
+
+/**
+ * 앱 내 문의 폼 → 이메일 발송 (nodemailer + Gmail SMTP).
+ * 시크릿: GMAIL_USER(발송 계정), GMAIL_APP_PASSWORD(앱 비밀번호).
+ *   firebase functions:secrets:set GMAIL_USER
+ *   firebase functions:secrets:set GMAIL_APP_PASSWORD
+ */
+exports.sendInquiry = functions
+  .region('asia-northeast3')
+  .runWith({ secrets: ['GMAIL_USER', 'GMAIL_APP_PASSWORD'] })
+  .https.onCall(async (data, context) => {
+    if (!context.auth) {
+      throw new functions.https.HttpsError('unauthenticated', '인증이 필요합니다.');
+    }
+    const category = (data && data.category) || '기타';
+    const content = ((data && data.content) || '').toString().trim();
+    const deviceInfo = ((data && data.deviceInfo) || '알 수 없음')
+      .toString()
+      .slice(0, 200);
+    if (!content) {
+      throw new functions.https.HttpsError('invalid-argument', '내용이 비어 있습니다.');
+    }
+    if (content.length > 5000) {
+      throw new functions.https.HttpsError('invalid-argument', '내용이 너무 깁니다.');
+    }
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
+      },
+    });
+
+    // 발송=수신 동일 계정(자기 자신에게) — 이메일을 코드에 하드코딩하지 않음
+    await transporter.sendMail({
+      from: `약봄 문의 <${process.env.GMAIL_USER}>`,
+      to: process.env.GMAIL_USER,
+      subject: `[약봄 문의/${category}]`,
+      text:
+        `휴대폰 정보: ${deviceInfo}\n` +
+        `내용: ${content}\n\n` +
+        `조치 부탁드립니다.\n\n` +
+        `---\n사용자 ID: ${context.auth.uid}`,
+    });
+
+    return { ok: true };
+  });
 
 /** epoch millis → KST 기준 "오전 8시" / "오후 1시 30분" */
 function koreanTimeLabel(millis) {
