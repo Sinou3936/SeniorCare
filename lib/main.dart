@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'firebase_options.dart';
 import 'screens/mode_select_screen.dart';
@@ -32,6 +33,8 @@ void _onAlarmRoute(String time, bool screenOn) {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // 세로 모드 고정 — 가로 회전 시 레이아웃 깨짐 방지 (시니어 앱, 세로 기준 디자인)
+  await SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp]);
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   FirebaseFirestore.instance.settings = const Settings(persistenceEnabled: true);
 
