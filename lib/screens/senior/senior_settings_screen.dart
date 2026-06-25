@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
+import '../../services/connectivity_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/notification_service.dart';
 import '../../services/prefs_service.dart';
@@ -175,7 +176,7 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
                   const SizedBox(height: 20),
                   Center(
                     child: Text(
-                      'SeniorCare v1.0.0',
+                      '약봄 v1.0.0',
                       style: TextStyle(fontSize: 14, color: Colors.grey[400]),
                     ),
                   ),
@@ -288,6 +289,7 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
   }
 
   Future<void> _linkWithGoogle() async {
+    if (!await ensureOnline(context)) return; // 오프라인이면 안내 후 중단
     final result = await AuthService.linkWithGoogle();
     if (!mounted) return;
     switch (result) {
@@ -328,6 +330,8 @@ class _SeniorSettingsScreenState extends State<SeniorSettingsScreen> {
   }
 
   Future<void> _confirmClearData() async {
+    if (!await ensureOnline(context)) return; // 오프라인이면 안내 후 중단 (서버까지 삭제 보장)
+    if (!mounted) return;
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(

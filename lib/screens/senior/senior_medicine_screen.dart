@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/medicine.dart';
+import '../../services/connectivity_service.dart';
 import '../../services/firestore_service.dart';
 import '../../widgets/medicine_card.dart';
 import 'senior_medicine_detail_screen.dart';
@@ -57,10 +58,18 @@ class SeniorMedicineScreen extends StatelessWidget {
         },
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => Navigator.push(
-          context,
-          MaterialPageRoute(builder: (_) => const SeniorMedicineAddScreen()),
-        ),
+        onPressed: () async {
+          // 추가는 진입 전에 온라인 확인 (폼 다 채우고 저장 때 막히는 것 방지)
+          if (!await ensureOnline(context,
+              message: '오프라인에서는 약을 추가할 수 없어요.\nWi-Fi나 데이터를 켜고 다시 시도해주세요.')) {
+            return;
+          }
+          if (!context.mounted) return;
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const SeniorMedicineAddScreen()),
+          );
+        },
         backgroundColor: const Color(0xFFE8896A),
         icon: const Icon(Icons.add, size: 28, color: Colors.white),
         label: const Text(

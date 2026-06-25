@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../models/medicine.dart';
+import '../../services/connectivity_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/notification_service.dart';
 import '../../services/prefs_service.dart';
@@ -61,6 +62,11 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
   Future<void> _save(BuildContext context) async {
     final name = _nameController.text.trim();
     if (name.isEmpty || _isSaving) return;
+    if (!await ensureOnline(context,
+        message: '오프라인에서는 약을 추가·수정·삭제할 수 없어요.\nWi-Fi나 데이터를 켜고 다시 시도해주세요.')) {
+      return;
+    }
+    if (!mounted) return;
     setState(() => _isSaving = true);
 
     final enabledSlots = _timeEnabled.entries

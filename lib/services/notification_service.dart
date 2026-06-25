@@ -90,9 +90,20 @@ class NotificationService {
 
     FirebaseMessaging.onMessage.listen(_showLocal);
 
-    final token = await _messaging.getToken();
-    if (token != null) await FirestoreService.saveFcmToken(token);
-    _messaging.onTokenRefresh.listen(FirestoreService.saveFcmToken);
+    // FCM 토큰 등록은 네트워크 필요 — 오프라인에서 getToken()이 멈추면 init()이 막혀
+    // runApp까지 못 가 앱이 안 뜸(B5). await 없이 백그라운드로 처리해 UI를 안 막는다.
+    _registerFcmTokenInBackground();
+  }
+
+  /// FCM 토큰 가져와 저장 (네트워크 필요, UI 비차단·오프라인 안전)
+  static Future<void> _registerFcmTokenInBackground() async {
+    try {
+      final token = await _messaging.getToken();
+      if (token != null) await FirestoreService.saveFcmToken(token);
+      _messaging.onTokenRefresh.listen(FirestoreService.saveFcmToken);
+    } catch (_) {
+      // 오프라인 등 실패 시 무시 — 온라인 복귀/다음 실행 때 등록됨
+    }
   }
 
   /// 알림 응답 콜백 — 알람 인텐트로 앱이 깨어났을 때(풀스크린 자동실행 또는 배너 탭)

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../models/appointment.dart';
+import '../../services/connectivity_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/notification_service.dart';
 import 'senior_hospital_edit_screen.dart';
@@ -78,13 +79,22 @@ class SeniorHospitalDetailScreen extends StatelessWidget {
                   child: SizedBox(
                     height: 64,
                     child: ElevatedButton(
-                      onPressed: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) =>
-                              SeniorHospitalEditScreen(appointment: appointment),
-                        ),
-                      ),
+                      onPressed: () async {
+                        // 삭제처럼 상세 화면에서 바로 차단 (화면 전환 없이)
+                        if (!await ensureOnline(context,
+                            message:
+                                '오프라인에서는 병원 예약을 추가·수정·삭제할 수 없어요.\nWi-Fi나 데이터를 켜고 다시 시도해주세요.')) {
+                          return;
+                        }
+                        if (!context.mounted) return;
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) =>
+                                SeniorHospitalEditScreen(appointment: appointment),
+                          ),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFE8896A),
                         shape: RoundedRectangleBorder(
@@ -126,6 +136,11 @@ class SeniorHospitalDetailScreen extends StatelessWidget {
   }
 
   Future<void> _confirmDelete(BuildContext context) async {
+    if (!await ensureOnline(context,
+        message: '오프라인에서는 병원 예약을 추가·수정·삭제할 수 없어요.\nWi-Fi나 데이터를 켜고 다시 시도해주세요.')) {
+      return;
+    }
+    if (!context.mounted) return;
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(

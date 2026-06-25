@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/medicine.dart';
@@ -407,10 +408,12 @@ class FirestoreService {
   }
 
   static Future<void> setLogTaken(String logId, bool taken) async {
-    await _logs.doc(logId).update({
+    // 서버 응답을 기다리지 않음 — 오프라인서도 로컬 캐시에 즉시 반영(리스너 갱신)되고
+    // 온라인 되면 자동 동기화. (await하면 오프라인서 멈춰 '모두 복용' 루프가 첫 항목에서 끊김)
+    unawaited(_logs.doc(logId).update({
       'taken': taken,
       'takenAt': taken ? Timestamp.now() : null,
-    });
+    }));
   }
 
   /// 풀스크린 알람 "복용 완료" 처리 — 오늘 해당 시간대("HH:mm") 미복용 로그 전부 taken:true
@@ -425,10 +428,18 @@ class FirestoreService {
     final start = DateTime(now.year, now.month, now.day);
     final end = start.add(const Duration(days: 1));
 
-    final snap = await _logs
-        .where('scheduledTime', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
-        .where('scheduledTime', isLessThan: Timestamp.fromDate(end))
-        .get();
+    // 캐시에서 읽음 — 오프라인서 기본 .get()이 서버 응답 기다리며 멈추는 것 방지
+    // (오늘 로그는 generateLogsForDate로 로컬 생성·캐시돼 있음). 풀스크린 알람은
+    // 오프라인서도 복용완료가 즉시 처리돼야 하므로 필수. 캐시 없으면 예외→안전 반환.
+    final QuerySnapshot snap;
+    try {
+      snap = await _logs
+          .where('scheduledTime', isGreaterThanOrEqualTo: Timestamp.fromDate(start))
+          .where('scheduledTime', isLessThan: Timestamp.fromDate(end))
+          .get(const GetOptions(source: Source.cache));
+    } catch (_) {
+      return; // 캐시 미스 등 — 화면은 정상 닫히도록 그냥 반환
+    }
 
     final batch = _db.batch();
     bool hasUpdate = false;
@@ -441,7 +452,8 @@ class FirestoreService {
         hasUpdate = true;
       }
     }
-    if (hasUpdate) await batch.commit();
+    // 커밋은 서버 응답 안 기다림 — 로컬 즉시 반영 + 온라인 시 동기화 (await하면 멈춤)
+    if (hasUpdate) unawaited(batch.commit());
   }
 
   static Future<void> addLog(MedicineLog log) async {

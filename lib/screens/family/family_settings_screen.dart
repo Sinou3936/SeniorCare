@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
+import '../../services/connectivity_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/prefs_service.dart';
 import '../mode_select_screen.dart';
@@ -114,7 +115,7 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
                         const SizedBox(height: 20),
                         Center(
                           child: Text(
-                            'SeniorCare v1.0.0',
+                            '약봄 v1.0.0',
                             style:
                                 TextStyle(fontSize: 14, color: Colors.grey[400]),
                           ),
@@ -178,6 +179,7 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
   }
 
   Future<void> _linkWithGoogle() async {
+    if (!await ensureOnline(context)) return; // 오프라인이면 안내 후 중단
     final result = await AuthService.linkWithGoogle();
     if (!mounted) return;
     switch (result) {

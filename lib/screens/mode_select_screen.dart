@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'senior/senior_main_screen.dart';
 import 'family/family_code_input_screen.dart';
+import '../services/connectivity_service.dart';
 import '../services/prefs_service.dart';
 
 class ModeSelectScreen extends StatelessWidget {
@@ -25,7 +26,7 @@ class ModeSelectScreen extends StatelessWidget {
               const Icon(Icons.favorite_rounded, color: Colors.white, size: 72),
               const SizedBox(height: 16),
               const Text(
-                'SeniorCare',
+                '약봄',
                 style: TextStyle(
                   color: Colors.white,
                   fontSize: 40,
@@ -63,10 +64,20 @@ class ModeSelectScreen extends StatelessWidget {
                 color: Colors.white24,
                 textColor: Colors.white,
                 border: Border.all(color: Colors.white, width: 2),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const FamilyCodeInputScreen()),
-                ),
+                onTap: () async {
+                  // 가족 모드는 온라인 필수 — 진입 전(코드 입력 가기 전)에 차단
+                  if (!await ensureOnline(context,
+                      message:
+                          '가족 모드는 부모님의 복약 현황을 실시간으로 확인해야 해서\nWi-Fi나 데이터 연결이 필요해요.')) {
+                    return;
+                  }
+                  if (!context.mounted) return;
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (_) => const FamilyCodeInputScreen()),
+                  );
+                },
               ),
               ],
             ),

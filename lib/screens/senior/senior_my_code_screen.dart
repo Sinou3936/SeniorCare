@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../services/connectivity_service.dart';
 import '../../services/firestore_service.dart';
 
 class SeniorMyCodeScreen extends StatefulWidget {
@@ -10,15 +11,30 @@ class SeniorMyCodeScreen extends StatefulWidget {
 }
 
 class _SeniorMyCodeScreenState extends State<SeniorMyCodeScreen> {
-  late Future<({String code, bool isExpired})> _codeFuture;
+  bool? _online; // null=확인중, false=오프라인(차단), true=온라인
+  Future<({String code, bool isExpired})>? _codeFuture;
 
   @override
   void initState() {
     super.initState();
-    _codeFuture = FirestoreService.getSeniorCode();
+    _checkAndLoad();
+  }
+
+  // 코드 발급/조회는 Firestore 쓰기·읽기 — 자녀가 코드로 즉시 연결해야 하므로 온라인 필요.
+  // (오프라인이면 서버에 코드가 없어 자녀가 연결 못 함 + 코드는 1시간 만료)
+  Future<void> _checkAndLoad() async {
+    setState(() => _online = null);
+    final ok = await ConnectivityService.isOnline();
+    if (!mounted) return;
+    setState(() {
+      _online = ok;
+      if (ok) _codeFuture = FirestoreService.getSeniorCode();
+    });
   }
 
   Future<void> _confirmRegenerate() async {
+    if (!await ensureOnline(context)) return; // 세션 중 오프라인 전환 대비
+    if (!mounted) return;
     final ok = await showDialog<bool>(
       context: context,
       builder: (_) => AlertDialog(
@@ -63,25 +79,40 @@ class _SeniorMyCodeScreenState extends State<SeniorMyCodeScreen> {
           style: TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
         ),
       ),
-      body: FutureBuilder<({String code, bool isExpired})>(
-        future: _codeFuture,
-        builder: (context, snap) {
-          if (snap.connectionState == ConnectionState.waiting) {
-            return const Center(
-              child: CircularProgressIndicator(color: Color(0xFFE8896A)),
-            );
-          }
-          if (snap.hasError) {
-            return const Center(child: Text('코드를 불러올 수 없어요'));
-          }
-          final result = snap.data!;
-          return _CodeBody(
-            code: result.code,
-            isExpired: result.isExpired,
-            onRegenerate: _confirmRegenerate,
+      body: _buildBody(),
+    );
+  }
+
+  Widget _buildBody() {
+    if (_online == null) {
+      return const Center(
+        child: CircularProgressIndicator(color: Color(0xFFE8896A)),
+      );
+    }
+    if (_online == false) {
+      return OfflineGate(
+        message: '가족 코드는 자녀에게 전달해 바로 연결해야 해서\nWi-Fi나 데이터 연결이 필요해요.',
+        onRetry: _checkAndLoad,
+      );
+    }
+    return FutureBuilder<({String code, bool isExpired})>(
+      future: _codeFuture,
+      builder: (context, snap) {
+        if (snap.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(color: Color(0xFFE8896A)),
           );
-        },
-      ),
+        }
+        if (snap.hasError) {
+          return const Center(child: Text('코드를 불러올 수 없어요'));
+        }
+        final result = snap.data!;
+        return _CodeBody(
+          code: result.code,
+          isExpired: result.isExpired,
+          onRegenerate: _confirmRegenerate,
+        );
+      },
     );
   }
 }

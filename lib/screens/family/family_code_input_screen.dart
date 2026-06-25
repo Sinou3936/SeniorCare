@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../services/connectivity_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/prefs_service.dart';
 import 'family_main_screen.dart';
@@ -30,6 +31,12 @@ class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
 
   Future<void> _connect() async {
     if (!_isFull) return;
+    // 코드 검증은 서버 조회 — 오프라인이면 무한 로딩 대신 안내
+    if (!await ensureOnline(context,
+        message: '가족 연결은 부모님 코드를 서버에서 확인해야 해서\nWi-Fi나 데이터 연결이 필요해요.')) {
+      return;
+    }
+    if (!mounted) return;
     setState(() {
       _isLoading = true;
       _errorMessage = null;

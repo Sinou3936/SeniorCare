@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import '../../models/appointment.dart';
+import '../../services/connectivity_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/notification_service.dart';
 
@@ -38,6 +39,11 @@ class _SeniorHospitalAddScreenState extends State<SeniorHospitalAddScreen> {
   Future<void> _save(BuildContext context) async {
     final name = _hospitalController.text.trim();
     if (name.isEmpty || _isSaving) return;
+    if (!await ensureOnline(context,
+        message: '오프라인에서는 병원 예약을 추가·수정·삭제할 수 없어요.\nWi-Fi나 데이터를 켜고 다시 시도해주세요.')) {
+      return;
+    }
+    if (!context.mounted) return;
     setState(() => _isSaving = true);
     final date = DateTime(
       _selectedDate.year, _selectedDate.month, _selectedDate.day,
