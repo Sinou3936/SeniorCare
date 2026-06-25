@@ -52,12 +52,13 @@ exports.sendInquiry = functions
     await transporter.sendMail({
       from: `약봄 문의 <${process.env.GMAIL_USER}>`,
       to: process.env.GMAIL_USER,
-      subject: `[약봄 문의/${category}]`,
+      subject: '[약봄 문의]',
       text:
+        `카테고리: ${category}\n` +
+        `사용자 ID: ${context.auth.uid}\n` +
         `휴대폰 정보: ${deviceInfo}\n` +
         `내용: ${content}\n\n` +
-        `조치 부탁드립니다.\n\n` +
-        `---\n사용자 ID: ${context.auth.uid}`,
+        `조치 부탁드립니다.`,
     });
 
     return { ok: true };
