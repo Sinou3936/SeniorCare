@@ -7,6 +7,21 @@ class PrefsService {
   static const _keyHospitalNotification = 'hospital_notification_enabled';
   static const _keyLinkedSeniorUid = 'linked_senior_uid';
   static const _keyMedicineSchedule = 'medicine_schedule_cache';
+  static const _keyScheduledAlarmIds = 'scheduled_alarm_ids';
+
+  /// 윈도우 스케줄한 알람 ID 집합 저장 (재등록 시 전부 취소용 — 고아 방지)
+  static Future<void> saveScheduledAlarmIds(List<int> ids) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(
+        _keyScheduledAlarmIds, ids.map((e) => e.toString()).toList());
+  }
+
+  static Future<List<int>> loadScheduledAlarmIds() async {
+    final prefs = await SharedPreferences.getInstance();
+    return (prefs.getStringList(_keyScheduledAlarmIds) ?? const [])
+        .map(int.parse)
+        .toList();
+  }
 
   static Future<void> saveMode(String mode) async {
     final prefs = await SharedPreferences.getInstance();
