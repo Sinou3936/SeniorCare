@@ -7,6 +7,7 @@ import 'package:timezone/data/latest_all.dart' as tz_data;
 import 'package:flutter/services.dart';
 import '../models/medicine.dart';
 import '../models/appointment.dart';
+import '../utils/medicine_schedule.dart';
 import 'firestore_service.dart';
 import 'prefs_service.dart';
 
@@ -150,13 +151,34 @@ class NotificationService {
 
   // ── 슬롯 단위 알람 ────────────────────────────────────────
 
-  /// 슬롯 알람 ID: "08:00" → 50480
+  /// 슬롯 알람 ID: "08:00" → 50480 (스누즈 등 슬롯시각 기준용으로만 잔존)
   static int _slotNotificationId(String time) {
     final parts = time.split(':');
     final hour = int.parse(parts[0]);
     final minute = int.parse(parts[1]);
     return 50000 + hour * 60 + minute;
   }
+
+  // ── 윈도우(날짜별) 알람 ID ────────────────────────────────
+  static const int _windowDays = 7;
+
+  static int _dayCode(DateTime date) =>
+      DateTime(date.year, date.month, date.day)
+          .difference(DateTime(2020, 1, 1))
+          .inDays; // 2026 ≈ 2380
+
+  static int _timeCode(String time) {
+    final p = time.split(':');
+    return int.parse(p[0]) * 60 + int.parse(p[1]); // 0..1439
+  }
+
+  /// 윈도우 메인 알람 ID (1억대, int32 안전)
+  static int _windowedSlotId(DateTime date, String time) =>
+      100000000 + _dayCode(date) * 2000 + _timeCode(time);
+
+  /// 윈도우 리마인더 ID (2억대)
+  static int _windowedReminderId(DateTime date, String time) =>
+      200000000 + _dayCode(date) * 2000 + _timeCode(time);
 
   /// 전체 활성 약을 슬롯 단위로 재등록 + 캐시 갱신 (메인 진입점)
   static Future<void> rescheduleAllAlarms(List<Medicine> medicines) async {
@@ -166,53 +188,75 @@ class NotificationService {
     await rebuildScheduleCache(medicines);
   }
 
+  /// 앞으로 [_windowDays]일치를 (날짜, 슬롯시각) 단위로 개별 스케줄.
+  /// 각 날짜에 활성인 약만 그날 알람에 묶는다. 무한반복(matchDateTimeComponents) 미사용.
+  /// 스케줄한 ID를 prefs에 저장해 다음 재등록 때 전부 취소(고아 방지).
   static Future<void> _scheduleSlotAlarms(List<Medicine> medicines) async {
-    final Map<String, List<Medicine>> timeToMeds = {};
-    for (final m in medicines) {
-      for (final t in m.times) {
-        timeToMeds.putIfAbsent(t, () => []).add(m);
+    final now = tz.TZDateTime.now(tz.local);
+    final today = DateTime(now.year, now.month, now.day);
+    final scheduledIds = <int>[];
+
+    for (var i = 0; i < _windowDays; i++) {
+      final date = today.add(Duration(days: i));
+
+      // 이 날짜에 활성인 슬롯시각별 약 묶기
+      final Map<String, List<Medicine>> timeToMeds = {};
+      for (final m in medicines) {
+        for (final t in m.times) {
+          if (MedicineSchedule.isSlotActiveOn(
+              m.startDate, t, m.durationDays, date)) {
+            timeToMeds.putIfAbsent(t, () => []).add(m);
+          }
+        }
+      }
+
+      for (final entry in timeToMeds.entries) {
+        final time = entry.key;
+        final meds = entry.value;
+        final parts = time.split(':');
+        if (parts.length != 2) continue;
+        final hour = int.tryParse(parts[0]);
+        final minute = int.tryParse(parts[1]);
+        if (hour == null || minute == null) continue;
+
+        final scheduledTime = tz.TZDateTime(
+            tz.local, date.year, date.month, date.day, hour, minute);
+        if (!scheduledTime.isAfter(now)) continue; // 과거(오늘 지난 슬롯) 스킵
+
+        final names = meds.map((m) => m.name).toList();
+        final timeLabel = _koreanTimeLabel(hour, minute);
+        final allTopical = meds.every((m) => m.type == MedicineType.topical);
+        final verb = allTopical ? '바르실' : '드실';
+        final verbPast = allTopical ? '바르셨어요' : '드셨어요';
+
+        // 메인 알람 (fullScreenIntent + 채널음)
+        final slotId = _windowedSlotId(date, time);
+        await _local.zonedSchedule(
+          id: slotId,
+          title: '$timeLabel 약 $verb 시간이에요',
+          body: names.join(', '),
+          scheduledDate: scheduledTime,
+          notificationDetails: _alarmNotificationDetails,
+          androidScheduleMode: AndroidScheduleMode.alarmClock,
+          payload: time,
+        );
+        scheduledIds.add(slotId);
+
+        // 자동 +10분 리마인더 (one-shot)
+        final reminderId = _windowedReminderId(date, time);
+        await _local.zonedSchedule(
+          id: reminderId,
+          title: '$timeLabel 약, 아직 안 $verbPast?',
+          body: names.join(', '),
+          scheduledDate: scheduledTime.add(const Duration(minutes: 10)),
+          notificationDetails: _notificationDetails,
+          androidScheduleMode: AndroidScheduleMode.alarmClock,
+        );
+        scheduledIds.add(reminderId);
       }
     }
 
-    for (final entry in timeToMeds.entries) {
-      final time = entry.key;
-      final meds = entry.value;
-      final names = meds.map((m) => m.name).toList();
-      final parts = time.split(':');
-      if (parts.length != 2) continue;
-      final hour = int.tryParse(parts[0]);
-      final minute = int.tryParse(parts[1]);
-      if (hour == null || minute == null) continue;
-
-      final timeLabel = _koreanTimeLabel(hour, minute);
-      // 슬롯에 먹는약이 하나라도 있으면 "드실", 전부 바르는약이면 "바르실"
-      final allTopical = meds.every((m) => m.type == MedicineType.topical);
-      final verb = allTopical ? '바르실' : '드실';
-      final verbPast = allTopical ? '바르셨어요' : '드셨어요';
-
-      final scheduledTime = _nextOccurrence(hour, minute);
-
-      await _local.zonedSchedule(
-        id: _slotNotificationId(time),
-        title: '$timeLabel 약 $verb 시간이에요',
-        body: names.join(', '),
-        scheduledDate: scheduledTime,
-        notificationDetails: _alarmNotificationDetails,
-        androidScheduleMode: AndroidScheduleMode.alarmClock,
-        matchDateTimeComponents: DateTimeComponents.time,
-        payload: time,
-      );
-
-      // 자동 +10분 리마인더 (one-shot, 복용 완료 시 취소)
-      await _local.zonedSchedule(
-        id: _slotReminderNotificationId(time),
-        title: '$timeLabel 약, 아직 안 $verbPast?',
-        body: names.join(', '),
-        scheduledDate: scheduledTime.add(const Duration(minutes: 10)),
-        notificationDetails: _notificationDetails,
-        androidScheduleMode: AndroidScheduleMode.alarmClock,
-      );
-    }
+    await PrefsService.saveScheduledAlarmIds(scheduledIds);
   }
 
   /// "08:00" → "오전 8시", "13:30" → "오후 1시 30분"
@@ -224,36 +268,38 @@ class NotificationService {
     return minute == 0 ? base : '$base $minute분';
   }
 
-  /// 슬롯 리마인더 ID: "08:00" → 70480
-  static int _slotReminderNotificationId(String time) {
-    final parts = time.split(':');
-    final hour = int.parse(parts[0]);
-    final minute = int.parse(parts[1]);
-    return 70000 + hour * 60 + minute;
-  }
-
   /// 슬롯 리마인더 취소 (복용 완료 또는 10분 후 다시 버튼 시)
+  /// 오늘자 슬롯 리마인더 취소 (복용완료/닫기용)
   static Future<void> cancelSlotReminder(String time) async {
-    await _local.cancel(id: _slotReminderNotificationId(time));
+    final now = tz.TZDateTime.now(tz.local);
+    await _local.cancel(
+        id: _windowedReminderId(DateTime(now.year, now.month, now.day), time));
   }
 
-  /// 슬롯 메인 알람 알림 취소 — FLAG_INSISTENT 진동/소리 정지용
+  /// 오늘자 슬롯 메인 알람 알림 취소 — 진동/소리 정지용
   static Future<void> cancelSlotAlarm(String time) async {
-    await _local.cancel(id: _slotNotificationId(time));
+    final now = tz.TZDateTime.now(tz.local);
+    await _local.cancel(
+        id: _windowedSlotId(DateTime(now.year, now.month, now.day), time));
   }
 
-  /// 캐시 기반으로 등록된 복약 알림 취소 (메인 알람 + 리마인더, 옵션상 스누즈)
+  /// 등록된 복약 알림 전부 취소 (윈도우 메인 알람 + 리마인더, 옵션상 스누즈)
   /// 병원 예약 알람(20000000+)은 건드리지 않음
   /// [includeSnooze] 재스케줄(rescheduleAllAlarms) 시엔 false — 사용자가 누른 스누즈는 보존
   static Future<void> cancelAllSlotAlarms({bool includeSnooze = true}) async {
-    final schedule = await PrefsService.loadMedicineSchedule();
-    for (final time in schedule.keys) {
-      await _local.cancel(id: _slotNotificationId(time));          // 메인 알람
-      await _local.cancel(id: _slotReminderNotificationId(time));  // +10분 리마인더
-      if (includeSnooze) {
-        await _local.cancel(id: 60000 + _slotNotificationId(time)); // 스누즈
+    // 이전에 스케줄한 윈도우 알람 전부 취소 (고아 방지)
+    final ids = await PrefsService.loadScheduledAlarmIds();
+    for (final id in ids) {
+      await _local.cancel(id: id);
+    }
+    // 스누즈는 슬롯시각 기반이라 캐시로 별도 취소
+    if (includeSnooze) {
+      final schedule = await PrefsService.loadMedicineSchedule();
+      for (final time in schedule.keys) {
+        await _local.cancel(id: 60000 + _slotNotificationId(time));
       }
     }
+    await PrefsService.saveScheduledAlarmIds(const []);
   }
 
   /// SharedPreferences 약 스케줄 캐시 갱신
@@ -356,15 +402,6 @@ class NotificationService {
 
   static Future<void> openExactAlarmSettings() async {
     await Permission.scheduleExactAlarm.request();
-  }
-
-  static tz.TZDateTime _nextOccurrence(int hour, int minute) {
-    final now = tz.TZDateTime.now(tz.local);
-    var scheduled = tz.TZDateTime(tz.local, now.year, now.month, now.day, hour, minute);
-    if (scheduled.isBefore(now)) {
-      scheduled = scheduled.add(const Duration(days: 1));
-    }
-    return scheduled;
   }
 
   static Future<void> _requestBatteryOptimizationExemption() async {
