@@ -6,6 +6,7 @@ import '../models/medicine_log.dart';
 import '../models/appointment.dart';
 import '../models/app_notification.dart';
 import '../utils/time_utils.dart';
+import '../utils/medicine_schedule.dart';
 import 'auth_service.dart';
 
 class FirestoreService {
@@ -185,9 +186,8 @@ class FirestoreService {
       final todayDate = DateTime(today.year, today.month, today.day);
       return s.docs
           .map((d) => Medicine.fromFirestore(d))
-          .where((m) =>
-              m.endDate == null ||
-              !m.endDate!.isBefore(todayDate))
+          .where((m) => MedicineSchedule.hasActiveOnOrAfter(
+              m.startDate, m.times, m.durationDays, todayDate))
           .toList();
     });
   }
@@ -198,7 +198,8 @@ class FirestoreService {
     final todayDate = DateTime(today.year, today.month, today.day);
     return snap.docs
         .map((d) => Medicine.fromFirestore(d))
-        .where((m) => m.endDate == null || !m.endDate!.isBefore(todayDate))
+        .where((m) => MedicineSchedule.hasActiveOnOrAfter(
+            m.startDate, m.times, m.durationDays, todayDate))
         .toList();
   }
 
@@ -316,14 +317,12 @@ class FirestoreService {
     for (final doc in medicinesSnap.docs) {
       final medicine = Medicine.fromFirestore(doc);
 
-      final startDay = DateTime(medicine.startDate.year, medicine.startDate.month, medicine.startDate.day);
-      if (start.isBefore(startDay)) continue;
-      if (medicine.endDate != null) {
-        final endDay = DateTime(medicine.endDate!.year, medicine.endDate!.month, medicine.endDate!.day);
-        if (start.isAfter(endDay)) continue;
-      }
-
       for (final time in medicine.times) {
+        // 이 슬롯이 이 날짜에 활성(발생일)인지 — durationDays 규칙
+        if (!MedicineSchedule.isSlotActiveOn(
+            medicine.startDate, time, medicine.durationDays, start)) {
+          continue;
+        }
         final parts = time.split(':');
         if (parts.length != 2) continue;
         final h = int.tryParse(parts[0]);
