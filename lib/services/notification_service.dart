@@ -182,10 +182,23 @@ class NotificationService {
 
   /// 전체 활성 약을 슬롯 단위로 재등록 + 캐시 갱신 (메인 진입점)
   static Future<void> rescheduleAllAlarms(List<Medicine> medicines) async {
-    // 이전 캐시 기반으로 복약 알림만 취소 (병원 알람·사용자 스누즈는 보존)
+    await _cancelLegacyAlarmsOnce();
+    // 이전 윈도우 ID 기반으로 복약 알림만 취소 (병원 알람·사용자 스누즈는 보존)
     await cancelAllSlotAlarms(includeSnooze: false);
     await _scheduleSlotAlarms(medicines);
     await rebuildScheduleCache(medicines);
+  }
+
+  /// 1회성 마이그레이션: 옛 버전(v1.0.4 이전)이 무한반복으로 걸어둔 슬롯 알람 유령 제거.
+  /// 옛 스킴 ID = 메인 50000+(h*60+m), 리마인더 70000+(h*60+m). 앱 데이터 삭제로는
+  /// 안 지워지므로(시스템 AlarmManager) 업그레이드 사용자에게 남는다. 병원 알람(20000000+)은 미접촉.
+  static Future<void> _cancelLegacyAlarmsOnce() async {
+    if (await PrefsService.loadLegacyAlarmsCleared()) return;
+    for (var t = 0; t <= 1439; t++) {
+      await _local.cancel(id: 50000 + t); // 옛 메인
+      await _local.cancel(id: 70000 + t); // 옛 리마인더
+    }
+    await PrefsService.saveLegacyAlarmsCleared(true);
   }
 
   /// 앞으로 [_windowDays]일치를 (날짜, 슬롯시각) 단위로 개별 스케줄.

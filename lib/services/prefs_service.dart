@@ -23,6 +23,19 @@ class PrefsService {
         .toList();
   }
 
+  static const _keyLegacyAlarmsCleared = 'legacy_alarms_cleared';
+
+  /// 옛 버전(무한반복 슬롯 알람) 유령 제거 1회성 마이그레이션 완료 여부
+  static Future<bool> loadLegacyAlarmsCleared() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyLegacyAlarmsCleared) ?? false;
+  }
+
+  static Future<void> saveLegacyAlarmsCleared(bool v) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyLegacyAlarmsCleared, v);
+  }
+
   static Future<void> saveMode(String mode) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyMode, mode);
