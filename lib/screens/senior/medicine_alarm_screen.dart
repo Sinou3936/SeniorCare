@@ -75,6 +75,9 @@ class _MedicineAlarmScreenState extends State<MedicineAlarmScreen> {
     // 실제 복용 처리 (오늘 이 시간대 로그 taken:true) + 자동 리마인더 취소 후 홈으로
     await FirestoreService.markDoseTakenAt(widget.time);
     await NotificationService.cancelSlotReminder(widget.time);
+    // 7일 윈도우 앞으로 재연장 (무한약도 끊기지 않게). 캐시 기반이라 오프라인 안전.
+    final meds = await FirestoreService.getActiveMedicines();
+    await NotificationService.rescheduleAllAlarms(meds);
     _dismiss();
   }
 
