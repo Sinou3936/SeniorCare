@@ -99,9 +99,9 @@ class _DetailView extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    medicine.endDate != null
-                        ? '복용 종료: ${medicine.endDate!.year}년 ${medicine.endDate!.month}월 ${medicine.endDate!.day}일'
-                        : '복용 종료: 미설정 (계속 복용)',
+                    medicine.durationDays != null
+                        ? '복용 기간: ${medicine.durationDays}일'
+                        : '복용 기간: 계속',
                     style: const TextStyle(fontSize: 16, color: Color(0xFF666666)),
                   ),
                 ],
