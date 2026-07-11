@@ -21,7 +21,9 @@ class Medicine {
   final String? photoUrl;
   final List<String> times;
   final DateTime startDate;
-  final DateTime? endDate;
+
+  /// 복용 기간(일수). null = 계속(무한). 각 슬롯이 이 일수만큼 발동한다.
+  final int? durationDays;
   final MedicineType type;
 
   const Medicine({
@@ -30,7 +32,7 @@ class Medicine {
     this.photoUrl,
     required this.times,
     required this.startDate,
-    this.endDate,
+    this.durationDays,
     this.type = MedicineType.oral,
   });
 
@@ -42,9 +44,7 @@ class Medicine {
       photoUrl: d['photoUrl'] as String?,
       times: List<String>.from(d['times'] ?? []),
       startDate: (d['startDate'] as Timestamp).toDate(),
-      endDate: d['endDate'] != null
-          ? (d['endDate'] as Timestamp).toDate()
-          : null,
+      durationDays: (d['durationDays'] as num?)?.toInt(),
       type: MedicineType.fromString(d['type'] as String?),
     );
   }
@@ -54,7 +54,7 @@ class Medicine {
         'photoUrl': photoUrl,
         'times': times,
         'startDate': Timestamp.fromDate(startDate),
-        'endDate': endDate != null ? Timestamp.fromDate(endDate!) : null,
+        'durationDays': durationDays,
         'type': type.name,
       };
 }
