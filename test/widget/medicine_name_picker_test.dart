@@ -35,7 +35,7 @@ void main() {
       await tester.tap(find.text('혈압·심장약'));
       await tester.pump();
       expect(find.text('혈압약'), findsOneWidget);
-      expect(find.text('심장 관련 약'), findsOneWidget);
+      expect(find.text('심장약'), findsOneWidget);
 
       await tester.tap(find.text('혈압약'));
       expect(picked?.name, '혈압약');

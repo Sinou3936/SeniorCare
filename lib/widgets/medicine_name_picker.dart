@@ -20,7 +20,7 @@ const List<MedicineNameCategory> medicineNameCategories = [
   MedicineNameCategory('혈압·심장약', [
     MedicineNameItem('혈압약'),
     MedicineNameItem('혈전 예방약'),
-    MedicineNameItem('심장 관련 약'),
+    MedicineNameItem('심장약'),
   ]),
   MedicineNameCategory('당뇨·콜레스테롤약', [
     MedicineNameItem('고지혈증약'),
@@ -42,12 +42,12 @@ const List<MedicineNameCategory> medicineNameCategories = [
     MedicineNameItem('알레르기약'),
     MedicineNameItem('흡입기', type: MedicineType.topical),
   ]),
-  MedicineNameCategory('정신건강·수면 관련 약', [
-    MedicineNameItem('수면 관련 약'),
-    MedicineNameItem('불안·우울 관련 약'),
+  MedicineNameCategory('정신건강·수면약', [
+    MedicineNameItem('수면제'),
+    MedicineNameItem('불안·우울약'),
     MedicineNameItem('치매약'),
   ]),
-  MedicineNameCategory('기타 질환 관련 약', [
+  MedicineNameCategory('기타 질환약', [
     MedicineNameItem('골다공증약'),
     MedicineNameItem('전립선약'),
     MedicineNameItem('갑상선약'),
