@@ -6,6 +6,7 @@ import '../../services/notification_service.dart';
 import '../../services/prefs_service.dart';
 import 'senior_medicine_add_screen.dart' show MedicineTypeButton;
 import '../../widgets/duration_selector.dart';
+import '../../widgets/medicine_name_picker.dart';
 
 class SeniorMedicineEditScreen extends StatefulWidget {
   final Medicine medicine;
@@ -16,7 +17,7 @@ class SeniorMedicineEditScreen extends StatefulWidget {
 }
 
 class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
-  late final TextEditingController _nameController;
+  late String _name;
 
   // 슬롯 이름 → 기본 분 단위
   static const _defaultMinutes = {'새벽': 4 * 60, '아침': 8 * 60, '점심': 12 * 60, '저녁': 18 * 60, '취침': 21 * 60};
@@ -31,7 +32,7 @@ class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
   @override
   void initState() {
     super.initState();
-    _nameController = TextEditingController(text: widget.medicine.name);
+    _name = widget.medicine.name;
 
     // 기존 times ("08:00" 형식) 파싱
     final existingTimes = <String, int>{};
@@ -52,12 +53,6 @@ class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
     };
     _durationDays = widget.medicine.durationDays;
     _medicineType = widget.medicine.type;
-  }
-
-  @override
-  void dispose() {
-    _nameController.dispose();
-    super.dispose();
   }
 
   String _slotFromMinutes(int mins) {
@@ -86,8 +81,7 @@ class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
   }
 
   Future<void> _save() async {
-    final name = _nameController.text.trim();
-    if (name.isEmpty) return;
+    final name = _name;
     if (!await ensureOnline(context,
         message: '오프라인에서는 약을 추가·수정·삭제할 수 없어요.\nWi-Fi나 데이터를 켜고 다시 시도해주세요.')) {
       return;
@@ -141,18 +135,12 @@ class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
           children: [
             const Text('약 이름', style: TextStyle(fontSize: 18, color: Color(0xFF666666))),
             const SizedBox(height: 8),
-            TextField(
-              controller: _nameController,
-              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-              decoration: InputDecoration(
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.all(16),
-              ),
+            MedicineNamePicker(
+              name: _name,
+              onSelected: (item) => setState(() {
+                _name = item.name;
+                _medicineType = item.type;
+              }),
             ),
             const SizedBox(height: 24),
             const Text('약 종류',
