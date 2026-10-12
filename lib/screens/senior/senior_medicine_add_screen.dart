@@ -5,8 +5,10 @@ import '../../services/connectivity_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/notification_service.dart';
 import '../../services/prefs_service.dart';
+import '../../utils/tap_guard.dart';
 import '../../utils/time_utils.dart';
 import '../../widgets/duration_selector.dart';
+import '../../widgets/medicine_name_picker.dart';
 
 class SeniorMedicineAddScreen extends StatefulWidget {
   const SeniorMedicineAddScreen({super.key});
@@ -16,7 +18,8 @@ class SeniorMedicineAddScreen extends StatefulWidget {
 }
 
 class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
-  final _nameController = TextEditingController();
+  String? _name; // null = 아직 안 고름
+  final _saveGuard = TapGuard();
 
   int? _durationDays; // null = 계속
   bool _isSaving = false;
@@ -37,12 +40,6 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
     '취침': false,
   };
 
-  @override
-  void dispose() {
-    _nameController.dispose();
-    super.dispose();
-  }
-
   String _formatTime(int minutes) {
     final h = (minutes ~/ 60).toString().padLeft(2, '0');
     final m = (minutes % 60).toString().padLeft(2, '0');
@@ -61,8 +58,8 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
   }
 
   Future<void> _save(BuildContext context) async {
-    final name = _nameController.text.trim();
-    if (name.isEmpty || _isSaving) return;
+    final name = _name;
+    if (name == null || _isSaving) return;
     if (!await ensureOnline(context,
         message: '오프라인에서는 약을 추가·수정·삭제할 수 없어요.\nWi-Fi나 데이터를 켜고 다시 시도해주세요.')) {
       return;
@@ -123,24 +120,12 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
             const Text('약 이름',
                 style: TextStyle(fontSize: 18, color: Color(0xFF666666))),
             const SizedBox(height: 8),
-            TextField(
-              controller: _nameController,
-              style: const TextStyle(
-                  fontSize: 22, fontWeight: FontWeight.bold),
-              decoration: InputDecoration(
-                hintText: '약 이름 입력',
-                hintStyle: const TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFFCCCCCC)),
-                filled: true,
-                fillColor: Colors.white,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(14),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.all(16),
-              ),
+            MedicineNamePicker(
+              name: _name,
+              onSelected: (item) => setState(() {
+                _name = item.name;
+                _medicineType = item.type;
+              }),
             ),
             const SizedBox(height: 24),
             const Text('약 종류',
@@ -200,7 +185,9 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
               width: double.infinity,
               height: 64,
               child: ElevatedButton(
-                onPressed: _isSaving ? null : () => _save(context),
+                onPressed: _isSaving || _name == null
+                    ? null
+                    : () => _saveGuard.run(() => _save(context)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFE8896A),
                   shape: RoundedRectangleBorder(

@@ -4,6 +4,8 @@ import '../../models/appointment.dart';
 import '../../services/connectivity_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/notification_service.dart';
+import '../../utils/recent_hospitals.dart';
+import '../../utils/tap_guard.dart';
 
 class SeniorHospitalAddScreen extends StatefulWidget {
   const SeniorHospitalAddScreen({super.key});
@@ -18,6 +20,29 @@ class _SeniorHospitalAddScreenState extends State<SeniorHospitalAddScreen> {
   DateTime _selectedDate = DateTime.now().add(const Duration(days: 1));
   int _timeMinutes = 10 * 60;
   bool _isSaving = false;
+  final _saveGuard = TapGuard();
+  List<RecentHospital> _recent = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadRecent();
+  }
+
+  // 실패해도(오프라인 등) 버튼만 안 보일 뿐 직접 입력은 그대로 가능
+  Future<void> _loadRecent() async {
+    try {
+      final all = await FirestoreService.getRecentAppointments();
+      if (mounted) setState(() => _recent = recentHospitals(all));
+    } catch (_) {}
+  }
+
+  void _pickRecent(RecentHospital h) {
+    setState(() {
+      _hospitalController.text = h.name;
+      _timeMinutes = h.timeMinutes;
+    });
+  }
 
   @override
   void dispose() {
@@ -111,6 +136,44 @@ class _SeniorHospitalAddScreenState extends State<SeniorHospitalAddScreen> {
                 contentPadding: const EdgeInsets.all(16),
               ),
             ),
+            if (_recent.isNotEmpty) ...[
+              const SizedBox(height: 14),
+              const Text('최근 병원',
+                  style: TextStyle(fontSize: 16, color: Color(0xFF999999))),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  for (final h in _recent)
+                    GestureDetector(
+                      onTap: () => _pickRecent(h),
+                      child: Container(
+                        constraints: BoxConstraints(
+                            maxWidth: MediaQuery.of(context).size.width - 40),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 18, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                              color: const Color(0xFFE8896A), width: 2),
+                        ),
+                        child: Text(
+                          h.name,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFFE8896A),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ],
             const SizedBox(height: 24),
             const Text('날짜', style: TextStyle(fontSize: 18, color: Color(0xFF666666))),
             const SizedBox(height: 8),
@@ -196,7 +259,8 @@ class _SeniorHospitalAddScreenState extends State<SeniorHospitalAddScreen> {
               width: double.infinity,
               height: 64,
               child: ElevatedButton(
-                onPressed: _isSaving ? null : () => _save(context),
+                onPressed:
+                    _isSaving ? null : () => _saveGuard.run(() => _save(context)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFE8896A),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),

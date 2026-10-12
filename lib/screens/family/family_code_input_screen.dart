@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import '../../services/connectivity_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/prefs_service.dart';
+import '../../utils/tap_guard.dart';
 import 'family_main_screen.dart';
 
 class FamilyCodeInputScreen extends StatefulWidget {
@@ -17,6 +18,7 @@ class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
   final FocusNode _focusNode = FocusNode();
 
   bool _isLoading = false;
+  final _connectGuard = TapGuard();
   String? _errorMessage;
 
   @override
@@ -190,7 +192,9 @@ class _FamilyCodeInputScreenState extends State<FamilyCodeInputScreen> {
                   width: double.infinity,
                   height: 64,
                   child: ElevatedButton(
-                    onPressed: _isFull && !_isLoading ? _connect : null,
+                    onPressed: _isFull && !_isLoading
+                        ? () => _connectGuard.run(_connect)
+                        : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.white,
                       disabledBackgroundColor: Colors.white38,

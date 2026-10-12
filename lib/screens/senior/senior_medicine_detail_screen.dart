@@ -4,6 +4,7 @@ import '../../services/connectivity_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/notification_service.dart';
 import '../../services/prefs_service.dart';
+import '../../utils/tap_guard.dart';
 import 'senior_medicine_edit_screen.dart';
 
 class SeniorMedicineDetailScreen extends StatelessWidget {
@@ -32,6 +33,8 @@ class SeniorMedicineDetailScreen extends StatelessWidget {
 }
 
 class _DetailView extends StatelessWidget {
+  static final _guard = TapGuard();
+
   final Medicine medicine;
   const _DetailView({required this.medicine});
 
@@ -114,7 +117,7 @@ class _DetailView extends StatelessWidget {
                   child: SizedBox(
                     height: 64,
                     child: ElevatedButton(
-                      onPressed: () async {
+                      onPressed: () => _guard.run(() async {
                         // 삭제처럼 상세 화면에서 바로 차단 (화면 전환 없이)
                         if (!await ensureOnline(context,
                             message:
@@ -129,7 +132,7 @@ class _DetailView extends StatelessWidget {
                                 SeniorMedicineEditScreen(medicine: medicine),
                           ),
                         );
-                      },
+                      }),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFE8896A),
                         shape: RoundedRectangleBorder(
@@ -148,7 +151,7 @@ class _DetailView extends StatelessWidget {
                   child: SizedBox(
                     height: 64,
                     child: ElevatedButton(
-                      onPressed: () => _confirmDelete(context),
+                      onPressed: () => _guard.run(() => _confirmDelete(context)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFE53935),
                         shape: RoundedRectangleBorder(

@@ -3,9 +3,12 @@ import 'senior/senior_main_screen.dart';
 import 'family/family_code_input_screen.dart';
 import '../services/connectivity_service.dart';
 import '../services/prefs_service.dart';
+import '../utils/tap_guard.dart';
 
 class ModeSelectScreen extends StatelessWidget {
   const ModeSelectScreen({super.key});
+
+  static final _guard = TapGuard();
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +48,7 @@ class ModeSelectScreen extends StatelessWidget {
                 subtitle: '약 복용 · 병원 예약',
                 color: Colors.white,
                 textColor: const Color(0xFFE8896A),
-                onTap: () async {
+                onTap: () => _guard.run(() async {
                   await PrefsService.saveMode('senior');
                   if (context.mounted) {
                     Navigator.pushReplacement(
@@ -53,7 +56,7 @@ class ModeSelectScreen extends StatelessWidget {
                       MaterialPageRoute(builder: (_) => const SeniorMainScreen()),
                     );
                   }
-                },
+                }),
 
               ),
               const SizedBox(height: 20),
@@ -64,7 +67,7 @@ class ModeSelectScreen extends StatelessWidget {
                 color: Colors.white24,
                 textColor: Colors.white,
                 border: Border.all(color: Colors.white, width: 2),
-                onTap: () async {
+                onTap: () => _guard.run(() async {
                   // 가족 모드는 온라인 필수 — 진입 전(코드 입력 가기 전)에 차단
                   if (!await ensureOnline(context,
                       message:
@@ -77,7 +80,7 @@ class ModeSelectScreen extends StatelessWidget {
                     MaterialPageRoute(
                         builder: (_) => const FamilyCodeInputScreen()),
                   );
-                },
+                }),
               ),
               ],
             ),
