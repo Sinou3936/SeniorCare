@@ -483,6 +483,15 @@ class FirestoreService {
     return snap.docs.map((d) => Appointment.fromFirestore(d)).toList();
   }
 
+  /// 예약 추가 화면의 "최근 병원" 용 — 예약일이 최신인 순으로 [limit]건 (지난 예약 포함)
+  static Future<List<Appointment>> getRecentAppointments({int limit = 30}) async {
+    final snap = await _appointments
+        .orderBy('date', descending: true)
+        .limit(limit)
+        .get();
+    return snap.docs.map((d) => Appointment.fromFirestore(d)).toList();
+  }
+
   static Future<void> addAppointment(Appointment a) async {
     await _appointments.doc(a.id).set(a.toMap());
   }
