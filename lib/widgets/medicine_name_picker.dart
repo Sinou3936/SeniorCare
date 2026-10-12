@@ -15,15 +15,16 @@ class MedicineNameCategory {
 }
 
 /// 약 이름 카테고리 — 입력칸 없이 버튼으로만 이름을 정한다(시니어 타이핑 부담·잘못된 값 방지).
-/// 목록에 없는 약은 '그 외 약'으로 등록한다.
+/// 카테고리별 세부 항목은 65세 이상이 많이 복용하는 순(노인실태조사 유병률 기준 추정).
 const List<MedicineNameCategory> medicineNameCategories = [
   MedicineNameCategory('혈압·심장약', [
     MedicineNameItem('혈압약'),
+    MedicineNameItem('혈전 예방약'),
     MedicineNameItem('심장 관련 약'),
   ]),
   MedicineNameCategory('당뇨·콜레스테롤약', [
-    MedicineNameItem('당뇨약'),
     MedicineNameItem('고지혈증약'),
+    MedicineNameItem('당뇨약'),
   ]),
   MedicineNameCategory('관절·통증약', [
     MedicineNameItem('관절약'),
@@ -39,20 +40,23 @@ const List<MedicineNameCategory> medicineNameCategories = [
     MedicineNameItem('감기약'),
     MedicineNameItem('기침약'),
     MedicineNameItem('알레르기약'),
+    MedicineNameItem('흡입기', type: MedicineType.topical),
   ]),
   MedicineNameCategory('정신건강·수면 관련 약', [
     MedicineNameItem('수면 관련 약'),
     MedicineNameItem('불안·우울 관련 약'),
+    MedicineNameItem('치매약'),
   ]),
   MedicineNameCategory('기타 질환 관련 약', [
+    MedicineNameItem('골다공증약'),
+    MedicineNameItem('전립선약'),
     MedicineNameItem('갑상선약'),
-    MedicineNameItem('그 외 약'),
   ]),
   MedicineNameCategory('외용약·영양제', [
-    MedicineNameItem('연고', type: MedicineType.topical),
     MedicineNameItem('파스', type: MedicineType.topical),
-    MedicineNameItem('안약', type: MedicineType.topical),
     MedicineNameItem('비타민·영양제'),
+    MedicineNameItem('안약', type: MedicineType.topical),
+    MedicineNameItem('연고', type: MedicineType.topical),
   ]),
 ];
 

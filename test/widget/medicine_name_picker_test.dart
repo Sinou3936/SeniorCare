@@ -70,6 +70,27 @@ void main() {
       expect(find.text('혈압약'), findsNothing);
     });
 
+    testWidgets('흡입기는 바르는약으로 정해진다', (tester) async {
+      MedicineNameItem? picked;
+      await tester.pumpWidget(host(onSelected: (i) => picked = i));
+
+      await tester.tap(find.text('감기·호흡기약'));
+      await tester.pump();
+      await tester.tap(find.text('흡입기'));
+      expect(picked?.type, MedicineType.topical);
+    });
+
+    test('노인 다빈도 약이 목록에 있고, 직접 입력용 "그 외 약"은 없다', () {
+      final names = [
+        for (final c in medicineNameCategories) ...c.items.map((i) => i.name),
+      ];
+      expect(
+        names,
+        containsAll(['혈전 예방약', '치매약', '골다공증약', '전립선약', '갑상선약', '흡입기']),
+      );
+      expect(names, isNot(contains('그 외 약')));
+    });
+
     test('세부 이름은 중복 없이 유일하다', () {
       final names = [
         for (final c in medicineNameCategories) ...c.items.map((i) => i.name),

@@ -3,9 +3,12 @@ import '../../models/appointment.dart';
 import '../../services/connectivity_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/notification_service.dart';
+import '../../utils/tap_guard.dart';
 import 'senior_hospital_edit_screen.dart';
 
 class SeniorHospitalDetailScreen extends StatelessWidget {
+  static final _guard = TapGuard();
+
   final Appointment appointment;
 
   const SeniorHospitalDetailScreen({super.key, required this.appointment});
@@ -79,7 +82,7 @@ class SeniorHospitalDetailScreen extends StatelessWidget {
                   child: SizedBox(
                     height: 64,
                     child: ElevatedButton(
-                      onPressed: () async {
+                      onPressed: () => _guard.run(() async {
                         // 삭제처럼 상세 화면에서 바로 차단 (화면 전환 없이)
                         if (!await ensureOnline(context,
                             message:
@@ -94,7 +97,7 @@ class SeniorHospitalDetailScreen extends StatelessWidget {
                                 SeniorHospitalEditScreen(appointment: appointment),
                           ),
                         );
-                      },
+                      }),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFE8896A),
                         shape: RoundedRectangleBorder(
@@ -113,7 +116,7 @@ class SeniorHospitalDetailScreen extends StatelessWidget {
                   child: SizedBox(
                     height: 64,
                     child: ElevatedButton(
-                      onPressed: () => _confirmDelete(context),
+                      onPressed: () => _guard.run(() => _confirmDelete(context)),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFE53935),
                         shape: RoundedRectangleBorder(

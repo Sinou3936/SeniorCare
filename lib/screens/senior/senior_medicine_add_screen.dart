@@ -5,6 +5,7 @@ import '../../services/connectivity_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/notification_service.dart';
 import '../../services/prefs_service.dart';
+import '../../utils/tap_guard.dart';
 import '../../utils/time_utils.dart';
 import '../../widgets/duration_selector.dart';
 import '../../widgets/medicine_name_picker.dart';
@@ -18,6 +19,7 @@ class SeniorMedicineAddScreen extends StatefulWidget {
 
 class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
   String? _name; // null = 아직 안 고름
+  final _saveGuard = TapGuard();
 
   int? _durationDays; // null = 계속
   bool _isSaving = false;
@@ -183,8 +185,9 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
               width: double.infinity,
               height: 64,
               child: ElevatedButton(
-                onPressed:
-                    _isSaving || _name == null ? null : () => _save(context),
+                onPressed: _isSaving || _name == null
+                    ? null
+                    : () => _saveGuard.run(() => _save(context)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFE8896A),
                   shape: RoundedRectangleBorder(

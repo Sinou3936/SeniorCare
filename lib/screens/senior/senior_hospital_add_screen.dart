@@ -4,6 +4,7 @@ import '../../models/appointment.dart';
 import '../../services/connectivity_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/notification_service.dart';
+import '../../utils/tap_guard.dart';
 
 class SeniorHospitalAddScreen extends StatefulWidget {
   const SeniorHospitalAddScreen({super.key});
@@ -18,6 +19,7 @@ class _SeniorHospitalAddScreenState extends State<SeniorHospitalAddScreen> {
   DateTime _selectedDate = DateTime.now().add(const Duration(days: 1));
   int _timeMinutes = 10 * 60;
   bool _isSaving = false;
+  final _saveGuard = TapGuard();
 
   @override
   void dispose() {
@@ -196,7 +198,8 @@ class _SeniorHospitalAddScreenState extends State<SeniorHospitalAddScreen> {
               width: double.infinity,
               height: 64,
               child: ElevatedButton(
-                onPressed: _isSaving ? null : () => _save(context),
+                onPressed:
+                    _isSaving ? null : () => _saveGuard.run(() => _save(context)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFE8896A),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),

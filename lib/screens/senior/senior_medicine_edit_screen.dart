@@ -4,6 +4,7 @@ import '../../services/connectivity_service.dart';
 import '../../services/firestore_service.dart';
 import '../../services/notification_service.dart';
 import '../../services/prefs_service.dart';
+import '../../utils/tap_guard.dart';
 import 'senior_medicine_add_screen.dart' show MedicineTypeButton;
 import '../../widgets/duration_selector.dart';
 import '../../widgets/medicine_name_picker.dart';
@@ -18,6 +19,7 @@ class SeniorMedicineEditScreen extends StatefulWidget {
 
 class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
   late String _name;
+  final _saveGuard = TapGuard();
 
   // 슬롯 이름 → 기본 분 단위
   static const _defaultMinutes = {'새벽': 4 * 60, '아침': 8 * 60, '점심': 12 * 60, '저녁': 18 * 60, '취침': 21 * 60};
@@ -197,7 +199,7 @@ class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
               width: double.infinity,
               height: 64,
               child: ElevatedButton(
-                onPressed: _isSaving ? null : _save,
+                onPressed: _isSaving ? null : () => _saveGuard.run(_save),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFE8896A),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
