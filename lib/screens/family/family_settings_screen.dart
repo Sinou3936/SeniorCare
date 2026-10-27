@@ -133,14 +133,6 @@ class _FamilySettingsScreenState extends State<FamilySettingsScreen> {
                                         assetPath: 'account-deletion.md'))),
                           ),
                         ]),
-                        const SizedBox(height: 12),
-                        const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 4),
-                          child: Text(
-                            '이 앱은 복약 관리를 돕는 도구이며, 의료 전문가의 진단·처방·상담을 대체하지 않습니다.',
-                            style: TextStyle(fontSize: 13, color: Color(0xFF999999)),
-                          ),
-                        ),
 
                         const SizedBox(height: 32),
 
