@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
@@ -46,12 +47,10 @@ void main() async {
     // 오프라인 등 실패 시 계속 진행 — 온라인 복귀/다음 실행 때 인증
   }
 
-  // 마지막 로그인 기록 — 미사용 계정 정리 판단용. 실패해도 앱 실행을 막지 않음
-  try {
-    await FirestoreService.recordLogin();
-  } catch (_) {
-    // 인증 실패/오프라인 등 — 다음 실행 때 기록
-  }
+  // 마지막 로그인 기록 — 미사용 계정 정리 판단용.
+  // await 하지 않는다: Firestore 쓰기 Future 는 서버 확인 전까지 완료되지 않아
+  // 오프라인에서 시작이 멈춘다. 쓰기는 로컬 큐에 쌓여 온라인 복귀 때 전송된다.
+  unawaited(FirestoreService.recordLogin().catchError((_) {}));
 
   await NotificationService.init();
 
