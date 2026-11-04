@@ -46,6 +46,13 @@ void main() async {
     // 오프라인 등 실패 시 계속 진행 — 온라인 복귀/다음 실행 때 인증
   }
 
+  // 마지막 로그인 기록 — 미사용 계정 정리 판단용. 실패해도 앱 실행을 막지 않음
+  try {
+    await FirestoreService.recordLogin();
+  } catch (_) {
+    // 인증 실패/오프라인 등 — 다음 실행 때 기록
+  }
+
   await NotificationService.init();
 
   // 백그라운드 앱이 알람으로 깨어났을 때(onNewIntent) → 화면상태로 분기

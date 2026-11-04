@@ -7,6 +7,7 @@ import '../models/appointment.dart';
 import '../models/app_notification.dart';
 import '../utils/time_utils.dart';
 import '../utils/medicine_schedule.dart';
+import '../utils/user_profile_fields.dart';
 import 'auth_service.dart';
 
 class FirestoreService {
@@ -107,6 +108,21 @@ class FirestoreService {
     // 시니어 doc에 가족 uid 추가
     await _users.doc(seniorUid).set(
       {'linkedFamilyUids': FieldValue.arrayUnion([familyUid])},
+      SetOptions(merge: true),
+    );
+  }
+
+  /// 마지막 로그인 시각·익명 여부 갱신.
+  /// 미사용 계정 정리 판단용으로 Firebase 콘솔에서 확인한다.
+  /// 가입일(createdAt)은 Cloud Functions 가 계정 생성 시 한 번만 기록한다.
+  static Future<void> recordLogin() async {
+    final uid = AuthService.uid;
+    if (uid == null) return;
+    await _users.doc(uid).set(
+      UserProfileFields.loginUpdate(
+        isAnonymous: AuthService.isAnonymous,
+        serverTimestamp: FieldValue.serverTimestamp(),
+      ),
       SetOptions(merge: true),
     );
   }

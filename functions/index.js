@@ -2,6 +2,8 @@ const functions = require('firebase-functions/v1');
 const { initializeApp } = require('firebase-admin/app');
 const { getFirestore, Timestamp } = require('firebase-admin/firestore');
 const { getMessaging } = require('firebase-admin/messaging');
+const { getAuth } = require('firebase-admin/auth');
+const { buildProfileFromAuthUser } = require('./user_profile');
 const { CloudTasksClient } = require('@google-cloud/tasks');
 const nodemailer = require('nodemailer');
 
@@ -220,4 +222,63 @@ exports.sendMissedDoseNotification = functions
 
     await markNotified();
     res.sendStatus(200);
+  });
+
+/**
+ * 신규 계정 생성 시 users/{uid} 에 가입일을 기록.
+ * 계정당 정확히 한 번만 실행되므로 createdAt 이 덮어써지지 않는다.
+ * Auth 트리거는 리전 지정을 지원하지 않아 기본 리전에 배포된다.
+ */
+exports.recordUserSignup = functions.auth.user().onCreate(async (user) => {
+  const profile = buildProfileFromAuthUser(user);
+  await db
+    .collection('users')
+    .doc(user.uid)
+    .set(
+      {
+        createdAt: Timestamp.fromDate(profile.createdAt),
+        isAnonymous: profile.isAnonymous,
+      },
+      { merge: true },
+    );
+});
+
+/**
+ * 기존 사용자 백필 — Auth 의 생성일/마지막 로그인을 users 문서로 복사.
+ * 1회 실행용. 실행 후 이 함수는 삭제할 것.
+ * 시크릿: BACKFILL_SECRET
+ *   firebase functions:secrets:set BACKFILL_SECRET
+ */
+exports.backfillUserProfiles = functions
+  .region('asia-northeast3')
+  .runWith({ secrets: ['BACKFILL_SECRET'], timeoutSeconds: 540 })
+  .https.onCall(async (data) => {
+    const given = (data && data.secret) || '';
+    if (!given || given !== process.env.BACKFILL_SECRET) {
+      throw new functions.https.HttpsError('permission-denied', '관리자 전용입니다.');
+    }
+
+    let pageToken;
+    let scanned = 0;
+    do {
+      const page = await getAuth().listUsers(1000, pageToken);
+      const batch = db.batch();
+      for (const user of page.users) {
+        const profile = buildProfileFromAuthUser(user);
+        const fields = {
+          createdAt: Timestamp.fromDate(profile.createdAt),
+          isAnonymous: profile.isAnonymous,
+        };
+        // 앱에서 이미 기록한 lastLoginAt 을 null 로 덮어쓰지 않도록 값이 있을 때만 쓴다
+        if (profile.lastLoginAt) {
+          fields.lastLoginAt = Timestamp.fromDate(profile.lastLoginAt);
+        }
+        batch.set(db.collection('users').doc(user.uid), fields, { merge: true });
+        scanned++;
+      }
+      await batch.commit();
+      pageToken = page.pageToken;
+    } while (pageToken);
+
+    return { scanned };
   });
