@@ -18,6 +18,8 @@ migrate_working_dir/
 google-services.json
 GoogleService-Info.plist
 firebase_options.dart
+# 활성 프로젝트 지정 — 로컬 환경별로 다르므로 추적 제외
+.firebaserc
 
 # 릴리스 서명 — 절대 커밋 금지 (분실 시 앱 업데이트 불가)
 android/key.properties
