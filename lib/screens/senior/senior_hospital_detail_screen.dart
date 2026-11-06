@@ -6,12 +6,38 @@ import '../../services/notification_service.dart';
 import '../../utils/tap_guard.dart';
 import 'senior_hospital_edit_screen.dart';
 
+/// 병원 상세 — 서버를 구독해서 수정 직후에도 최신 값을 보여준다 (약 상세와 같은 방식).
 class SeniorHospitalDetailScreen extends StatelessWidget {
+  final Appointment appointment;
+
+  const SeniorHospitalDetailScreen({super.key, required this.appointment});
+
+  @override
+  Widget build(BuildContext context) {
+    return StreamBuilder<Appointment?>(
+      stream: FirestoreService.watchAppointment(appointment.id),
+      initialData: appointment,
+      builder: (context, snap) {
+        final a = snap.data;
+        if (a == null) {
+          // 삭제된 경우 자동으로 뒤로 이동
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            if (context.mounted) Navigator.pop(context);
+          });
+          return const SizedBox.shrink();
+        }
+        return _HospitalDetailView(appointment: a);
+      },
+    );
+  }
+}
+
+class _HospitalDetailView extends StatelessWidget {
   static final _guard = TapGuard();
 
   final Appointment appointment;
 
-  const SeniorHospitalDetailScreen({super.key, required this.appointment});
+  const _HospitalDetailView({required this.appointment});
 
   @override
   Widget build(BuildContext context) {

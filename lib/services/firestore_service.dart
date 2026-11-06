@@ -485,6 +485,13 @@ class FirestoreService {
         .map((s) => s.docs.map((d) => Appointment.fromFirestore(d)).toList());
   }
 
+  /// 예약 한 건 구독 — 상세 화면이 수정·삭제를 바로 반영하도록. 삭제되면 null.
+  static Stream<Appointment?> watchAppointment(String id) {
+    return _appointments.doc(id).snapshots().map(
+          (d) => d.exists ? Appointment.fromFirestore(d) : null,
+        );
+  }
+
   static Stream<List<Appointment>> watchAppointments() {
     return _appointments.orderBy('date').snapshots().map(
           (s) => s.docs.map((d) => Appointment.fromFirestore(d)).toList(),
