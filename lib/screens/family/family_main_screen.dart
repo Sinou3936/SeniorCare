@@ -57,6 +57,9 @@ class _FamilyMainScreenState extends State<FamilyMainScreen> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
         onTap: (i) => setState(() => _currentIndex = i),
+        // 탭이 4개면 기본이 shifting(선택된 탭만 글씨 표시)이라 fixed 로 고정
+        type: BottomNavigationBarType.fixed,
+        showUnselectedLabels: true,
         selectedFontSize: 16,
         unselectedFontSize: 14,
         iconSize: 30,
