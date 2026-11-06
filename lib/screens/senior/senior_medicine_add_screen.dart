@@ -154,13 +154,13 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
-            const Text(
             const SizedBox(height: 8),
             const Text(
               '약 이름에 따라 자동으로 정해져요',
               style: TextStyle(fontSize: 14, color: Color(0xFF999999)),
             ),
+            const SizedBox(height: 24),
+            const Text(
               '복용 시간 설정',
               style: TextStyle(
                   fontSize: 20,
@@ -300,9 +300,9 @@ class _TimeRow extends StatelessWidget {
   }
 }
 
+/// 약 종류 표시 칸 — 눌러서 바꾸지 않고, 약 이름에 따라 자동으로 정해진 값을 보여주기만 한다.
 class MedicineTypeButton extends StatelessWidget {
   final IconData icon;
-/// 약 종류 표시 칸 — 눌러서 바꾸지 않고, 약 이름에 따라 자동으로 정해진 값을 보여주기만 한다.
   final String label;
   final String sublabel;
   final bool selected;

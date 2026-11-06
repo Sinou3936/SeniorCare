@@ -170,12 +170,12 @@ class _SeniorMedicineEditScreenState extends State<SeniorMedicineEditScreen> {
                 ),
               ],
             ),
-            const SizedBox(height: 24),
             const SizedBox(height: 8),
             const Text(
               '약 이름에 따라 자동으로 정해져요',
               style: TextStyle(fontSize: 14, color: Color(0xFF999999)),
             ),
+            const SizedBox(height: 24),
             const Text(
               '복용 시간 설정',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1A1A2E)),
