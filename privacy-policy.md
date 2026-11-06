@@ -79,4 +79,4 @@ permalink: /privacy-policy/
 
 ## 8. 문의처
 
-개인정보 관련 문의: **asd27090@gmail.com**
+개인정보 관련 문의: **khyunseong9630@gmail.com**

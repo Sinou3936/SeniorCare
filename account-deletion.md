@@ -24,7 +24,7 @@ permalink: /account-deletion/
 
 계정 자체와 모든 관련 데이터의 완전 삭제를 원하시면 아래로 요청해 주세요.
 
-- **이메일: asd27090@gmail.com**
+- **이메일: khyunseong9630@gmail.com**
 - 제목에 "계정 삭제 요청"이라고 적어 주세요.
 - 요청 접수 후 영업일 기준 **7일 이내** 처리됩니다.
 
@@ -52,4 +52,4 @@ permalink: /account-deletion/
 
 ---
 
-문의: **asd27090@gmail.com**
+문의: **khyunseong9630@gmail.com**
