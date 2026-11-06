@@ -79,7 +79,8 @@ class _FamilyInquiryScreenState extends State<FamilyInquiryScreen> {
                 color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        padding: EdgeInsets.fromLTRB(
+            20, 20, 20, 20 + MediaQuery.viewPaddingOf(context).bottom),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

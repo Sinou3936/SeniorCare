@@ -113,7 +113,9 @@ class _SeniorMedicineAddScreenState extends State<SeniorMedicineAddScreen> {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
+        // 하단 시스템 바(내비게이션 바)에 저장 버튼이 가려지지 않도록 그만큼 여백 추가
+        padding: EdgeInsets.fromLTRB(
+            20, 20, 20, 20 + MediaQuery.viewPaddingOf(context).bottom),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
